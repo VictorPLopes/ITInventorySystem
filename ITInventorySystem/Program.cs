@@ -1,4 +1,6 @@
 using ITInventorySystem.Data;
+using ITInventorySystem.Repositories.Implementations;
+using ITInventorySystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,11 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IUserInterface,UserService>();
+builder.Services.AddScoped<IClientInterface, ClientService>();
+builder.Services.AddScoped<IWorkOrderInterface, WorkOrderService>();
+builder.Services.AddScoped<IProductInterface, ProductService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
