@@ -2,34 +2,34 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using ITInventorySystem.Models.Enums;
 
-namespace ITInventorySystem.Models
+namespace ITInventorySystem.Models;
+
+public class WorkOrder
 {
-    public class WorkOrder
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public DateTime StartDate { get; set; }
+    public DateTime StartDate { get; set; }
 
-        [Required]
-        public Client Client { get; set; }
+    [Required] public Client Client   { get; set; }
+    [Required] public int    ClientId { get; set; } // Chave estrangeira para Client
 
-        public User UserInCharge { get; set; }
+    public            User UserInCharge   { get; set; }
+    [Required] public int  UserInChargeId { get; set; } // Chave estrangeira para User
 
-        [StringLength(1000)]
-        public string Description { get; set; }
+    [StringLength(1000)] public string Description { get; set; }
 
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal WorkHours { get; set; }
+    [Column(TypeName = "decimal(18,2)")] public decimal WorkHours { get; set; }
 
-        public EWorkOrderStatus Status { get; set; } = EWorkOrderStatus.Pending;
+    public EWorkOrderStatus Status { get; set; } = EWorkOrderStatus.Pending;
 
-        public ICollection<ProductsInWorkOrder> ProductsInWorkOrder { get; set; }
+    public ICollection<Product> Products { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime CreatedAt { get; set; }
+    public ICollection<ProductsInWorkOrder>
+        ProductsInWorkOrder { get; set; } // Uma ordem de serviço pode ter vários produtos
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public DateTime? UpdatedAt { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime CreatedAt { get; set; }
 
-    }
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public DateTime? UpdatedAt { get; set; }
 }
