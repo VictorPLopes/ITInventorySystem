@@ -1,9 +1,8 @@
-﻿namespace ITInventorySystem.Models.Enums
+﻿namespace ITInventorySystem.Models.Enums;
+
+public enum EWorkOrderStatus
 {
-    public enum EWorkOrderStatus
-    {
-        Finished,
-        InProgress,
-        Pending
-    }
+    Finished,
+    InProgress,
+    Pending
 }

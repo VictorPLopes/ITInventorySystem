@@ -1,26 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ITInventorySystem.Models
+namespace ITInventorySystem.Models;
+
+public class ProductsInWorkOrder
 {
-    public class ProductsInWorkOrder
-    {
-        [ForeignKey("Product")]
-        public int ProductId { get; set; }
+    [ForeignKey("Product")] public int ProductId { get; set; } // Chave estrangeira para Product
 
-        [ForeignKey("WorkOrder")]
-        public int WorkOrderId { get; set; }
+    [ForeignKey("WorkOrder")] public int WorkOrderId { get; set; } // Chave estrangeira para WorkOrder
 
-        public Product Product { get; set; }
+    public int ProductQuantity { get; set; }
 
-        public WorkOrder WorkOrder { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime CreatedAt { get; set; }
 
-        public int ProductQuantity { get; set; }
-
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime CreatedAt { get; set; }
-
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public DateTime? UpdatedAt { get; set; }
-    }
-
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public DateTime? UpdatedAt { get; set; }
 }

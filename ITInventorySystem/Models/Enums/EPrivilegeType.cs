@@ -1,10 +1,8 @@
-﻿namespace ITInventorySystem.Models.Enums
-{
-    public enum EPrivilegeType
-    {
-        Master,
-        Admin,
-        Standard
-    }
-}
+﻿namespace ITInventorySystem.Models.Enums;
 
+public enum EPrivilegeType
+{
+    Master,
+    Admin,
+    Standard
+}

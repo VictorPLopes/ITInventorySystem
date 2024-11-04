@@ -1,43 +1,33 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ITInventorySystem.Models
+namespace ITInventorySystem.Models;
 
+public class Client
 {
-    public class Client
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
+    [Required] [StringLength(14)] public string IdDoc { get; set; } // CPF/CNPJ
 
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+    [Required] [StringLength(100)] public string Name { get; set; }
 
-        [StringLength(200)]
-        public string Street { get; set; }
+    [Required] [EmailAddress] public string Email { get; set; }
 
-        [StringLength(100)]
-        public string City { get; set; }
+    [StringLength(200)] public string Street { get; set; }
 
-        [StringLength(50)]
-        public string State { get; set; }
+    [StringLength(100)] public string City { get; set; }
 
-        [StringLength(10)]
-        public string PostalCode { get; set; }
+    [StringLength(50)] public string State { get; set; }
 
-        [Phone]
-        public string PhoneNumber { get; set; }
+    [StringLength(10)] public string PostalCode { get; set; }
 
-        public ICollection<WorkOrder> WorkOrders { get; set; }
+    [Phone] public string PhoneNumber { get; set; }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime CreatedAt { get; set; }
+    public ICollection<WorkOrder> WorkOrders { get; set; } // Um cliente pode ter várias ordens de serviço
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public DateTime? UpdatedAt { get; set; }
-    }
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public DateTime CreatedAt { get; set; }
 
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+    public DateTime? UpdatedAt { get; set; }
 }
