@@ -11,10 +11,10 @@ public class AppDbContext : DbContext
     }
 
 
-    public DbSet<User>                Users               { get; set; }
-    public DbSet<Client>              Clients             { get; set; }
-    public DbSet<Product>             Products            { get; set; }
-    public DbSet<WorkOrder>           WorkOrders          { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Client> Clients { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<WorkOrder> WorkOrders { get; set; }
     public DbSet<ProductsInWorkOrder> ProductsInWorkOrder { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -76,6 +76,26 @@ public class AppDbContext : DbContext
                     .WithMany(p => p.WorkOrders)
                     .UsingEntity<
                         ProductsInWorkOrder>(); // Define a relação muitos para muitos entre WorkOrder e Product
+
+        modelBuilder.Entity<Product>()
+        .Property(p => p.CreatedAt)
+        .HasDefaultValueSql("GETDATE()");    
+
+        modelBuilder.Entity<User>()
+        .Property(p => p.CreatedAt)
+        .HasDefaultValueSql("GETDATE()");
+ 
+        modelBuilder.Entity<WorkOrder>()
+        .Property(p => p.CreatedAt)
+        .HasDefaultValueSql("GETDATE()");
+
+        modelBuilder.Entity<Client>()
+        .Property(p => p.CreatedAt)
+        .HasDefaultValueSql("GETDATE()");     
+
+        modelBuilder.Entity<ProductsInWorkOrder>()
+        .Property(p => p.CreatedAt)
+        .HasDefaultValueSql("GETDATE()");      
 
         base.OnModelCreating(modelBuilder);
     }

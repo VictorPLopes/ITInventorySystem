@@ -1,11 +1,19 @@
-﻿using ITInventorySystem.Models;
+﻿using ITInventorySystem.Data;
+using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
 
 namespace ITInventorySystem.Repositories.Implementations;
 
 public class WorkOrderService : IWorkOrderInterface
 {
-    public Task AddAsync(WorkOrder workOrder) => throw new NotImplementedException();
+    private readonly AppDbContext _context;
+
+    public WorkOrderService(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public Task<WorkOrder> AddAsync(WorkOrder workOrder) => throw new NotImplementedException();
 
     public Task DeleteAsync(int id) => throw new NotImplementedException();
 

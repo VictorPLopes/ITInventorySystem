@@ -1,12 +1,14 @@
-﻿using ITInventorySystem.Models;
+﻿using ITInventorySystem.DTO.Product;
+using ITInventorySystem.Models;
 
 namespace ITInventorySystem.Repositories.Interfaces;
 
 public interface IProductInterface
 {
-    Task<Product>              GetByIdAsync(int id);
+
+    Task<Product> GetByIdAsync(int id);
     Task<IEnumerable<Product>> GetAllAsync();
-    Task                       AddAsync(Product    product);
-    Task                       UpdateAsync(Product product);
-    Task                       DeleteAsync(int     id);
+    Task<Product> AddAsync(ProductCreateDTO product);
+    Task UpdateAsync(ProductUpdateDTO product);
+    Task DeleteAsync(int id);
 }

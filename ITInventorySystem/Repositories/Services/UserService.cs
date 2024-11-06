@@ -1,11 +1,18 @@
-﻿using ITInventorySystem.Models;
+﻿using ITInventorySystem.Data;
+using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
 
 namespace ITInventorySystem.Repositories.Implementations;
 
 public class UserService : IUserInterface
 {
-    public Task AddAsync(User user) => throw new NotImplementedException();
+    private readonly AppDbContext _context;
+
+    public UserService(AppDbContext context)
+    {
+        _context = context;
+    }
+    public Task<User> AddAsync(User user) => throw new NotImplementedException();
 
     public Task DeleteAsync(int id) => throw new NotImplementedException();
 
