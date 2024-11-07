@@ -17,7 +17,7 @@ public class ProductService : IProductInterface
     }  
 
     public async Task<Product> AddAsync(ProductCreateDTO product)
-    {
+    {       
         var prod = new Product()
         {
             Name = product.Name,

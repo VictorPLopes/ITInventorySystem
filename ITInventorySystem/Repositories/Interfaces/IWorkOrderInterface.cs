@@ -1,4 +1,5 @@
-﻿using ITInventorySystem.Models;
+﻿using ITInventorySystem.DTO.WorkOrder;
+using ITInventorySystem.Models;
 
 namespace ITInventorySystem.Repositories.Interfaces;
 
@@ -6,7 +7,7 @@ public interface IWorkOrderInterface
 {
     Task<WorkOrder> GetByIdAsync(int id);
     Task<IEnumerable<WorkOrder>> GetAllAsync();
-    Task<WorkOrder> AddAsync(WorkOrder workOrder);
-    Task UpdateAsync(WorkOrder workOrder);
+    Task<WorkOrder> AddAsync(WorkOrderCreateDTO workOrder);
+    Task UpdateAsync(WorkOrderUpdateDTO workOrder);
     Task DeleteAsync(int id);
 }

@@ -1,4 +1,5 @@
 ﻿using ITInventorySystem.Data;
+using ITInventorySystem.DTO.Client;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
 
@@ -12,15 +13,28 @@ public class ClientService : IClientInterface
     {
         _context = context;
     }
-    public Task DeleteAsync(int id) => throw new NotImplementedException();
 
-    public Task<IEnumerable<Client>> GetAllAsync() => throw new NotImplementedException();
+    public Task<Client> AddAsync(ClientCreateDTO client)
+    {
+        throw new NotImplementedException();
+    }
 
-    public Task<Client> GetByIdAsync(int id) => throw new NotImplementedException();
+    public Task DeleteAsync(int id)
+    {
+        throw new NotImplementedException();
+    }
 
-    public Task UpdateAsync(Client client) => throw new NotImplementedException();
+    public Task<IEnumerable<Client>> GetAllAsync()
+    {
+        throw new NotImplementedException();
+    }
 
-    Task<Client> IClientInterface.AddAsync(Client client)
+    public Task<Client> GetByIdAsync(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task UpdateAsync(ClientUpdateDTO client)
     {
         throw new NotImplementedException();
     }
