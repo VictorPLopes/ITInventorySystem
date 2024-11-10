@@ -92,6 +92,7 @@ public class ProductService : IProductInterface
         prod.SalePrice = product.SalePrice;
         prod.UpdatedAt = DateTime.Now;
 
+        _context.Products.Update(prod);
         await _context.SaveChangesAsync();
     }
 }

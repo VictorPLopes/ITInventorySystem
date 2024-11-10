@@ -16,8 +16,9 @@ public class User
     [EmailAddress]
     public string Email { get; set; }
 
-    [Required]
-    public string PasswordHash { get; set; }
+    [Required] public byte[] PasswordHash { get; set; } = new byte[32];
+    
+    [Required] public byte[] PasswordSalt { get; set; } = new byte[32];
 
     public EPrivilegeType Type { get; set; }
 

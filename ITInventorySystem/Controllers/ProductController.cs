@@ -50,7 +50,7 @@ namespace ITInventorySystem.Controllers
             }            
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("DeleteProduct/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
