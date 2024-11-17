@@ -1,6 +1,7 @@
 using ITInventorySystem.Data;
 using ITInventorySystem.Repositories.Implementations;
 using ITInventorySystem.Repositories.Interfaces;
+using ITInventorySystem.Repositories.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
