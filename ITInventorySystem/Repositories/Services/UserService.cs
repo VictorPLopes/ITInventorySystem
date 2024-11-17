@@ -6,7 +6,7 @@ using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace ITInventorySystem.Repositories.Implementations;
+namespace ITInventorySystem.Repositories.Services;
 
 public class UserService(AppDbContext context) : IUserInterface
 {
@@ -144,7 +144,7 @@ public class UserService(AppDbContext context) : IUserInterface
     }
 
 
-    public void HashPassword(string password, out byte[] passwordHash, out byte[] passwordSalt)
+    private static void HashPassword(string password, out byte[] passwordHash, out byte[] passwordSalt)
     {
         using var hmac = new HMACSHA512();
         passwordSalt = hmac.Key;
