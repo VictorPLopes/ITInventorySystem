@@ -1,5 +1,5 @@
 ﻿using ITInventorySystem.DTO.Client;
-using ITInventorySystem.DTO.Product;
+using ITInventorySystem.DTO.Products;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;

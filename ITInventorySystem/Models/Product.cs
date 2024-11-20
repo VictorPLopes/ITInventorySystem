@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ITInventorySystem.Models;
 
@@ -27,9 +28,8 @@ public class Product
     [StringLength(100)]
     public string? BrandManufacturerName { get; set; }
 
-    public ICollection<WorkOrder> WorkOrders { get; set; }
-
-    public ICollection<ProductsInWorkOrder> ProductsInWorkOrder { get; set; } // Um produto pode estar em várias ordens de serviço
+    [JsonIgnore]
+    public ICollection<ProductsInWorkOrder> ProductsInWorkOrder { get; set; } = new List<ProductsInWorkOrder>();// Um produto pode estar em várias ordens de serviço
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public DateTime CreatedAt { get; set; }

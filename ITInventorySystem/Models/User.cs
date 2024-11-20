@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using ITInventorySystem.Models.Enums;
 
 namespace ITInventorySystem.Models;
@@ -16,14 +17,18 @@ public class User
     [EmailAddress]
     public string Email { get; set; }
 
-    [Required] public byte[] PasswordHash { get; set; } = new byte[32];
+    [Required]
+    [JsonIgnore]
+    public byte[] PasswordHash { get; set; } = new byte[32];
     
-    [Required] public byte[] PasswordSalt { get; set; } = new byte[32];
+    [Required]
+    [JsonIgnore]
+    public byte[] PasswordSalt { get; set; } = new byte[32];
 
     public EPrivilegeType Type { get; set; }
 
     public bool Status { get; set; } = true;
-
+    [JsonIgnore]
     public ICollection<WorkOrder> WorkOrders { get; set; } // Um usuário pode ter várias ordens de serviço
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

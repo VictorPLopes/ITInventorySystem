@@ -1,8 +1,10 @@
-﻿namespace ITInventorySystem.DTO.Product
+﻿namespace ITInventorySystem.DTO.Products
 {
-    public class ProductCreateDTO
+    public class ProductUpdateDTO
     {
-        public string Name { get; set; } = string.Empty;
+        public int Id { get; set; }
+
+        public string Name { get; set; }
 
         public int Quantity { get; set; }
 
@@ -15,6 +17,5 @@
         public decimal SalePrice { get; set; }
 
         public string? BrandManufacturerName { get; set; }
-        
     }
 }

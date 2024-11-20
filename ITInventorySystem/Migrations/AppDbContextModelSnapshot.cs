@@ -225,7 +225,6 @@ namespace ITInventorySystem.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
@@ -255,17 +254,21 @@ namespace ITInventorySystem.Migrations
 
             modelBuilder.Entity("ITInventorySystem.Models.ProductsInWorkOrder", b =>
                 {
-                    b.HasOne("ITInventorySystem.Models.Product", null)
+                    b.HasOne("ITInventorySystem.Models.Product", "Product")
                         .WithMany("ProductsInWorkOrder")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ITInventorySystem.Models.WorkOrder", null)
+                    b.HasOne("ITInventorySystem.Models.WorkOrder", "WorkOrder")
                         .WithMany("ProductsInWorkOrder")
                         .HasForeignKey("WorkOrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("WorkOrder");
                 });
 
             modelBuilder.Entity("ITInventorySystem.Models.WorkOrder", b =>

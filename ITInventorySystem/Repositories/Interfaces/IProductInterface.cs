@@ -1,4 +1,4 @@
-﻿using ITInventorySystem.DTO.Product;
+﻿using ITInventorySystem.DTO.Products;
 using ITInventorySystem.Models;
 
 namespace ITInventorySystem.Repositories.Interfaces;

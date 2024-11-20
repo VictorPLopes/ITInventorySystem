@@ -67,6 +67,7 @@ public class UserService(AppDbContext context) : IUserInterface
         userDb.Name = user.Name;
         userDb.Email = user.Email;
         userDb.Type = user.Type;
+        userDb.UpdatedAt = DateTime.Now;
         if (user.Password != "")
         {
             HashPassword(user.Password, out var passwordHash, out var passwordSalt);

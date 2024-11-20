@@ -9,8 +9,6 @@ public class AppDbContext : DbContext
         : base(option)
     {
     }
-
-
     public DbSet<User> Users { get; set; }
     public DbSet<Client> Clients { get; set; }
     public DbSet<Product> Products { get; set; }
@@ -19,18 +17,20 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        /*modelBuilder.Entity<ProductsInWorkOrder>()
-                    .HasKey(pw => new { pw.ProductId, pw.WorkOrderId }); //Define chave composta
+        // Configuração da tabela de junção ProductsInWorkOrder
+        modelBuilder.Entity<ProductsInWorkOrder>()
+            .HasKey(pw => new { pw.ProductId, pw.WorkOrderId }); // Define chave composta
 
         modelBuilder.Entity<ProductsInWorkOrder>()
-                    .HasOne(pw => pw.Product)
-                    .WithMany(p => p.ProductsInWorkOrder)
-                    .HasForeignKey(pw => pw.ProductId);
+            .HasOne(pw => pw.Product)
+            .WithMany(p => p.ProductsInWorkOrder)
+            .HasForeignKey(pw => pw.ProductId);
 
         modelBuilder.Entity<ProductsInWorkOrder>()
-                    .HasOne(pw => pw.WorkOrder)
-                    .WithMany(w => w.ProductsInWorkOrder)
-                    .HasForeignKey(pw => pw.WorkOrderId);*/
+            .HasOne(pw => pw.WorkOrder)
+            .WithMany(w => w.ProductsInWorkOrder)
+            .HasForeignKey(pw => pw.WorkOrderId);
+
 
         modelBuilder.Entity<Client>()
                     .HasIndex(c => c.Email)
@@ -62,20 +62,9 @@ public class AppDbContext : DbContext
                     .Property(p => p.SalePrice)
                     .HasColumnType("decimal(18, 2)"); // Define o tipo de dado para o campo SalePrice
 
-        /*modelBuilder.Entity<Product>()
-                    .HasMany(p => p.WorkOrders)
-                    .WithMany(w => w.Products)
-                    .UsingEntity<ProductsInWorkOrder>(); // Define a relação muitos para muitos entre Product e WorkOrder*/
-
         modelBuilder.Entity<WorkOrder>()
                     .Property(w => w.WorkHours)
                     .HasColumnType("decimal(18, 2)"); // Define o tipo de dado para o campo WorkHours
-
-        modelBuilder.Entity<WorkOrder>()
-                    .HasMany(w => w.Products)
-                    .WithMany(p => p.WorkOrders)
-                    .UsingEntity<
-                        ProductsInWorkOrder>(); // Define a relação muitos para muitos entre WorkOrder e Product
 
         modelBuilder.Entity<Product>()
         .Property(p => p.CreatedAt)

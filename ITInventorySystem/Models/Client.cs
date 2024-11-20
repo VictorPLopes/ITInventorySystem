@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ITInventorySystem.Models;
 
@@ -30,7 +31,7 @@ public class Client
 
     [Phone]
     public string PhoneNumber { get; set; }
-
+    [JsonIgnore]
     public ICollection<WorkOrder> WorkOrders { get; set; } // Um cliente pode ter várias ordens de serviço
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

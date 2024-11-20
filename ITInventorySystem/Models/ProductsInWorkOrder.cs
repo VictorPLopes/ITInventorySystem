@@ -1,14 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ITInventorySystem.Models;
 
 public class ProductsInWorkOrder
 {
-    [ForeignKey("Product")]
-    public int ProductId { get; set; } // Chave estrangeira para Product
-
-    [ForeignKey("WorkOrder")]
-    public int WorkOrderId { get; set; } // Chave estrangeira para WorkOrder
+    public int ProductId { get; set; }
+    public Product Product { get; set; }
+    
+    public int WorkOrderId { get; set; }
+    [JsonIgnore]
+    public WorkOrder WorkOrder { get; set; }
 
     public int ProductQuantity { get; set; }
 

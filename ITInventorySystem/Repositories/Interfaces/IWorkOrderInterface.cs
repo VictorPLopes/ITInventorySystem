@@ -8,6 +8,6 @@ public interface IWorkOrderInterface
     Task<WorkOrder> GetByIdAsync(int id);
     Task<IEnumerable<WorkOrder>> GetAllAsync();
     Task<WorkOrder> AddAsync(WorkOrderCreateDTO workOrder);
-    Task UpdateAsync(WorkOrderUpdateDTO workOrder);
+    Task<WorkOrder> UpdateAsync(WorkOrderUpdateDTO workOrder);
     Task DeleteAsync(int id);
 }
