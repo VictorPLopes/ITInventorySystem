@@ -1,6 +1,7 @@
 ﻿using ITInventorySystem.DTO.User;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;
@@ -98,5 +99,20 @@ public class UserController(IUserInterface userInterface) : ControllerBase
     }
 
     [HttpPost("Login")]
-    public async Task<ActionResult<User>> Login(string email, string password) => Ok(await userInterface.Login(email, password));
+    public async Task<ActionResult<User>> Login([FromBody] LoginRequest loginRequest)
+    {
+        if (loginRequest == null)
+        {
+            return BadRequest("Dados de login inválidos.");
+        }
+
+        var user = await userInterface.Login(loginRequest.Email, loginRequest.Password);
+
+        if (user == null)
+        {
+            return Unauthorized("E-mail ou senha incorretos.");
+        }
+
+        return Ok(user);
+    }
 }

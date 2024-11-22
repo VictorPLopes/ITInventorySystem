@@ -1,23 +1,18 @@
-import Login, { Username, Password, Submit, Title, Logo} from '@react-login-page/base';
-
-import './App.css';
+// src/App.tsx
+import { Route, Routes } from 'react-router-dom';
+import LoginPage from './components/Login';  // Certifique-se de que o caminho está correto!
+import HomePage from './components/home';  // Certifique-se de que o caminho está correto!
 
 function App() {
-    return (
-        <Login style={
-            {
-                padding: '30px',
-                borderRadius: '25px',
-                boxShadow: '0 0 100px 0 rgba(0, 0, 0, 0.3)',
-            }
-        }>
-            <Username placeholder="E-Mail" name="userEmail" />
-            <Password placeholder="Senha" name="userPassword" />
-            <Submit>Entrar</Submit>
-            <Title>Acesso ao Sistema</Title>
-            <Logo visible={false}></Logo>
-        </Login>
-    )
+  return (
+    <div className="App">
+      <Routes>
+        {/* Definindo a rota para a página de login */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/home" element={<HomePage />} />
+      </Routes>
+    </div>
+  );
 }
 
-export default App
+export default App;
