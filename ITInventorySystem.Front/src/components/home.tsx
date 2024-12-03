@@ -8,6 +8,7 @@ const Home: React.FC = () => {
       <p>Essa é a página inicial do sistema.</p>
       <div className="nav-links">
         <Link to="/login">Ir para o Login</Link>
+        <br />
         <Link to="/dashboard">Ir para o Dashboard</Link>
       </div>
     </div>

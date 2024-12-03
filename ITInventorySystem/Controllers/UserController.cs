@@ -1,4 +1,5 @@
-﻿using ITInventorySystem.DTO.User;
+﻿using ITInventorySystem.DTO.Client;
+using ITInventorySystem.DTO.User;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity.Data;
@@ -8,6 +9,8 @@ namespace ITInventorySystem.Controllers;
 
 public class UserController(IUserInterface userInterface) : ControllerBase
 {
+    //private readonly IUserInterface _userInterface;
+
     [HttpGet("GetAllUsers")]
     public async Task<ActionResult<IEnumerable<User>>> GetAllUsers() => Ok(await userInterface.GetAllAsync());
     
@@ -17,9 +20,17 @@ public class UserController(IUserInterface userInterface) : ControllerBase
     [HttpGet("GetUserByEmail/{email}")]
     public async Task<ActionResult<User>> GetUserByEmail(string email) => Ok(await userInterface.GetByEmailAsync(email));
     
+    /*[HttpPost("CreateUser")]
+    public async Task<ActionResult<User>> CreateUser(UserCreateDTO user) => Ok(await userInterface.AddAsync(user));*/
+
+
     [HttpPost("CreateUser")]
-    public async Task<ActionResult<User>> CreateUser(UserCreateDTO user) => Ok(await userInterface.AddAsync(user));
-    
+    public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDTO usr)
+    {
+        var user = await userInterface.AddAsync(usr);
+        return Ok(user);
+    }
+
     [HttpPut("UpdateUser")]
     public async Task<ActionResult> UpdateUser(UserUpdateDTO user)
     {

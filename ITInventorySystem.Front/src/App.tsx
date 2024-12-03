@@ -1,7 +1,10 @@
 // src/App.tsx
 import { Route, Routes } from 'react-router-dom';
-import LoginPage from './components/Login';  // Certifique-se de que o caminho está correto!
-import HomePage from './components/home';  // Certifique-se de que o caminho está correto!
+import LoginPage from './components/Login'; 
+import HomePage from './components/home';  
+import Dashboard from './components/dashboard';  
+import RegisterPage from './components/register';
+import UsersPage from './components/users';
 
 function App() {
   return (
@@ -10,6 +13,9 @@ function App() {
         {/* Definindo a rota para a página de login */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/home" element={<HomePage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/users" element={<UsersPage />} />
       </Routes>
     </div>
   );

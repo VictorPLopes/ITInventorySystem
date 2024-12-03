@@ -22,7 +22,7 @@ function LoginPage() {
       });
 
       if (response.status === 200) {
-        navigate('/Home');
+        navigate('/dashboard');
       }
     } catch (err) {
       if (err instanceof AxiosError) {
