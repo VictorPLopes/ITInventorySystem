@@ -1,168 +1,170 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
 }
 
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+    height: 6em;
+    padding: 1.5em;
+    will-change: filter;
+    transition: filter 300ms;
 }
+
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+    filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+    filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
 @keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+    a:nth-of-type(2) .logo {
+        animation: logo-spin infinite 20s linear;
+    }
 }
 
 .card {
-  padding: 2em;
+    padding: 2em;
 }
 
 .read-the-docs {
-  color: #888;
+    color: #888;
 }
 
 /* Estilo global */
 body {
-  font-family: 'Roboto', sans-serif;
-  background-color: #121212; /* Dark background */
-  color: #e0e0e0; /* Text color light for dark mode */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #121212; /* Dark background */
+    color: #e0e0e0; /* Text color light for dark mode */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
 }
 
 /* Container do login */
 .login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
 /* Caixa de login */
 .login-box {
-  background-color: #1f1f1f; /* Dark background for the box */
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow */
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
+    background-color: #1f1f1f; /* Dark background for the box */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
 }
 
 /* Título do login */
 .login-title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #fff; /* White text for title */
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #fff; /* White text for title */
 }
 
 /* Estilo dos campos de entrada */
 .input-field {
-  margin-bottom: 20px;
-  text-align: left;
+    margin-bottom: 20px;
+    text-align: left;
 }
 
 .input-field label {
-  display: block;
-  font-size: 14px;
-  color: #b0b0b0; /* Light gray for labels */
-  margin-bottom: 5px;
+    display: block;
+    font-size: 14px;
+    color: #b0b0b0; /* Light gray for labels */
+    margin-bottom: 5px;
 }
 
 .input-field input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #333; /* Dark border */
-  border-radius: 5px;
-  font-size: 14px;
-  color: #e0e0e0; /* Light gray text */
-  background-color: #333; /* Dark background for input */
-  box-sizing: border-box;
-  transition: border-color 0.3s ease;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #333; /* Dark border */
+    border-radius: 5px;
+    font-size: 14px;
+    color: #e0e0e0; /* Light gray text */
+    background-color: #333; /* Dark background for input */
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
 }
 
 .input-field input:focus {
-  border-color: #4CAF50;
-  outline: none;
+    border-color: #4CAF50;
+    outline: none;
 }
 
 /* Botão de login */
 .btn-container button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 12px;
-  width: 100%;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .btn-container button:hover {
-  background-color: #45a049;
+    background-color: #45a049;
 }
 
 .btn-container button:disabled {
-  background-color: #555;
+    background-color: #555;
 }
 
 /* Mensagem de erro */
 .error-message {
-  color: #ff6f61; /* Error color */
-  font-size: 14px;
-  margin-top: 10px;
+    color: #ff6f61; /* Error color */
+    font-size: 14px;
+    margin-top: 10px;
 }
 
 .modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .add-user-button {
-  margin-bottom: 15px;
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
+    margin-bottom: 15px;
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
 }

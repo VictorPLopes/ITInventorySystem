@@ -6,33 +6,33 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adicionar os serviços ao contêiner.
+// Adicionar os serviÃ§os ao contÃªiner.
 builder.Services.AddControllers();
 
-// Configuração de CORS para permitir a origem do frontend
+// ConfiguraÃ§Ã£o de CORS para permitir a origem do frontend
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        // Ajuste o URL do seu frontend. Aqui está configurado para localhost:3000
-        policy.WithOrigins("http://localhost:5173") // URL do seu frontend (ajuste conforme necessário)
-              .AllowAnyMethod()   // Permite qualquer método HTTP (GET, POST, PUT, DELETE, etc.)
-              .AllowAnyHeader()   // Permite qualquer cabeçalho
+        // Ajuste o URL do seu frontend. Aqui estÃ¡ configurado para localhost:3000
+        policy.WithOrigins("http://localhost:5173") // URL do seu frontend (ajuste conforme necessÃ¡rio)
+              .AllowAnyMethod()   // Permite qualquer mÃ©todo HTTP (GET, POST, PUT, DELETE, etc.)
+              .AllowAnyHeader()   // Permite qualquer cabeÃ§alho
               .AllowCredentials(); // Permite enviar cookies ou credenciais
     });
 });
 
-// Configuração do Swagger
+// ConfiguraÃ§Ã£o do Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Injeção de dependências para os serviços
+// InjeÃ§Ã£o de dependÃªncias para os serviÃ§os
 builder.Services.AddScoped<IUserInterface, UserService>();
 builder.Services.AddScoped<IClientInterface, ClientService>();
 builder.Services.AddScoped<IWorkOrderInterface, WorkOrderService>();
 builder.Services.AddScoped<IProductInterface, ProductService>();
 
-// Configuração do banco de dados com SQL Server
+// ConfiguraÃ§Ã£o do banco de dados com SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -40,7 +40,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
-// Configuração do pipeline HTTP.
+// ConfiguraÃ§Ã£o do pipeline HTTP.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -49,14 +49,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Habilitar CORS com a política definida
+// Habilitar CORS com a polÃ­tica definida
 app.UseCors("AllowFrontend");
 
-// Configuração de autorização
+// ConfiguraÃ§Ã£o de autorizaÃ§Ã£o
 app.UseAuthorization();
 
 // Mapear os controllers
 app.MapControllers();
 
-// Inicia a aplicação
+// Inicia a aplicaÃ§Ã£o
 app.Run();

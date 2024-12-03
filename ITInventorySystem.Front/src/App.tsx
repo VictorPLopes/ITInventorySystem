@@ -1,24 +1,24 @@
 // src/App.tsx
-import { Route, Routes } from 'react-router-dom';
-import LoginPage from './components/Login'; 
-import HomePage from './components/home';  
-import Dashboard from './components/dashboard';  
-import RegisterPage from './components/register';
-import UsersPage from './components/users';
+import {Route, Routes} from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import HomePage from './pages/HomePage';
+import Dashboard from './pages/DashboardPage';
+// import RegisterPage from './pages/register';
+import UsersPage from './pages/UsersPage';
 
 function App() {
-  return (
-    <div className="App">
-      <Routes>
-        {/* Definindo a rota para a página de login */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/users" element={<UsersPage />} />
-      </Routes>
-    </div>
-  );
+    let port: string = "44307"
+    return (
+        <div className="App">
+            <Routes>
+                {/* Definindo a rota para a página de login */}
+                <Route path="/login" element={<LoginPage port={port}/>}/>
+                <Route path="/home" element={<HomePage/>}/>
+                <Route path="/dashboard" element={<Dashboard/>}/>
+                <Route path="/users" element={<UsersPage port={port}/>}/>
+            </Routes>
+        </div>
+    );
 }
 
 export default App;
