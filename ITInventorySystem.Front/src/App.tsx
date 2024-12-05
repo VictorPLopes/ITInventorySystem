@@ -3,11 +3,16 @@ import {Route, Routes} from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import Dashboard from './pages/DashboardPage';
-// import RegisterPage from './pages/register';
 import UsersPage from './pages/UsersPage';
+import {useEffect} from "react";
+import './App.css';
 
 function App() {
     let port: string = "44307"
+    useEffect(() => {
+        // Definindo o tema dark no carregamento da aplicação
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+    }, []);
     return (
         <div className="App">
             <Routes>

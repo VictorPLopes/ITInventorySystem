@@ -1,96 +1,108 @@
-﻿import React, { useState } from 'react';
-import axios from 'axios';
+﻿import React, {useState} from 'react';
+import {Button, Form, FormControl, FormGroup, FormLabel, Modal} from 'react-bootstrap';
 
-interface UserModalProps {
-    port: string;
-    closeModal: () => void;
-    onUserRegistered: () => void;
+interface User {
+    id?: number;
+    name: string;
+    email: string;
+    password: string;
+    type: number;
+    status: boolean;
 }
 
-export const UserModal: React.FC<UserModalProps> = ({ port, closeModal, onUserRegistered }) => {
-    const [newUser, setNewUser] = useState({ name: '', email: '', password: '', type: 0 });
-    const [registrationError, setRegistrationError] = useState<string>('');
-    const [registerLoading, setRegisterLoading] = useState<boolean>(false);
+interface UserModalProps {
+    show: boolean;
+    onClose: () => void;
+    onSave: (user: Partial<User>) => void;
+    user: Partial<User>;
+}
 
-    const handleRegister = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setRegisterLoading(true);
-        setRegistrationError('');
+export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user}) => {
+    const [formData, setFormData] = useState<Partial<User>>(user);
 
-        try {
-            const response = await axios.post(`https://localhost:${port}/CreateUser`, newUser);
-            if (response.status === 201) {
-                onUserRegistered(); // Refresh users list
-                closeModal(); // Close modal
-                setNewUser({ name: '', email: '', password: '', type: 0 }); // Reset form
-            }
-        } catch (err) {
-            setRegistrationError('Erro ao registrar o usuário. Verifique os dados e tente novamente.');
-        } finally {
-            setRegisterLoading(false);
-        }
+    // Explicit type for the change handler
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | any>) => {
+        const {name, value} = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: name === 'type' ? parseInt(value, 10) : value,
+        }));
+    };
+
+    const handleSave = () => {
+        onSave(formData);
     };
 
     return (
-        <div className="modal">
-            <div className="modal-content">
-                <h2>Registrar Novo Usuário</h2>
-                <form onSubmit={handleRegister}>
-                    <div className="input-field">
-                        <label htmlFor="name">Nome</label>
-                        <input
+        <Modal show={show} onHide={onClose}>
+            <Modal.Header closeButton>
+                <Modal.Title>{user.id ? 'Editar Usuário' : 'Novo Usuário'}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form>
+                    <FormGroup className="mb-3">
+                        <FormLabel>Nome</FormLabel>
+                        <FormControl
                             type="text"
-                            id="name"
-                            value={newUser.name}
-                            onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                            required
+                            name="name"
+                            value={formData.name || ''}
+                            onChange={(e) => handleInputChange(e)}
+                            placeholder="Digite o nome"
                         />
-                    </div>
-                    <div className="input-field">
-                        <label htmlFor="email">E-mail</label>
-                        <input
+                    </FormGroup>
+                    <FormGroup className="mb-3">
+                        <FormLabel>E-mail</FormLabel>
+                        <FormControl
                             type="email"
-                            id="email"
-                            value={newUser.email}
-                            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                            required
+                            name="email"
+                            value={formData.email || ''}
+                            onChange={(e) => handleInputChange(e)}
+                            placeholder="Digite o e-mail"
                         />
-                    </div>
-                    <div className="input-field">
-                        <label htmlFor="password">Senha</label>
-                        <input
+                    </FormGroup>
+                    <FormGroup>
+                        <FormLabel>Senha</FormLabel>
+                        <FormControl
                             type="password"
-                            id="password"
-                            value={newUser.password}
-                            onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                            required
+                            name="password"
+                            value={formData.password || ''}
+                            onChange={(e) => handleInputChange(e)}
+                            placeholder="Digite a senha"
                         />
-                    </div>
-                    <div className="input-field">
-                        <label htmlFor="type">Tipo</label>
-                        <select
-                            id="type"
-                            value={newUser.type}
+                    </FormGroup>
+                    <FormGroup className="mb-3">
+                        <FormLabel>Status</FormLabel>
+                        <Form.Select
+                            name="status"
+                            value={formData.status ? 'Ativo' : 'Inativo'}
                             onChange={(e) =>
-                                setNewUser({ ...newUser, type: parseInt(e.target.value, 10) })
+                                setFormData({
+                                    ...formData,
+                                    status: e.target.value === 'Ativo',
+                                })
                             }
                         >
-                            <option value={0}>0</option>
-                            <option value={1}>1</option>
-                            <option value={2}>2</option>
-                        </select>
-                    </div>
-                    <div className="btn-container">
-                        <button type="submit" disabled={registerLoading}>
-                            {registerLoading ? 'Registrando...' : 'Registrar'}
-                        </button>
-                        <button type="button" onClick={closeModal}>
-                            Cancelar
-                        </button>
-                    </div>
-                </form>
-                {registrationError && <p className="error-message">{registrationError}</p>}
-            </div>
-        </div>
+                            <option value="Ativo">Ativo</option>
+                            <option value="Inativo">Inativo</option>
+                        </Form.Select>
+                    </FormGroup>
+                    <FormGroup>
+                        <FormLabel>Tipo</FormLabel>
+                        <Form.Select name="type" value={formData.type || 0} onChange={handleInputChange}>
+                            <option value={0}>Usuário</option>
+                            <option value={1}>Administrador</option>
+                        </Form.Select>
+                    </FormGroup>
+                </Form>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={onClose}>
+                    Cancelar
+                </Button>
+                <Button variant="primary" onClick={handleSave}>
+                    Salvar
+                </Button>
+            </Modal.Footer>
+        </Modal>
     );
 };
