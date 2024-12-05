@@ -1,9 +1,16 @@
 ﻿import React from 'react';
+import {Button, ButtonGroup} from 'react-bootstrap';
+import DataTable from 'datatables.net-react';
+import DT from 'datatables.net-bs5';
+import {MdDelete, MdEditSquare} from "react-icons/md";
+
+DataTable.use(DT);
 
 interface User {
     id: number;
     name: string;
     email: string;
+    password: string;
     type: number;
     status: boolean;
     createdAt: string;
@@ -12,41 +19,51 @@ interface User {
 
 interface UserTableProps {
     users: User[];
+    onEdit: (user: User) => void;
+    onDelete: (user: User) => void;
 }
 
-export const UserTable: React.FC<UserTableProps> = ({ users }) => {
-    const formatDateTime = (dateTime: string | null): string => {
-        if (!dateTime) return '-';
-        const date = new Date(dateTime);
-        return date.toLocaleString();
-    };
+export const UserTable: React.FC<UserTableProps> = ({users, onEdit, onDelete}) => {
+    const columns = [
+        {
+            title: 'ID',
+            data: 'id'
+        },
+        {
+            title: 'Nome',
+            data: 'name'
+        },
+        {
+            title: 'E-mail',
+            data: 'email'
+        },
+        {
+            title: 'Status',
+            data: 'status',
+            render: (data: boolean) => data ? 'Ativo' : 'Inativo'
+        },
+        {
+            title: 'Ações',
+            name: 'actions'
+        },
+    ];
 
     return (
-        <table className="users-table">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>E-mail</th>
-                <th>Tipo</th>
-                <th>Status</th>
-                <th>Criado em</th>
-                <th>Atualizado em</th>
-            </tr>
-            </thead>
-            <tbody>
-            {users.map((user) => (
-                <tr key={user.id}>
-                    <td>{user.id}</td>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>{user.type === 0 ? 'Usuário' : 'Administrador'}</td>
-                    <td>{user.status ? 'Ativo' : 'Inativo'}</td>
-                    <td>{formatDateTime(user.createdAt)}</td>
-                    <td>{formatDateTime(user.updatedAt)}</td>
-                </tr>
-            ))}
-            </tbody>
-        </table>
+        <DataTable
+            columns={columns}
+            data={users}
+            slots={{
+                'actions': (_data: any, row: User) => (
+                    <ButtonGroup>
+                        <Button variant="warning" size="sm" onClick={() => onEdit(row)}>
+                            <MdEditSquare/>
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => onDelete(row)}>
+                            <MdDelete/>
+                        </Button>
+                    </ButtonGroup>
+                )
+            }}
+        />
     );
 };

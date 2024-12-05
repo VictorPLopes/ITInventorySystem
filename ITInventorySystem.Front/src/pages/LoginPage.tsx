@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import axios, {AxiosError} from 'axios';
 import {useNavigate} from 'react-router-dom';
-import '../App.css'; // Importa o arquivo CSS
+import {Alert, Button, Col, Container, Form, FormControl, FormGroup, FormLabel, Row} from "react-bootstrap";
 
 function LoginPage({port}: { port: string }) {
     const [email, setEmail] = useState<string>('');
@@ -16,7 +16,7 @@ function LoginPage({port}: { port: string }) {
         setError('');
 
         try {
-            const response = await axios.post('https://localhost:' + port + '/Login', {
+            const response = await axios.post(`https://localhost:${port}/Login`, {
                 email,
                 password,
             });
@@ -36,44 +36,61 @@ function LoginPage({port}: { port: string }) {
     };
 
     return (
-        <div className="login-container">
-            <div className="login-box">
-                <h2 className="login-title">Acesso ao Sistema</h2>
-                <form onSubmit={handleLogin}>
-                    <div className="input-field">
-                        <label htmlFor="email">E-mail</label>
-                        <input
-                            type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Digite seu e-mail"
-                            required
-                        />
-                    </div>
+        <Container className="d-flex justify-content-center align-items-center vh-100">
+            <Row className="w-75">
+                <Col md={6} className="mx-auto">
+                    <div className="border p-4 shadow-lg bg-body-tertiary rounded login-box">
+                        <h3 className="text-center mb-4">Acesso ao Sistema</h3>
+                        <Form onSubmit={handleLogin}>
+                            <FormGroup controlId="email" className="form-floating mb-3">
+                                <FormControl
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="Digite seu e-mail"
+                                    required
+                                />
+                                <FormLabel>E-mail</FormLabel>
+                            </FormGroup>
 
-                    <div className="input-field">
-                        <label htmlFor="password">Senha</label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Digite sua senha"
-                            required
-                        />
-                    </div>
+                            <FormGroup controlId="password" className="form-floating mb-3">
+                                <FormControl
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Digite sua senha"
+                                    required
+                                />
+                                <FormLabel>Senha</FormLabel>
+                            </FormGroup>
 
-                    <div className="btn-container">
-                        <button type="submit" disabled={loading}>
-                            {loading ? 'Carregando...' : 'Entrar'}
-                        </button>
-                    </div>
 
-                    {error && <p className="error-message">{error}</p>}
-                </form>
-            </div>
-        </div>
+                            <div className="text-center mt-4">
+                                <Button
+                                    variant="success"
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-100"
+                                    style={{transition: "transform 0.2s, box-shadow 0.2s"}}
+                                    onMouseOver={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                                    onMouseOut={(e) => e.currentTarget.style.transform = "scale(1)"}
+                                >
+                                    {loading ? 'Carregando...' : 'Entrar'}
+                                </Button>
+
+                            </div>
+
+                            {error && (
+                                <Alert variant="danger" className="mt-3 text-center" style={{fontWeight: "bold"}}>
+                                    {error}
+                                </Alert>
+                            )}
+
+                        </Form>
+                    </div>
+                </Col>
+            </Row>
+        </Container>
     );
 }
 
