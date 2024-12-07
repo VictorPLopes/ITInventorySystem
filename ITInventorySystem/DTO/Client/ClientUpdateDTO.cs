@@ -1,22 +1,21 @@
-﻿namespace ITInventorySystem.DTO.Client
+﻿namespace ITInventorySystem.DTO.Client;
+
+public class ClientUpdateDto
 {
-    public class ClientUpdateDTO
-    {
-        public int Id { get; set; }
-        public string IdDoc { get; set; }// CPF/CNPJ
+    public int Id { get; set; }
+    public string IdDoc { get; set; } // CPF/CNPJ
 
-        public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
-        public string Email { get; set; }
+    public string Email { get; set; }
 
-        public string Street { get; set; }
+    public string Street { get; set; }
 
-        public string City { get; set; }
+    public string City { get; set; }
 
-        public string State { get; set; }
+    public string State { get; set; }
 
-        public string PostalCode { get; set; }
+    public string PostalCode { get; set; }
 
-        public string PhoneNumber { get; set; }
-    }
+    public string PhoneNumber { get; set; }
 }

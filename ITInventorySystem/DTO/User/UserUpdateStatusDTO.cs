@@ -1,7 +1,7 @@
 ﻿namespace ITInventorySystem.DTO.User;
 
-public class UserUpdateStatusDTO
+public class UserUpdateStatusDto
 {
-    public int  Id { get; set; }
+    public int Id { get; set; }
     public bool Status { get; set; }
 }

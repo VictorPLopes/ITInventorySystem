@@ -2,23 +2,15 @@
 using ITInventorySystem.DTO.Products;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
-namespace ITInventorySystem.Repositories.Implementations;
+namespace ITInventorySystem.Repositories.Services;
 
-public class ProductService : IProductInterface
+public class ProductService(AppDbContext context) : IProductInterface
 {
-    private readonly AppDbContext _context;
-
-    public ProductService(AppDbContext context)
+    public async Task<Product> AddAsync(ProductCreateDto product)
     {
-        _context = context;
-    }  
-
-    public async Task<Product> AddAsync(ProductCreateDTO product)
-    {       
-        var prod = new Product()
+        var prod = new Product
         {
             Name = product.Name,
             Description = product.Description,
@@ -29,59 +21,46 @@ public class ProductService : IProductInterface
             SalePrice = product.SalePrice
         };
 
-        _context.Products.Add(prod);
-        await _context.SaveChangesAsync();
+        context.Products.Add(prod);
+        await context.SaveChangesAsync();
 
         return prod;
     }
 
-    public async Task DeleteAsync(int id) 
+    public async Task DeleteAsync(int id)
     {
         try
         {
-            var prod = await _context.Products
-                .FirstOrDefaultAsync(prodDB => prodDB.Id == id);
+            var prod = await context.Products
+                                    .FirstOrDefaultAsync(prodDb => prodDb.Id == id);
 
-            if (prod == null)
-            {
-                throw new KeyNotFoundException("Product not found!");
-            }
+            if (prod == null) throw new KeyNotFoundException("Product not found!");
 
-            _context.Products.Remove(prod);
-            await _context.SaveChangesAsync();
+            context.Products.Remove(prod);
+            await context.SaveChangesAsync();
         }
         catch (Exception ex)
         {
-
             throw new InvalidOperationException("An error occurred while deleting the product.", ex);
         }
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync() 
-    {
-        return await _context.Products.ToListAsync();
-    }
+    public async Task<IEnumerable<Product>> GetAllAsync() => await context.Products.ToListAsync();
 
 
     public async Task<Product> GetByIdAsync(int id)
     {
-        var product = await _context.Products.FindAsync(id);
-        if (product == null)
-        {
-            throw new KeyNotFoundException("Product not found!");
-        }
+        var product = await context.Products.FindAsync(id);
+        if (product == null) throw new KeyNotFoundException("Product not found!");
         return product;
-    } 
-    
-    public async Task UpdateAsync(ProductUpdateDTO product)
-    {
-        var prod = await _context.Products
-               .FirstOrDefaultAsync(prodDB => prodDB.Id == product.Id);
+    }
 
-        if (prod == null)
-        {
-            throw new KeyNotFoundException("Product not found!");
-        }
+    public async Task UpdateAsync(ProductUpdateDto product)
+    {
+        var prod = await context.Products
+                                .FirstOrDefaultAsync(prodDb => prodDb.Id == product.Id);
+
+        if (prod == null) throw new KeyNotFoundException("Product not found!");
 
         prod.Name = product.Name;
         prod.Description = product.Description;
@@ -92,7 +71,7 @@ public class ProductService : IProductInterface
         prod.SalePrice = product.SalePrice;
         prod.UpdatedAt = DateTime.Now;
 
-        _context.Products.Update(prod);
-        await _context.SaveChangesAsync();
+        context.Products.Update(prod);
+        await context.SaveChangesAsync();
     }
 }

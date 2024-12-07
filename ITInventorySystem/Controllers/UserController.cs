@@ -1,8 +1,6 @@
-﻿using ITInventorySystem.DTO.Client;
-using ITInventorySystem.DTO.User;
+﻿using ITInventorySystem.DTO.User;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;
@@ -13,26 +11,27 @@ public class UserController(IUserInterface userInterface) : ControllerBase
 
     [HttpGet("GetAllUsers")]
     public async Task<ActionResult<IEnumerable<User>>> GetAllUsers() => Ok(await userInterface.GetAllAsync());
-    
-    [HttpGet("GetUser/{id}")]
+
+    [HttpGet("GetUser/{id:int}")]
     public async Task<ActionResult<User>> GetUser(int id) => Ok(await userInterface.GetByIdAsync(id));
-    
+
     [HttpGet("GetUserByEmail/{email}")]
-    public async Task<ActionResult<User>> GetUserByEmail(string email) => Ok(await userInterface.GetByEmailAsync(email));
-    
+    public async Task<ActionResult<User>> GetUserByEmail(string email) =>
+        Ok(await userInterface.GetByEmailAsync(email));
+
     /*[HttpPost("CreateUser")]
     public async Task<ActionResult<User>> CreateUser(UserCreateDTO user) => Ok(await userInterface.AddAsync(user));*/
 
 
     [HttpPost("CreateUser")]
-    public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDTO usr)
+    public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDto usr)
     {
         var user = await userInterface.AddAsync(usr);
         return Ok(user);
     }
 
     [HttpPut("UpdateUser")]
-    public async Task<ActionResult> UpdateUser(UserUpdateDTO user)
+    public async Task<ActionResult> UpdateUser([FromBody] UserUpdateDto user)
     {
         try
         {
@@ -49,9 +48,9 @@ public class UserController(IUserInterface userInterface) : ControllerBase
             return StatusCode(500, new { message = "An error occurred while updating the user", error = ex.Message });
         }
     }
-    
+
     [HttpPut("UpdateUserPassword")]
-    public async Task<ActionResult> UpdateUserPassword(UserUpdatePasswordDTO user)
+    public async Task<ActionResult> UpdateUserPassword([FromBody] UserUpdatePasswordDto user)
     {
         try
         {
@@ -69,9 +68,9 @@ public class UserController(IUserInterface userInterface) : ControllerBase
             return StatusCode(500, new { message = "An error occurred while updating the user", error = ex.Message });
         }
     }
-    
+
     [HttpPut("UpdateUserStatus")]
-    public async Task<ActionResult> UpdateUserStatus(UserUpdateStatusDTO user)
+    public async Task<ActionResult> UpdateUserStatus([FromBody] UserUpdateStatusDto user)
     {
         try
         {
@@ -88,8 +87,8 @@ public class UserController(IUserInterface userInterface) : ControllerBase
             return StatusCode(500, new { message = "An error occurred while updating the user", error = ex.Message });
         }
     }
-    
-    [HttpDelete("DeleteUser/{id}")]
+
+    [HttpDelete("DeleteUser/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         try
@@ -107,23 +106,5 @@ public class UserController(IUserInterface userInterface) : ControllerBase
             // Para outros tipos de erro, retorna um status 500 Internal Server Error
             return StatusCode(500, new { message = "An error occurred while deleting the user", error = ex.Message });
         }
-    }
-
-    [HttpPost("Login")]
-    public async Task<ActionResult<User>> Login([FromBody] LoginRequest loginRequest)
-    {
-        if (loginRequest == null)
-        {
-            return BadRequest("Dados de login inválidos.");
-        }
-
-        var user = await userInterface.Login(loginRequest.Email, loginRequest.Password);
-
-        if (user == null)
-        {
-            return Unauthorized("E-mail ou senha incorretos.");
-        }
-
-        return Ok(user);
     }
 }

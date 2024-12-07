@@ -1,6 +1,6 @@
 ﻿namespace ITInventorySystem.DTO.User;
 
-public class UserUpdatePasswordDTO
+public class UserUpdatePasswordDto
 {
     public int Id { get; set; }
     public string Password { get; set; }

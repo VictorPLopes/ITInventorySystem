@@ -1,79 +1,69 @@
 ﻿using ITInventorySystem.DTO.Client;
-using ITInventorySystem.DTO.Products;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ITInventorySystem.Controllers
+namespace ITInventorySystem.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class ClientController(IClientInterface clientInterface) : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ClientController : ControllerBase
+    [HttpGet("GetAllClients")]
+    public async Task<ActionResult<IEnumerable<Client>>> GetAllClients()
     {
-        private readonly IClientInterface _clientInterface;
+        var clients = await clientInterface.GetAllAsync();
+        return Ok(clients);
+    }
 
-        public ClientController(IClientInterface clientInterface)
+    [HttpGet("GetClient/{id:int}")]
+    public async Task<ActionResult<Client>> GetClient(int id)
+    {
+        var client = await clientInterface.GetByIdAsync(id);
+        return Ok(client);
+    }
+
+    [HttpPost("CreateClient")]
+    public async Task<ActionResult<Client>> CreateClient([FromBody] ClientCreateDto clt)
+    {
+        var client = await clientInterface.AddAsync(clt);
+        return Ok(client);
+    }
+
+    [HttpPut("UpdateClient")]
+    public async Task<ActionResult> UpdateClient([FromBody] ClientUpdateDto clt)
+    {
+        try
         {
-            _clientInterface = clientInterface;
+            await clientInterface.UpdateAsync(clt);
+            return NoContent();
         }
-
-        [HttpGet("GetAllClients")]
-        public async Task<ActionResult<IEnumerable<Client>>> GetAllClients()
+        catch (KeyNotFoundException ex)
         {
-            var clients = await _clientInterface.GetAllAsync();
-            return Ok(clients);
+            return NotFound(ex.Message); // Retorna 404 se o cliente não foi encontrado
         }
+    }
 
-        [HttpGet("GetClient/{id}")]
-        public async Task<ActionResult<Client>> GetClient(int id)
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        try
         {
-            var client = await _clientInterface.GetByIdAsync(id);
-            return Ok(client);
+            // Chama o método DeleteAsync do serviço
+            await clientInterface.DeleteAsync(id);
+
+            // Retorna uma resposta de sucesso (status 200 OK)
+            return Ok(new { message = "Client deleted successfully" });
         }
-
-        [HttpPost("CreateClient")]
-        public async Task<ActionResult<Client>> CreateClient(ClientCreateDTO clt)
+        catch (KeyNotFoundException)
         {
-            var client = await _clientInterface.AddAsync(clt);
-            return Ok(client);
+            // Caso o cliente não seja encontrado, retorna um status 404 Not Found
+            return NotFound(new { message = "Client not found" });
         }
-
-        [HttpPut("UpdateClient")]
-        public async Task<ActionResult> UpdateClient(ClientUpdateDTO clt)
+        catch (Exception ex)
         {
-            try
-            {
-                await _clientInterface.UpdateAsync(clt);
-                return NoContent();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message); // Retorna 404 se o cliente não foi encontrado
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                // Chama o método DeleteAsync do serviço
-                await _clientInterface.DeleteAsync(id);
-
-                // Retorna uma resposta de sucesso (status 200 OK)
-                return Ok(new { message = "Client deleted successfully" });
-            }
-            catch (KeyNotFoundException)
-            {
-                // Caso o cliente não seja encontrado, retorna um status 404 Not Found
-                return NotFound(new { message = "Client not found" });
-            }
-            catch (Exception ex)
-            {
-                // Para outros tipos de erro, retorna um status 500 Internal Server Error
-                return StatusCode(500, new { message = "An error occurred while deleting the client", error = ex.Message });
-            }
+            // Para outros tipos de erro, retorna um status 500 Internal Server Error
+            return StatusCode(500, new { message = "An error occurred while deleting the client", error = ex.Message });
         }
     }
 }

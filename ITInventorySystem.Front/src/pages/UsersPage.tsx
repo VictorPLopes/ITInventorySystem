@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import axios from 'axios';
+import axios from "../AxiosConfig";
 import Swal from 'sweetalert2';
 import toast, {Toaster} from 'react-hot-toast';
 import {UserModal} from '../components/UserModal';
@@ -23,8 +23,21 @@ const UsersPage = ({port}: { port: string }) => {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [currentUser, setCurrentUser] = useState<Partial<User>>({});
     const [isEdit, setIsEdit] = useState<boolean>(false);
+    const [message, setMessage] = useState<string>('');
+    const [error, setError] = useState<string>('');
 
     useEffect(() => {
+        const fetchUsersPage = async () => {
+            try {
+                const response = await axios.get(`https://localhost:${port}/UsersPage`);
+                setMessage(response.data); // Define a mensagem recebida da API
+            } catch (err) {
+                setError('Erro ao acessar a página de usuários. Verifique sua autenticação.');
+            }
+        };
+
+        fetchUsersPage();
+
         fetchUsers();
     }, []);
 
@@ -75,6 +88,11 @@ const UsersPage = ({port}: { port: string }) => {
         });
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        window.location.href = '/';
+    };
+
     const handleSaveUser = async (user: Partial<User>) => {
         const apiEndpoint = isEdit ? `https://localhost:${port}/UpdateUser` : `https://localhost:${port}/CreateUser`;
 
@@ -93,29 +111,41 @@ const UsersPage = ({port}: { port: string }) => {
             <Toaster position="top-right"/>
             <Row>
                 <Col>
-                    <h2 className="text-center mb-4">Usuários Registrados</h2>
+                    <h2 className="mb-4">Usuários Registrados</h2>
                 </Col>
-            </Row>
-            <Row className="mb-4">
                 <Col className="text-end">
-                    <Button variant="success" onClick={handleAddUser}>
-                        + Novo Usuário
+                    <Button variant="danger" onClick={handleLogout}>
+                        Sair
                     </Button>
                 </Col>
             </Row>
-            <Row>
-                <Col>
-                    {loading ? (
-                        <div className="d-flex justify-content-center align-items-center" style={{minHeight: '300px'}}>
-                            <Spinner animation="border" role="status" variant="primary"/>
-                        </div>
-                    ) : (
-                        <div className="p-4 rounded shadow-lg bg-body-tertiary">
-                            <UserTable users={users} onEdit={handleEditUser} onDelete={handleDeleteUser}/>
-                        </div>
-                    )}
-                </Col>
-            </Row>
+            {message ? (<>
+                    <Row className="mb-4">
+                        <Col className="text-end">
+                            <Button variant="success" onClick={handleAddUser}>
+                                + Novo Usuário
+                            </Button>
+                        </Col>
+                    </Row><Row>
+                    <Col>
+                        {loading ? (
+                            <div className="d-flex justify-content-center align-items-center"
+                                 style={{minHeight: '300px'}}>
+                                <Spinner animation="border" role="status" variant="primary"/>
+                            </div>
+                        ) : (
+                            <div className="p-4 rounded shadow-lg bg-body-tertiary">
+                                <UserTable users={users} onEdit={handleEditUser} onDelete={handleDeleteUser}/>
+                            </div>
+                        )}
+                    </Col>
+                </Row>
+                </>
+            ) : error ? (
+                <p>{error}</p>
+            ) : (
+                <p>Carregando...</p>
+            )}
             {showModal && (
                 <UserModal
                     show={showModal}

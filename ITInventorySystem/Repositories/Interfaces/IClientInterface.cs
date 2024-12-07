@@ -5,9 +5,9 @@ namespace ITInventorySystem.Repositories.Interfaces;
 
 public interface IClientInterface
 {
-    Task<Client>GetByIdAsync(int id);
+    Task<Client> GetByIdAsync(int id);
     Task<IEnumerable<Client>> GetAllAsync();
-    Task<Client> AddAsync(ClientCreateDTO client);
-    Task UpdateAsync(ClientUpdateDTO client);
+    Task<Client> AddAsync(ClientCreateDto client);
+    Task UpdateAsync(ClientUpdateDto client);
     Task DeleteAsync(int id);
 }
