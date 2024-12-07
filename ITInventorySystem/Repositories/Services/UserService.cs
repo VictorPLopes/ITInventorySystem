@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using ITInventorySystem.Data;
+﻿using ITInventorySystem.Data;
 using ITInventorySystem.DTO.User;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
@@ -10,14 +8,14 @@ namespace ITInventorySystem.Repositories.Services;
 
 public class UserService(AppDbContext context) : IUserInterface
 {
-    public async Task<User> AddAsync(UserCreateDTO user)
+    public async Task<User> AddAsync(UserCreateDto user)
     {
         if (await context.Users.AnyAsync(userDb => userDb.Email == user.Email))
             throw new InvalidOperationException("Email already in use!");
-        
-        HashPassword(user.Password, out var passwordHash, out var passwordSalt);
-        
-        var newUser = new User()
+
+        HashPassword.Hash(user.Password, out var passwordHash, out var passwordSalt);
+
+        var newUser = new User
         {
             Name = user.Name,
             Email = user.Email,
@@ -25,105 +23,105 @@ public class UserService(AppDbContext context) : IUserInterface
             PasswordSalt = passwordSalt,
             Type = user.Type
         };
-        
+
         context.Users.Add(newUser);
         await context.SaveChangesAsync();
 
         return newUser;
     }
-    
+
     public async Task<IEnumerable<User>> GetAllAsync() => await context.Users.ToListAsync();
 
     public async Task<User> GetByIdAsync(int id)
     {
         var user = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == id);
-        
+
         if (user == null)
             throw new KeyNotFoundException("User not found!");
-        
+
         return user;
     }
 
     public async Task<User> GetByEmailAsync(string email)
     {
         var user = await context.Users.FirstOrDefaultAsync(userDb => userDb.Email == email);
-        
+
         if (user == null)
             throw new KeyNotFoundException("User not found!");
-        
+
         return user;
     }
 
-    public async Task<User> UpdateAsync(UserUpdateDTO user)
+    public async Task<User> UpdateAsync(UserUpdateDto user)
     {
         if (await context.Users.AnyAsync(userDb => userDb.Email == user.Email && userDb.Id != user.Id))
             throw new InvalidOperationException("Email already in use!");
-        
+
         var userDb = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == user.Id);
-        
+
         if (userDb == null)
             throw new KeyNotFoundException("User not found!");
-        
+
         userDb.Name = user.Name;
         userDb.Email = user.Email;
         userDb.Type = user.Type;
         userDb.UpdatedAt = DateTime.Now;
         if (user.Password != "")
         {
-            HashPassword(user.Password, out var passwordHash, out var passwordSalt);
+            HashPassword.Hash(user.Password, out var passwordHash, out var passwordSalt);
             userDb.PasswordHash = passwordHash;
             userDb.PasswordSalt = passwordSalt;
         }
-        
+
         context.Users.Update(userDb);
         await context.SaveChangesAsync();
-        
+
         return userDb;
     }
 
-    public async Task UpdatePasswordAsync(UserUpdatePasswordDTO user)
+    public async Task UpdatePasswordAsync(UserUpdatePasswordDto user)
     {
         var userDb = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == user.Id);
-        
+
         if (userDb == null)
             throw new KeyNotFoundException("User not found!");
-        
-        if (!VerifyPassword(user.Password, userDb.PasswordHash, userDb.PasswordSalt))
+
+        if (!HashPassword.Verify(user.Password, userDb.PasswordHash, userDb.PasswordSalt))
             throw new InvalidOperationException("Incorrect password!");
-        
-        HashPassword(user.NewPassword, out var passwordHash, out var passwordSalt);
-        
+
+        HashPassword.Hash(user.NewPassword, out var passwordHash, out var passwordSalt);
+
         userDb.PasswordHash = passwordHash;
         userDb.PasswordSalt = passwordSalt;
-        
+
         context.Users.Update(userDb);
         await context.SaveChangesAsync();
     }
 
-    public async Task<User> UpdateStatusAsync(UserUpdateStatusDTO user)
+    public async Task<User> UpdateStatusAsync(UserUpdateStatusDto user)
     {
         var userDb = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == user.Id);
-        
+
         if (userDb == null)
             throw new KeyNotFoundException("User not found!");
-        
+
         userDb.Status = user.Status;
-        
+
         context.Users.Update(userDb);
         await context.SaveChangesAsync();
-        
+
         return userDb;
     }
-    
+
     public async Task DeleteAsync(int id)
     {
         try
         {
             var user = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == id);
-            
+
             if (user == null)
                 throw new KeyNotFoundException("User not found!");
-            
+
             context.Users.Remove(user);
             await context.SaveChangesAsync();
         }
@@ -132,30 +130,5 @@ public class UserService(AppDbContext context) : IUserInterface
             Console.WriteLine(e);
             throw;
         }
-    }
-
-    public async Task<User> Login(string email, string password)
-    {
-        var user = await context.Users.FirstOrDefaultAsync(userDb => userDb.Email == email);
-
-        if (user == null || !VerifyPassword(password, user.PasswordHash, user.PasswordSalt))
-            throw new KeyNotFoundException("Incorrect email or password!");
-
-        return user;
-    }
-
-
-    private static void HashPassword(string password, out byte[] passwordHash, out byte[] passwordSalt)
-    {
-        using var hmac = new HMACSHA512();
-        passwordSalt = hmac.Key;
-        passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-    }
-    
-    private static bool VerifyPassword(string password, byte[] passwordHash, byte[] passwordSalt)
-    {
-        using var hmac = new HMACSHA512(passwordSalt);
-        var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-        return computedHash.SequenceEqual(passwordHash);
     }
 }

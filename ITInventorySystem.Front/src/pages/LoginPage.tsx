@@ -1,14 +1,29 @@
-import React, {useState} from 'react';
-import axios, {AxiosError} from 'axios';
+import React, {useEffect, useState} from 'react';
+import {AxiosError} from 'axios';
+import axios from "../AxiosConfig";
 import {useNavigate} from 'react-router-dom';
 import {Alert, Button, Col, Container, Form, FormControl, FormGroup, FormLabel, Row} from "react-bootstrap";
 
 function LoginPage({port}: { port: string }) {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+//    const [token, setToken] = useState<string>('');
     const [error, setError] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Função para chamar o endpoint protegido `painelControle`
+        const fetchDashboard = async () => {
+            try {
+                await axios.get(`https://localhost:${port}/Dashboard`);
+                navigate('/dashboard');
+            } catch (err) {
+                // Não faz nada, pois o usuário ainda não está autenticado
+            }
+        };
+        fetchDashboard();
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,6 +37,8 @@ function LoginPage({port}: { port: string }) {
             });
 
             if (response.status === 200) {
+                // setToken(response.data.token);
+                localStorage.setItem('token', response.data.token);
                 navigate('/dashboard');
             }
         } catch (err) {

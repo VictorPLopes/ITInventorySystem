@@ -1,7 +1,6 @@
 // src/App.tsx
 import {Route, Routes} from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import HomePage from './pages/HomePage';
 import Dashboard from './pages/DashboardPage';
 import UsersPage from './pages/UsersPage';
 import {useEffect} from "react";
@@ -17,10 +16,14 @@ function App() {
         <div className="App">
             <Routes>
                 {/* Definindo a rota para a página de login */}
-                <Route path="/login" element={<LoginPage port={port}/>}/>
-                <Route path="/home" element={<HomePage/>}/>
-                <Route path="/dashboard" element={<Dashboard/>}/>
+                <Route path="*" element={<LoginPage port={port}/>}/>
+                {/*<Route path="/login" element={<LoginPage port={port}/>}/>*/}
+                <Route path="/dashboard" element={<Dashboard port={port}/>}/>
                 <Route path="/users" element={<UsersPage port={port}/>}/>
+                {/*<Route path="/clients" element={<ClientsPage port={port}/>}/>
+                <Route path="/inventory" element={<InventoryPage port={port}/>}/>
+                <Route path="/work-orders" element={<WorkOrdersPage port={port}/>}/>*/}
+
             </Routes>
         </div>
     );

@@ -7,10 +7,10 @@ public class ProductsInWorkOrder
 {
     public int ProductId { get; set; }
     public Product Product { get; set; }
-    
+
     public int WorkOrderId { get; set; }
-    [JsonIgnore]
-    public WorkOrder WorkOrder { get; set; }
+
+    [JsonIgnore] public WorkOrder WorkOrder { get; set; }
 
     public int ProductQuantity { get; set; }
 

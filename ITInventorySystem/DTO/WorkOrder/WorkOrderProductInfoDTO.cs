@@ -1,8 +1,7 @@
-﻿namespace ITInventorySystem.DTO.WorkOrder
+﻿namespace ITInventorySystem.DTO.WorkOrder;
+
+public class WorkOrderProductInfoDto
 {
-    public class WorkOrderProductInfoDTO
-    {
-        public int ProductId { get; set; } 
-        public int Quantity { get; set; } 
-    }
+    public int ProductId { get; set; }
+    public int Quantity { get; set; }
 }

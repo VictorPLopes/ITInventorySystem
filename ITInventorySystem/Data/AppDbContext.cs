@@ -3,12 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ITInventorySystem.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(option)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> option)
-        : base(option)
-    {
-    }
     public DbSet<User> Users { get; set; }
     public DbSet<Client> Clients { get; set; }
     public DbSet<Product> Products { get; set; }
@@ -19,17 +15,17 @@ public class AppDbContext : DbContext
     {
         // Configuração da tabela de junção ProductsInWorkOrder
         modelBuilder.Entity<ProductsInWorkOrder>()
-            .HasKey(pw => new { pw.ProductId, pw.WorkOrderId }); // Define chave composta
+                    .HasKey(pw => new { pw.ProductId, pw.WorkOrderId }); // Define chave composta
 
         modelBuilder.Entity<ProductsInWorkOrder>()
-            .HasOne(pw => pw.Product)
-            .WithMany(p => p.ProductsInWorkOrder)
-            .HasForeignKey(pw => pw.ProductId);
+                    .HasOne(pw => pw.Product)
+                    .WithMany(p => p.ProductsInWorkOrder)
+                    .HasForeignKey(pw => pw.ProductId);
 
         modelBuilder.Entity<ProductsInWorkOrder>()
-            .HasOne(pw => pw.WorkOrder)
-            .WithMany(w => w.ProductsInWorkOrder)
-            .HasForeignKey(pw => pw.WorkOrderId);
+                    .HasOne(pw => pw.WorkOrder)
+                    .WithMany(w => w.ProductsInWorkOrder)
+                    .HasForeignKey(pw => pw.WorkOrderId);
 
 
         modelBuilder.Entity<Client>()
@@ -67,24 +63,24 @@ public class AppDbContext : DbContext
                     .HasColumnType("decimal(18, 2)"); // Define o tipo de dado para o campo WorkHours
 
         modelBuilder.Entity<Product>()
-        .Property(p => p.CreatedAt)
-        .HasDefaultValueSql("GETDATE()");    
+                    .Property(p => p.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
 
         modelBuilder.Entity<User>()
-        .Property(p => p.CreatedAt)
-        .HasDefaultValueSql("GETDATE()");
- 
+                    .Property(p => p.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
+
         modelBuilder.Entity<WorkOrder>()
-        .Property(p => p.CreatedAt)
-        .HasDefaultValueSql("GETDATE()");
+                    .Property(p => p.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
 
         modelBuilder.Entity<Client>()
-        .Property(p => p.CreatedAt)
-        .HasDefaultValueSql("GETDATE()");     
+                    .Property(p => p.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
 
         modelBuilder.Entity<ProductsInWorkOrder>()
-        .Property(p => p.CreatedAt)
-        .HasDefaultValueSql("GETDATE()");      
+                    .Property(p => p.CreatedAt)
+                    .HasDefaultValueSql("GETDATE()");
 
         base.OnModelCreating(modelBuilder);
     }

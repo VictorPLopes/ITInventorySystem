@@ -1,21 +1,20 @@
-﻿namespace ITInventorySystem.DTO.Products
+﻿namespace ITInventorySystem.DTO.Products;
+
+public class ProductUpdateDto
 {
-    public class ProductUpdateDTO
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public string Name { get; set; }
+    public string Name { get; set; }
 
-        public int Quantity { get; set; }
+    public int Quantity { get; set; }
 
-        public string? Description { get; set; }
+    public string? Description { get; set; }
 
-        public string? Category { get; set; }
+    public string? Category { get; set; }
 
-        public decimal CostPrice { get; set; }
+    public decimal CostPrice { get; set; }
 
-        public decimal SalePrice { get; set; }
+    public decimal SalePrice { get; set; }
 
-        public string? BrandManufacturerName { get; set; }
-    }
+    public string? BrandManufacturerName { get; set; }
 }

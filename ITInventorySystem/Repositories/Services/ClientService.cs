@@ -3,22 +3,14 @@ using ITInventorySystem.DTO.Client;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.IO;
 
-namespace ITInventorySystem.Repositories.Implementations;
+namespace ITInventorySystem.Repositories.Services;
 
-public class ClientService : IClientInterface
+public class ClientService(AppDbContext context) : IClientInterface
 {
-    private readonly AppDbContext _context;
-
-    public ClientService(AppDbContext context)
+    public async Task<Client> AddAsync(ClientCreateDto client)
     {
-        _context = context;
-    }
-
-    public async Task<Client> AddAsync(ClientCreateDTO client)
-    {
-        var clt = new Client()
+        var clt = new Client
         {
             Name = client.Name,
             IdDoc = client.IdDoc,
@@ -30,8 +22,8 @@ public class ClientService : IClientInterface
             PostalCode = client.PostalCode
         };
 
-        _context.Add(clt);
-        await _context.SaveChangesAsync();
+        context.Add(clt);
+        await context.SaveChangesAsync();
 
         return clt;
     }
@@ -40,48 +32,35 @@ public class ClientService : IClientInterface
     {
         try
         {
-            var clt = await _context.Clients
-                .FirstOrDefaultAsync(cltDB => cltDB.Id == id);
+            var clt = await context.Clients
+                                   .FirstOrDefaultAsync(cltDb => cltDb.Id == id);
 
-            if (clt == null)
-            {
-                throw new KeyNotFoundException("Client not found!");
-            }
+            if (clt == null) throw new KeyNotFoundException("Client not found!");
 
-            _context.Clients.Remove(clt);
-            await _context.SaveChangesAsync();
+            context.Clients.Remove(clt);
+            await context.SaveChangesAsync();
         }
         catch (Exception ex)
         {
-
             throw new InvalidOperationException("An error occurred while deleting the client.", ex);
         }
     }
 
-    public async Task<IEnumerable<Client>> GetAllAsync()
-    {
-        return await _context.Clients.ToListAsync();
-    }
+    public async Task<IEnumerable<Client>> GetAllAsync() => await context.Clients.ToListAsync();
 
     public async Task<Client> GetByIdAsync(int id)
     {
-        var client = await _context.Clients.FindAsync(id);
-        if (client == null)
-        {
-            throw new KeyNotFoundException("Client not found!");
-        }
+        var client = await context.Clients.FindAsync(id);
+        if (client == null) throw new KeyNotFoundException("Client not found!");
         return client;
     }
 
-    public async Task UpdateAsync(ClientUpdateDTO client)
+    public async Task UpdateAsync(ClientUpdateDto client)
     {
-        var clt = await _context.Clients
-               .FirstOrDefaultAsync(cltDB => cltDB.Id == client.Id);
+        var clt = await context.Clients
+                               .FirstOrDefaultAsync(cltDb => cltDb.Id == client.Id);
 
-        if (clt == null)
-        {
-            throw new KeyNotFoundException("Client not found!");
-        }
+        if (clt == null) throw new KeyNotFoundException("Client not found!");
 
         clt.Name = client.Name;
         clt.Email = client.Email;
@@ -92,7 +71,7 @@ public class ClientService : IClientInterface
         clt.PostalCode = client.PostalCode;
         clt.UpdatedAt = DateTime.Now;
 
-        _context.Update(clt);
-        await _context.SaveChangesAsync();
+        context.Update(clt);
+        await context.SaveChangesAsync();
     }
 }
