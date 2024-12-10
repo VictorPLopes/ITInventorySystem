@@ -48,9 +48,9 @@ const Sidebar = ({
         sidenav: true,
         "sidenav-collapsed": isSidebarCollapsed,
     })
-    const closeSidenav = () => {
+    /*const closeSidenav = () => {
         changeIsSidebarCollapsed(true);
-    }
+    }*/
 
     const toggleCollapse = (): void => {
         changeIsSidebarCollapsed(!isSidebarCollapsed)
