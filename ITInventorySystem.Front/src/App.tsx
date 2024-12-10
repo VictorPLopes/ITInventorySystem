@@ -38,6 +38,7 @@ function App() {
                 <Route
                     element={
                         <Layout
+                            port={port}
                             screenWidth={screenWidth}
                             isSidebarCollapsed={isSidebarCollapsed}
                             setIsSidebarCollapsed={setIsSidebarCollapsed}

@@ -4,12 +4,13 @@ import classNames from "classnames";
 import Sidebar from "../components/left-sidebar/Sidebar"; // Importando a Sidebar
 
 type LayoutProps = {
+    port: string;
     isSidebarCollapsed: boolean;
     screenWidth: number;
     setIsSidebarCollapsed: (isSidebarCollapsed: boolean) => void;
 };
 
-const Layout = ({isSidebarCollapsed, screenWidth, setIsSidebarCollapsed}: LayoutProps) => {
+const Layout = ({port, isSidebarCollapsed, screenWidth, setIsSidebarCollapsed}: LayoutProps) => {
     const classes = classNames({
         body: true,
         "body-trimmed": !isSidebarCollapsed && screenWidth > 768, // Aplica o estilo quando a sidebar não está colapsada e a tela é maior que 768px
@@ -21,6 +22,7 @@ const Layout = ({isSidebarCollapsed, screenWidth, setIsSidebarCollapsed}: Layout
             <Sidebar
                 isSidebarCollapsed={isSidebarCollapsed}
                 changeIsSidebarCollapsed={setIsSidebarCollapsed}
+                port={port}
             />
 
             {/* O conteúdo principal da página será renderizado aqui */}
