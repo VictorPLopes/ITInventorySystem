@@ -67,7 +67,7 @@ public class UserService(AppDbContext context) : IUserInterface
         userDb.Type = user.Type;
         userDb.Status = user.Status;
         userDb.UpdatedAt = DateTime.Now;
-        
+
         context.Users.Update(userDb);
         await context.SaveChangesAsync();
 
@@ -80,7 +80,7 @@ public class UserService(AppDbContext context) : IUserInterface
 
         if (userDb == null)
             throw new KeyNotFoundException("User not found!");
-        
+
         HashPassword.Hash(user.NewPassword, out var passwordHash, out var passwordSalt);
         userDb.PasswordHash = passwordHash;
         userDb.PasswordSalt = passwordSalt;

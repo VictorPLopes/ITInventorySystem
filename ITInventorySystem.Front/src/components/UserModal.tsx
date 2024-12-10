@@ -1,5 +1,5 @@
-﻿import React, { useState } from 'react';
-import { Button, Form, FormControl, FormGroup, FormLabel, Modal } from 'react-bootstrap';
+﻿import React, {useState} from 'react';
+import {Button, Form, FormControl, FormGroup, FormLabel, Modal} from 'react-bootstrap';
 
 interface User {
     id?: number;
@@ -17,7 +17,7 @@ interface UserModalProps {
     user: Partial<User>;
 }
 
-export const UserModal: React.FC<UserModalProps> = ({ show, onClose, onSave, user }) => {
+export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user}) => {
     const [formData, setFormData] = useState<Partial<User>>(user);
     const [confirmPassword, setConfirmPassword] = useState(''); // Estado para a confirmação da senha
     const [error, setError] = useState(''); // Estado para mensagens de erro
@@ -26,7 +26,7 @@ export const UserModal: React.FC<UserModalProps> = ({ show, onClose, onSave, use
 
     // Manipula alterações nos campos do formulário
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | any>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: name === 'type' ? parseInt(value, 10) : value,
@@ -121,9 +121,14 @@ export const UserModal: React.FC<UserModalProps> = ({ show, onClose, onSave, use
                         <Form.Select
                             name="type"
                             value={formData.type || 0}
-                            onChange={handleInputChange}
+                            onChange={(e) =>
+                                setFormData({
+                                    ...formData,
+                                    type: parseInt(e.target.value, 10),
+                                })
+                            }
                         >
-                            <option value={0}>Usuário</option>
+                            <option value={2}>Técnico</option>
                             <option value={1}>Administrador</option>
                         </Form.Select>
                     </FormGroup>

@@ -4,9 +4,9 @@ import Swal from 'sweetalert2';
 import toast, {Toaster} from 'react-hot-toast';
 import {UserModal} from '../components/UserModal';
 import {UserTable} from '../components/UserTable';
-import { ChangePasswordModal } from '../components/ChangePasswordModal';
+import {ChangePasswordModal} from '../components/ChangePasswordModal';
 import {Button, Col, Container, Row, Spinner} from 'react-bootstrap';
-import { Value } from 'classnames';
+import {Value} from 'classnames';
 
 interface User {
     id: number;
@@ -91,14 +91,14 @@ const UsersPage = ({port}: { port: string }) => {
         });
     };
 
-    const handleChangePassword = (user : User) => {
+    const handleChangePassword = (user: User) => {
         setCurrentUser(user);
         setShowChangePasswordModal(true);
     };
 
-    const handleSavePassword = async (userId: Value, newPassword : string) => {
-        try{
-            await axios.put(`https://localhost:${port}/UpdateUserPassword`, { id: userId, newPassword: newPassword });
+    const handleSavePassword = async (userId: Value, newPassword: string) => {
+        try {
+            await axios.put(`https://localhost:${port}/UpdateUserPassword`, {id: userId, newPassword: newPassword});
             toast.success('Senha alterada com sucesso!');
             setShowChangePasswordModal(false);
         } catch (error: any) {
@@ -116,41 +116,40 @@ const UsersPage = ({port}: { port: string }) => {
         const apiEndpoint = isEdit ? `https://localhost:${port}/UpdateUser` : `https://localhost:${port}/CreateUser`;
 
         if (!user.name || !user.email) {
-            toast.error("Name and Email are required.");
+            toast.error("Nome e e-mail são obrigatórios.");
             return;
         }
 
         // Mapeia apenas os campos necessários
-        const payload:any = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        type: user.type,
-        status: user.status
+        const payload: any = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            type: user.type,
+            status: user.status
         };
 
-        if(!isEdit && user.password){
+        if (!isEdit && user.password) {
             payload.password = user.password;
-        }else if (!isEdit && !user.password) {
-            toast.error("Password is required for new users.");
+        } else if (!isEdit && !user.password) {
+            toast.error("A senha é obrigatória.");
             return;
         }
 
         try {
-            if(isEdit){
+            if (isEdit) {
                 await axios.put(apiEndpoint, payload);
-            }
-            else{
+            } else {
                 await axios.post(apiEndpoint, payload);
-            }            
+            }
             toast.success('Usuário salvo com sucesso!');
             setShowModal(false);
             await fetchUsers();
 
-        } catch(error: any) {
+        } catch (error: any) {
             const errorMessage = error.response?.data?.message || 'Erro ao salvar o usuário.';
             toast.error(errorMessage);
-            
+
         }
     };
 
@@ -183,7 +182,8 @@ const UsersPage = ({port}: { port: string }) => {
                             </div>
                         ) : (
                             <div className="p-4 rounded shadow-lg bg-body-tertiary">
-                                <UserTable users={users} onEdit={handleEditUser} onDelete={handleDeleteUser} onChangePassword={handleChangePassword}/>
+                                <UserTable users={users} onEdit={handleEditUser} onDelete={handleDeleteUser}
+                                           onChangePassword={handleChangePassword}/>
                             </div>
                         )}
                     </Col>

@@ -10,7 +10,7 @@ interface User {
     id: number;
     name: string;
     email: string;
-    password: string;
+    password?: string;
     type: number;
     status: boolean;
     createdAt: string;
@@ -63,8 +63,8 @@ export const UserTable: React.FC<UserTableProps> = ({users, onEdit, onDelete, on
                             <MdDelete/>
                         </Button>
                         <Button variant="info" size="sm" onClick={() => onChangePassword(row)}>
-                            <MdLock />
-                        </Button>                        
+                            <MdLock/>
+                        </Button>
                     </ButtonGroup>
                 )
             }}

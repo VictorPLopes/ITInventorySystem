@@ -1,7 +1,7 @@
-import React, {useState } from 'react';
+import React, {useState} from 'react';
 import {Button, Form, FormControl, FormGroup, FormLabel, Modal} from 'react-bootstrap';
 
-interface UserPasswordUpdate{
+interface UserPasswordUpdate {
     id: number;
     password: string;
 }
@@ -77,5 +77,5 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({show, o
                 </Button>
             </Modal.Footer>
         </Modal>
-    );   
+    );
 };

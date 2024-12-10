@@ -69,7 +69,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
             return StatusCode(500, new { message = "An error occurred while updating the user", error = ex.Message });
         }
     }
-    
+
     [HttpDelete("DeleteUser/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
