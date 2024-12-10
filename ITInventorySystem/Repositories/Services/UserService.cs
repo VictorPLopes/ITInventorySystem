@@ -65,14 +65,9 @@ public class UserService(AppDbContext context) : IUserInterface
         userDb.Name = user.Name;
         userDb.Email = user.Email;
         userDb.Type = user.Type;
+        userDb.Status = user.Status;
         userDb.UpdatedAt = DateTime.Now;
-        if (user.Password != "")
-        {
-            HashPassword.Hash(user.Password, out var passwordHash, out var passwordSalt);
-            userDb.PasswordHash = passwordHash;
-            userDb.PasswordSalt = passwordSalt;
-        }
-
+        
         context.Users.Update(userDb);
         await context.SaveChangesAsync();
 
@@ -85,32 +80,13 @@ public class UserService(AppDbContext context) : IUserInterface
 
         if (userDb == null)
             throw new KeyNotFoundException("User not found!");
-
-        if (!HashPassword.Verify(user.Password, userDb.PasswordHash, userDb.PasswordSalt))
-            throw new InvalidOperationException("Incorrect password!");
-
+        
         HashPassword.Hash(user.NewPassword, out var passwordHash, out var passwordSalt);
-
         userDb.PasswordHash = passwordHash;
         userDb.PasswordSalt = passwordSalt;
 
         context.Users.Update(userDb);
         await context.SaveChangesAsync();
-    }
-
-    public async Task<User> UpdateStatusAsync(UserUpdateStatusDto user)
-    {
-        var userDb = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == user.Id);
-
-        if (userDb == null)
-            throw new KeyNotFoundException("User not found!");
-
-        userDb.Status = user.Status;
-
-        context.Users.Update(userDb);
-        await context.SaveChangesAsync();
-
-        return userDb;
     }
 
     public async Task DeleteAsync(int id)

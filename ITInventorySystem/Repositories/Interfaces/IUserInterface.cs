@@ -11,6 +11,5 @@ public interface IUserInterface
     Task<User> AddAsync(UserCreateDto user);
     Task<User> UpdateAsync(UserUpdateDto user);
     Task UpdatePasswordAsync(UserUpdatePasswordDto user);
-    Task<User> UpdateStatusAsync(UserUpdateStatusDto user);
     Task DeleteAsync(int id);
 }

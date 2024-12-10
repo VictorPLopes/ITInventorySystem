@@ -1,11 +1,11 @@
-﻿import React, {useState} from 'react';
-import {Button, Form, FormControl, FormGroup, FormLabel, Modal} from 'react-bootstrap';
+﻿import React, { useState } from 'react';
+import { Button, Form, FormControl, FormGroup, FormLabel, Modal } from 'react-bootstrap';
 
 interface User {
     id?: number;
     name: string;
     email: string;
-    password: string;
+    password?: string; // Tornar opcional para usuários existentes
     type: number;
     status: boolean;
 }
@@ -17,26 +17,41 @@ interface UserModalProps {
     user: Partial<User>;
 }
 
-export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user}) => {
+export const UserModal: React.FC<UserModalProps> = ({ show, onClose, onSave, user }) => {
     const [formData, setFormData] = useState<Partial<User>>(user);
+    const [confirmPassword, setConfirmPassword] = useState(''); // Estado para a confirmação da senha
+    const [error, setError] = useState(''); // Estado para mensagens de erro
 
-    // Explicit type for the change handler
+    const isEdit = Boolean(user.id); // Determina se é edição
+
+    // Manipula alterações nos campos do formulário
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | any>) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: name === 'type' ? parseInt(value, 10) : value,
         }));
     };
 
+    // Manipula a alteração do campo de confirmação de senha
+    const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setConfirmPassword(e.target.value);
+    };
+
+    // Verifica se as senhas correspondem antes de salvar
     const handleSave = () => {
-        onSave(formData);
+        if (!isEdit && formData.password && formData.password !== confirmPassword) {
+            setError('As senhas não correspondem.');
+            return;
+        }
+        setError('');
+        onSave(formData); // Chama a função de salvar
     };
 
     return (
         <Modal show={show} onHide={onClose}>
             <Modal.Header closeButton>
-                <Modal.Title>{user.id ? 'Editar Usuário' : 'Novo Usuário'}</Modal.Title>
+                <Modal.Title>{isEdit ? 'Editar Usuário' : 'Novo Usuário'}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form>
@@ -46,7 +61,7 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                             type="text"
                             name="name"
                             value={formData.name || ''}
-                            onChange={(e) => handleInputChange(e)}
+                            onChange={handleInputChange}
                             placeholder="Digite o nome"
                         />
                     </FormGroup>
@@ -56,20 +71,35 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                             type="email"
                             name="email"
                             value={formData.email || ''}
-                            onChange={(e) => handleInputChange(e)}
+                            onChange={handleInputChange}
                             placeholder="Digite o e-mail"
                         />
                     </FormGroup>
-                    <FormGroup>
-                        <FormLabel>Senha</FormLabel>
-                        <FormControl
-                            type="password"
-                            name="password"
-                            value={formData.password || ''}
-                            onChange={(e) => handleInputChange(e)}
-                            placeholder="Digite a senha"
-                        />
-                    </FormGroup>
+                    {/* Renderiza os campos de senha apenas para criação */}
+                    {!isEdit && (
+                        <>
+                            <FormGroup className="mb-3">
+                                <FormLabel>Senha</FormLabel>
+                                <FormControl
+                                    type="password"
+                                    name="password"
+                                    value={formData.password || ''}
+                                    onChange={handleInputChange}
+                                    placeholder="Digite a senha"
+                                />
+                            </FormGroup>
+                            <FormGroup className="mb-3">
+                                <FormLabel>Confirme a Senha</FormLabel>
+                                <FormControl
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={handleConfirmPasswordChange}
+                                    placeholder="Confirme a senha"
+                                />
+                            </FormGroup>
+                        </>
+                    )}
+                    {error && <p className="text-danger">{error}</p>}
                     <FormGroup className="mb-3">
                         <FormLabel>Status</FormLabel>
                         <Form.Select
@@ -88,7 +118,11 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                     </FormGroup>
                     <FormGroup>
                         <FormLabel>Tipo</FormLabel>
-                        <Form.Select name="type" value={formData.type || 0} onChange={handleInputChange}>
+                        <Form.Select
+                            name="type"
+                            value={formData.type || 0}
+                            onChange={handleInputChange}
+                        >
                             <option value={0}>Usuário</option>
                             <option value={1}>Administrador</option>
                         </Form.Select>

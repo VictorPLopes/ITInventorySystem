@@ -35,11 +35,12 @@ public class UserController(IUserInterface userInterface) : ControllerBase
     {
         try
         {
-            return Ok(await userInterface.UpdateAsync(user));
+            await userInterface.UpdateAsync(user);
+            return Ok(user);
         }
         catch (KeyNotFoundException)
         {
-            // Caso o produto não seja encontrado, retorna um status 404 Not Found
+            // Caso o usuário não seja encontrado, retorna um status 404 Not Found
             return NotFound(new { message = "User not found" });
         }
         catch (Exception ex)
@@ -59,7 +60,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            // Caso o produto não seja encontrado, retorna um status 404 Not Found
+            // Caso o usuário não seja encontrado, retorna um status 404 Not Found
             return NotFound(new { message = "User not found" });
         }
         catch (Exception ex)
@@ -68,26 +69,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
             return StatusCode(500, new { message = "An error occurred while updating the user", error = ex.Message });
         }
     }
-
-    [HttpPut("UpdateUserStatus")]
-    public async Task<ActionResult> UpdateUserStatus([FromBody] UserUpdateStatusDto user)
-    {
-        try
-        {
-            return Ok(await userInterface.UpdateStatusAsync(user));
-        }
-        catch (KeyNotFoundException)
-        {
-            // Caso o produto não seja encontrado, retorna um status 404 Not Found
-            return NotFound(new { message = "User not found" });
-        }
-        catch (Exception ex)
-        {
-            // Para outros tipos de erro, retorna um status 500 Internal Server Error
-            return StatusCode(500, new { message = "An error occurred while updating the user", error = ex.Message });
-        }
-    }
-
+    
     [HttpDelete("DeleteUser/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -98,7 +80,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            // Caso o produto não seja encontrado, retorna um status 404 Not Found
+            // Caso o usuário não seja encontrado, retorna um status 404 Not Found
             return NotFound(new { message = "User not found" });
         }
         catch (Exception ex)

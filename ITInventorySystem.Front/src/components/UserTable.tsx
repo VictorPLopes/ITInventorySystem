@@ -2,7 +2,7 @@
 import {Button, ButtonGroup} from 'react-bootstrap';
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-bs5';
-import {MdDelete, MdEditSquare} from "react-icons/md";
+import {MdDelete, MdEditSquare, MdLock} from "react-icons/md";
 
 DataTable.use(DT);
 
@@ -21,9 +21,10 @@ interface UserTableProps {
     users: User[];
     onEdit: (user: User) => void;
     onDelete: (user: User) => void;
+    onChangePassword: (user: User) => void;
 }
 
-export const UserTable: React.FC<UserTableProps> = ({users, onEdit, onDelete}) => {
+export const UserTable: React.FC<UserTableProps> = ({users, onEdit, onDelete, onChangePassword}) => {
     const columns = [
         {
             title: 'ID',
@@ -61,6 +62,9 @@ export const UserTable: React.FC<UserTableProps> = ({users, onEdit, onDelete}) =
                         <Button variant="danger" size="sm" onClick={() => onDelete(row)}>
                             <MdDelete/>
                         </Button>
+                        <Button variant="info" size="sm" onClick={() => onChangePassword(row)}>
+                            <MdLock />
+                        </Button>                        
                     </ButtonGroup>
                 )
             }}
