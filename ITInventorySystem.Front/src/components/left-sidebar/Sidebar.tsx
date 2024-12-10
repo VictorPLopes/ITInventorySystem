@@ -6,6 +6,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faBars, faBoxOpen, faFileLines, faHome, faUserGear, faUserTie} from '@fortawesome/free-solid-svg-icons';
 import {useEffect, useState} from "react";
 import axios from "../../AxiosConfig.tsx";
+import {Button} from "react-bootstrap";
 
 
 type SidebarProps = {
@@ -78,6 +79,11 @@ const Sidebar = ({
         fetchUsersPage();
     }, []);
 
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        window.location.href = '/';
+    };
+    
     return (
         <div className={sidebarClasses}>
             <div className="logo-container">
@@ -114,6 +120,9 @@ const Sidebar = ({
                         </Link>
                     </li>
                 ))}
+                <Button variant="danger" onClick={handleLogout} className="w-100">
+                    Sair
+                </Button>
             </div>
         </div>
     )

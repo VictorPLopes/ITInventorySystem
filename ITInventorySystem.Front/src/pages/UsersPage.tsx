@@ -107,11 +107,6 @@ const UsersPage = ({port}: { port: string }) => {
         }
     }
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        window.location.href = '/';
-    };
-
     const handleSaveUser = async (user: Partial<User>) => {
         const apiEndpoint = isEdit ? `https://localhost:${port}/UpdateUser` : `https://localhost:${port}/CreateUser`;
 
@@ -159,11 +154,6 @@ const UsersPage = ({port}: { port: string }) => {
             <Row>
                 <Col>
                     <h2 className="mb-4">Usuários Registrados</h2>
-                </Col>
-                <Col className="text-end">
-                    <Button variant="danger" onClick={handleLogout}>
-                        Sair
-                    </Button>
                 </Col>
             </Row>
             {message ? (<>
