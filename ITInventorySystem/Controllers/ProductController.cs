@@ -30,12 +30,12 @@ public class ProductController(IProductInterface productInterface) : ControllerB
         return Ok(product);
     }
 
-    [HttpPut]
-    public async Task<ActionResult> UpdateProduct([FromBody] ProductUpdateDto prod)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult> UpdateProduct(int id, [FromBody] ProductUpdateDto prod)
     {
         try
         {
-            await productInterface.UpdateAsync(prod);
+            await productInterface.UpdateAsync(id, prod);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

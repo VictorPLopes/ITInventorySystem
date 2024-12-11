@@ -1,52 +1,53 @@
-import React, {useEffect, useState} from 'react';
-import {AxiosError} from 'axios';
+import React, {useEffect, useState} from "react";
+import {AxiosError} from "axios";
 import axios from "../AxiosConfig";
-import {useNavigate} from 'react-router-dom';
-import {Alert, Button, Col, Container, Form, FormControl, FormGroup, FormLabel, Row} from "react-bootstrap";
+import {useNavigate} from "react-router-dom";
+import {Alert, Button, Col, Container, Form, FormControl, FormGroup, FormLabel, Row,} from "react-bootstrap";
 
-function LoginPage({port}: { port: string }) {
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-//    const [token, setToken] = useState<string>('');
-    const [error, setError] = useState<string>('');
+const API_ENDPOINTS = {
+    login: (port: string) => `https://localhost:${port}/auth/login`,
+    dashboard: (port: string) => `https://localhost:${port}/auth/dashboard`,
+};
+
+const LoginPage = ({port}: { port: string }) => {
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [error, setError] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Função para chamar o endpoint protegido `painelControle`
-        const fetchDashboard = async () => {
+        const checkAuth = async () => {
             try {
-                await axios.get(`https://localhost:${port}/auth/dashboard`);
-                navigate('/dashboard');
-            } catch (err) {
-                // Não faz nada, pois o usuário ainda não está autenticado
+                await axios.get(API_ENDPOINTS.dashboard(port));
+                navigate("/dashboard");
+            } catch {
+                // User is not authenticated
             }
         };
-        fetchDashboard();
-    }, []);
+
+        checkAuth();
+    }, [port, navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
+        setError("");
 
         try {
-            const response = await axios.post(`https://localhost:${port}/auth/login`, {
+            const response = await axios.post(API_ENDPOINTS.login(port), {
                 email,
                 password,
             });
 
-            if (response.status === 200) {
-                // setToken(response.data.token);
-                localStorage.setItem('token', response.data.token);
-                navigate('/dashboard');
-            }
+            localStorage.setItem("token", response.data.token);
+            navigate("/dashboard");
         } catch (err) {
-            if (err instanceof AxiosError) {
-                setError('E-mail ou senha incorretos. Tente novamente.');
-            } else {
-                setError('Ocorreu um erro inesperado. Tente novamente mais tarde.');
-            }
+            const errorMessage =
+                err instanceof AxiosError
+                    ? "E-mail ou senha incorretos. Tente novamente."
+                    : "Ocorreu um erro inesperado. Tente novamente mais tarde.";
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -81,34 +82,28 @@ function LoginPage({port}: { port: string }) {
                                 <FormLabel>Senha</FormLabel>
                             </FormGroup>
 
-
                             <div className="text-center mt-4">
                                 <Button
                                     variant="success"
                                     type="submit"
                                     disabled={loading}
                                     className="w-100"
-                                    style={{transition: "transform 0.2s, box-shadow 0.2s"}}
-                                    onMouseOver={(e) => e.currentTarget.style.transform = "scale(1.05)"}
-                                    onMouseOut={(e) => e.currentTarget.style.transform = "scale(1)"}
                                 >
-                                    {loading ? 'Carregando...' : 'Entrar'}
+                                    {loading ? "Carregando..." : "Entrar"}
                                 </Button>
-
                             </div>
 
                             {error && (
-                                <Alert variant="danger" className="mt-3 text-center" style={{fontWeight: "bold"}}>
+                                <Alert variant="danger" className="mt-3 text-center">
                                     {error}
                                 </Alert>
                             )}
-
                         </Form>
                     </div>
                 </Col>
             </Row>
         </Container>
     );
-}
+};
 
 export default LoginPage;

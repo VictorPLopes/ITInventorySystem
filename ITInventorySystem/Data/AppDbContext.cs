@@ -5,10 +5,10 @@ namespace ITInventorySystem.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(option)
 {
-    public DbSet<User> Users { get; set; }
-    public DbSet<Client> Clients { get; set; }
-    public DbSet<Product> Products { get; set; }
-    public DbSet<WorkOrder> WorkOrders { get; set; }
+    public DbSet<User>                Users               { get; set; }
+    public DbSet<Client>              Clients             { get; set; }
+    public DbSet<Product>             Products            { get; set; }
+    public DbSet<WorkOrder>           WorkOrders          { get; set; }
     public DbSet<ProductsInWorkOrder> ProductsInWorkOrder { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

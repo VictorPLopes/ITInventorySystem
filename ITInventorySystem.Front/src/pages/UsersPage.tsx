@@ -1,13 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from "react";
 import axios from "../AxiosConfig";
-import Swal from 'sweetalert2';
-import toast, {Toaster} from 'react-hot-toast';
-import {UserModal} from '../components/UserModal';
-import {ChangePasswordModal} from '../components/ChangePasswordModal';
-import {Button, Col, Container, Row, Spinner} from 'react-bootstrap';
-import {Value} from 'classnames';
-import {GenericTable} from "../components/GenericTable.tsx";
+import Swal from "sweetalert2";
+import toast, {Toaster} from "react-hot-toast";
+import {UserModal} from "../components/UserModal";
+import {ChangePasswordModal} from "../components/ChangePasswordModal";
+import {Button, Col, Container, Row, Spinner} from "react-bootstrap";
 import {MdLock} from "react-icons/md";
+import {GenericTable} from "../components/GenericTable";
 
 interface User {
     id: number;
@@ -20,90 +19,73 @@ interface User {
     updatedAt: string | null;
 }
 
+const API_ENDPOINTS = {
+    usersPage: (port: string) => `https://localhost:${port}/auth/users-page`,
+    users: (port: string) => `https://localhost:${port}/users`,
+    updatePassword: (port: string, userId: number) =>
+        `https://localhost:${port}/users/${userId}/update-password`,
+};
+
 const UsersPage = ({port}: { port: string }) => {
     const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [showModal, setShowModal] = useState<boolean>(false);
+    const [loading, setLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
     const [currentUser, setCurrentUser] = useState<Partial<User>>({});
-    const [isEdit, setIsEdit] = useState<boolean>(false);
-    const [message, setMessage] = useState<string>('');
-    const [error, setError] = useState<string>('');
+    const [isEdit, setIsEdit] = useState(false);
     const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+    const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
     const columns = [
+        {title: "ID", data: "id"},
+        {title: "Nome", data: "name"},
+        {title: "E-mail", data: "email"},
         {
-            title: 'ID',
-            data: 'id'
-        },
-        {
-            title: 'Nome',
-            data: 'name'
-        },
-        {
-            title: 'E-mail',
-            data: 'email'
-        },
-        {
-            title: 'Tipo',
-            data: 'type',
-            /*
-            0: Master / root
-            1: Administrador
-            2: Técnico (usuário comum)
-            */
+            title: "Tipo",
+            data: "type",
             render: (data: number) => {
-                switch (data) {
-                    case 0:
-                        return 'Master (root)';
-                    case 1:
-                        return 'Administrador';
-                    case 2:
-                        return 'Técnico';
-                    default:
-                        return 'Desconhecido';
-                }
-            }
+                const types = ["Master (root)", "Administrador", "Técnico"];
+                return types[data] || "Desconhecido";
+            },
         },
         {
-            title: 'Status',
-            data: 'status',
-            render: (data: boolean) => data ? 'Ativo' : 'Inativo'
+            title: "Status",
+            data: "status",
+            render: (data: boolean) => (data ? "Ativo" : "Inativo"),
         },
-        {
-            title: 'Ações',
-            name: 'actions'
-        },
+        {title: "Ações", name: "actions"},
     ];
 
+    // Fetch user data
     useEffect(() => {
-        const fetchUsersPage = async () => {
+        const checkAccess = async () => {
             try {
-                const response = await axios.get(`https://localhost:${port}/auth/users-page`);
-                setMessage(response.data); // Define a mensagem recebida da API
-            } catch (err) {
-                setError('Erro ao acessar a página de usuários. Verifique sua autenticação.');
+                const response = await axios.get(API_ENDPOINTS.usersPage(port));
+                setHasAccess(true); // Access granted
+            } catch {
+                setHasAccess(false); // Access denied
             }
         };
 
-        fetchUsersPage();
-
-        fetchUsers();
-    }, []);
+        checkAccess();
+        if (hasAccess !== false) {
+            fetchUsers();
+        }
+    }, [port, hasAccess]);
 
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`https://localhost:${port}/users`);
+            const response = await axios.get(API_ENDPOINTS.users(port));
             setUsers(response.data);
-        } catch (err) {
-            toast.error('Erro ao buscar os usuários.');
+        } catch {
+            toast.error("Erro ao buscar os usuários.");
         } finally {
             setLoading(false);
         }
     };
 
     const handleAddUser = () => {
-        setCurrentUser({id: 0, name: '', email: '', type: 0, status: true});
+        setCurrentUser({id: 0, name: "", email: "", type: 0, status: true});
         setIsEdit(false);
         setShowModal(true);
     };
@@ -114,27 +96,25 @@ const UsersPage = ({port}: { port: string }) => {
         setShowModal(true);
     };
 
-    const handleDeleteUser = (user: User) => {
-        Swal.fire({
-            title: 'Tem certeza?',
-            text: 'Você não poderá desfazer esta ação!',
-            icon: 'warning',
+    const handleDeleteUser = async (user: User) => {
+        const confirmed = await Swal.fire({
+            title: "Tem certeza?",
+            text: "Você não poderá desfazer esta ação!",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: 'Sim, excluir!',
-            cancelButtonText: 'Cancelar',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                axios
-                    .delete(`https://localhost:${port}/DeleteUser/${user.id}`)
-                    .then(() => {
-                        toast.success('Usuário excluído com sucesso!');
-                        fetchUsers();
-                    })
-                    .catch(() => {
-                        toast.error('Erro ao excluir o usuário.');
-                    });
-            }
+            confirmButtonText: "Sim, excluir!",
+            cancelButtonText: "Cancelar",
         });
+
+        if (confirmed.isConfirmed) {
+            try {
+                await axios.delete(`${API_ENDPOINTS.users(port)}/${user.id}`);
+                toast.success("Usuário excluído com sucesso!");
+                fetchUsers();
+            } catch {
+                toast.error("Erro ao excluir o usuário.");
+            }
+        }
     };
 
     const handleChangePassword = (user: User) => {
@@ -142,55 +122,42 @@ const UsersPage = ({port}: { port: string }) => {
         setShowChangePasswordModal(true);
     };
 
-    const handleSavePassword = async (userId: Value, newPassword: string) => {
+    const handleSavePassword = async (userId: number, newPassword: string) => {
         try {
-            await axios.put(`https://localhost:${port}/users/update-password`, {id: userId, newPassword: newPassword});
-            toast.success('Senha alterada com sucesso!');
+            await axios.put(API_ENDPOINTS.updatePassword(port, userId), {newPassword});
+            toast.success("Senha alterada com sucesso!");
             setShowChangePasswordModal(false);
         } catch (error: any) {
-            const errorMessage = error.response?.data?.message || 'Erro ao alterar senha.';
-            toast.error(errorMessage);
+            toast.error(error.response?.data?.message || "Erro ao alterar senha.");
         }
-    }
+    };
 
     const handleSaveUser = async (user: Partial<User>) => {
-        const apiEndpoint = isEdit ? `https://localhost:${port}/users` : `https://localhost:${port}/users`;
-
         if (!user.name || !user.email) {
             toast.error("Nome e e-mail são obrigatórios.");
             return;
         }
 
-        // Mapeia apenas os campos necessários
-        const payload: any = {
-            id: user.id,
+        const endpoint = isEdit
+            ? `${API_ENDPOINTS.users(port)}/${user.id}`
+            : API_ENDPOINTS.users(port);
+        const method = isEdit ? "put" : "post";
+
+        const payload = {
             name: user.name,
             email: user.email,
             type: user.type,
-            status: user.status
+            status: user.status,
+            ...(user.password && {password: user.password}),
         };
 
-        if (!isEdit && user.password) {
-            payload.password = user.password;
-        } else if (!isEdit && !user.password) {
-            toast.error("A senha é obrigatória.");
-            return;
-        }
-
         try {
-            if (isEdit) {
-                await axios.put(apiEndpoint, payload);
-            } else {
-                await axios.post(apiEndpoint, payload);
-            }
-            toast.success('Usuário salvo com sucesso!');
+            await axios[method](endpoint, payload);
+            toast.success("Usuário salvo com sucesso!");
             setShowModal(false);
-            await fetchUsers();
-
+            fetchUsers();
         } catch (error: any) {
-            const errorMessage = error.response?.data?.message || 'Erro ao salvar o usuário.';
-            toast.error(errorMessage);
-
+            toast.error(error.response?.data?.message || "Erro ao salvar o usuário.");
         }
     };
 
@@ -202,41 +169,45 @@ const UsersPage = ({port}: { port: string }) => {
                     <h2 className="mb-4">Usuários Registrados</h2>
                 </Col>
             </Row>
-            {message ? (<>
+            {hasAccess === null ? (
+                <p>Carregando...</p>
+            ) : hasAccess ? (
+                <>
                     <Row className="mb-4">
                         <Col className="text-end">
                             <Button variant="success" onClick={handleAddUser}>
                                 + Novo Usuário
                             </Button>
                         </Col>
-                    </Row><Row>
-                    <Col>
-                        {loading ? (
-                            <div className="d-flex justify-content-center align-items-center"
-                                 style={{minHeight: '300px'}}>
-                                <Spinner animation="border" role="status" variant="primary"/>
-                            </div>
-                        ) : (
-                            <div className="p-4 rounded shadow-lg bg-body-tertiary">
-                                <GenericTable
-                                    data={users}
-                                    columns={columns}
-                                    actions={{
-                                        onEdit: handleEditUser,
-                                        onDelete: handleDeleteUser,
-                                        onExtra: handleChangePassword
-                                    }}
-                                    extraAction=<MdLock/>
-                                />
-                            </div>
-                        )}
-                    </Col>
-                </Row>
+                    </Row>
+                    <Row>
+                        <Col>
+                            {loading ? (
+                                <div
+                                    className="d-flex justify-content-center align-items-center"
+                                    style={{minHeight: "300px"}}
+                                >
+                                    <Spinner animation="border" role="status" variant="primary"/>
+                                </div>
+                            ) : (
+                                <div className="p-4 rounded shadow-lg bg-body-tertiary">
+                                    <GenericTable
+                                        data={users}
+                                        columns={columns}
+                                        actions={{
+                                            onEdit: handleEditUser,
+                                            onDelete: handleDeleteUser,
+                                            onExtra: handleChangePassword,
+                                        }}
+                                        extraAction={<MdLock/>}
+                                    />
+                                </div>
+                            )}
+                        </Col>
+                    </Row>
                 </>
-            ) : error ? (
-                <p>{error}</p>
             ) : (
-                <p>Carregando...</p>
+                <p>Erro ao acessar a página de usuários. Verifique sua autenticação.</p>
             )}
             {showModal && (
                 <UserModal

@@ -30,12 +30,12 @@ public class ClientController(IClientInterface clientInterface) : ControllerBase
         return Ok(client);
     }
 
-    [HttpPut]
-    public async Task<ActionResult> UpdateClient([FromBody] ClientUpdateDto clt)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult> UpdateClient(int id, [FromBody] ClientUpdateDto clt)
     {
         try
         {
-            await clientInterface.UpdateAsync(clt);
+            await clientInterface.UpdateAsync(id, clt);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

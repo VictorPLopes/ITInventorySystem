@@ -18,10 +18,10 @@ interface GenericTableProps<T> {
     extraAction?: any;
 }
 
-export const GenericTable = <T,>({ data, columns, actions, extraAction }: GenericTableProps<T>) => {
+export const GenericTable = <T, >({data, columns, actions, extraAction}: GenericTableProps<T>) => {
     return (
         <DataTable
-            options={{ language }}
+            options={{language}}
             columns={columns}
             data={data}
             slots={{

@@ -12,13 +12,13 @@ public class ProductService(AppDbContext context) : IProductInterface
     {
         var prod = new Product
         {
-            Name = product.Name,
-            Description = product.Description,
-            Quantity = product.Quantity,
+            Name                  = product.Name,
+            Description           = product.Description,
+            Quantity              = product.Quantity,
             BrandManufacturerName = product.BrandManufacturerName,
-            Category = product.Category,
-            CostPrice = product.CostPrice,
-            SalePrice = product.SalePrice
+            Category              = product.Category,
+            CostPrice             = product.CostPrice,
+            SalePrice             = product.SalePrice
         };
 
         context.Products.Add(prod);
@@ -55,21 +55,21 @@ public class ProductService(AppDbContext context) : IProductInterface
         return product;
     }
 
-    public async Task UpdateAsync(ProductUpdateDto product)
+    public async Task UpdateAsync(int id, ProductUpdateDto product)
     {
         var prod = await context.Products
-                                .FirstOrDefaultAsync(prodDb => prodDb.Id == product.Id);
+                                .FirstOrDefaultAsync(prodDb => prodDb.Id == id);
 
         if (prod == null) throw new KeyNotFoundException("Product not found!");
 
-        prod.Name = product.Name;
-        prod.Description = product.Description;
-        prod.Quantity = product.Quantity;
+        prod.Name                  = product.Name;
+        prod.Description           = product.Description;
+        prod.Quantity              = product.Quantity;
         prod.BrandManufacturerName = product.BrandManufacturerName;
-        prod.Category = product.Category;
-        prod.CostPrice = product.CostPrice;
-        prod.SalePrice = product.SalePrice;
-        prod.UpdatedAt = DateTime.Now;
+        prod.Category              = product.Category;
+        prod.CostPrice             = product.CostPrice;
+        prod.SalePrice             = product.SalePrice;
+        prod.UpdatedAt             = DateTime.Now;
 
         context.Products.Update(prod);
         await context.SaveChangesAsync();

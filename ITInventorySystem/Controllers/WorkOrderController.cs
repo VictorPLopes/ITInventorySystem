@@ -32,12 +32,12 @@ public class WorkOrderController(IWorkOrderInterface workOrderInterface) : Contr
         return Ok(workOrder);
     }
 
-    [HttpPut]
-    public async Task<ActionResult> UpdateWorkOrder([FromBody] WorkOrderUpdateDto wo)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult> UpdateWorkOrder(int id, [FromBody] WorkOrderUpdateDto wo)
     {
         try
         {
-            await workOrderInterface.UpdateAsync(wo);
+            await workOrderInterface.UpdateAsync(id, wo);
             return NoContent();
         }
         catch (Exception ex)

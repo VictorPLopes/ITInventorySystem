@@ -21,10 +21,6 @@ public class UserController(IUserInterface userInterface) : ControllerBase
     public async Task<ActionResult<User>> GetUserByEmail(string email) =>
         Ok(await userInterface.GetByEmailAsync(email));*/
 
-    /*[HttpPost("CreateUser")]
-    public async Task<ActionResult<User>> CreateUser(UserCreateDTO user) => Ok(await userInterface.AddAsync(user));*/
-
-
     [HttpPost]
     public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDto usr)
     {
@@ -32,12 +28,12 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         return Ok(user);
     }
 
-    [HttpPut]
-    public async Task<ActionResult> UpdateUser([FromBody] UserUpdateDto/**/ user)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult> UpdateUser(int id, [FromBody] UserUpdateDto user)
     {
         try
         {
-            await userInterface.UpdateAsync(user);
+            await userInterface.UpdateAsync(id, user);
             return Ok(user);
         }
         catch (KeyNotFoundException)
@@ -52,12 +48,12 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         }
     }
 
-    [HttpPut("update-password")]
-    public async Task<ActionResult> UpdateUserPassword([FromBody] UserUpdatePasswordDto user)
+    [HttpPut("{id:int}/update-password")]
+    public async Task<ActionResult> UpdateUserPassword(int id, [FromBody] UserUpdatePasswordDTO user)
     {
         try
         {
-            await userInterface.UpdatePasswordAsync(user);
+            await userInterface.UpdatePasswordAsync(id, user.NewPassword);
             return Ok(new { message = "User password updated successfully" });
         }
         catch (KeyNotFoundException)
