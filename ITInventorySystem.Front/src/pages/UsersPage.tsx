@@ -3,7 +3,6 @@ import axios from "../AxiosConfig";
 import Swal from 'sweetalert2';
 import toast, {Toaster} from 'react-hot-toast';
 import {UserModal} from '../components/UserModal';
-import {UserTable} from '../components/UserTable';
 import {ChangePasswordModal} from '../components/ChangePasswordModal';
 import {Button, Col, Container, Row, Spinner} from 'react-bootstrap';
 import {Value} from 'classnames';
