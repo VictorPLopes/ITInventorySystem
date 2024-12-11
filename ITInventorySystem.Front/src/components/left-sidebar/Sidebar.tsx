@@ -69,7 +69,7 @@ const Sidebar = ({
     useEffect(() => {
         const fetchUsersPage = async () => {
             try {
-                const response = await axios.get(`https://localhost:${port}/UsersPage`);
+                const response = await axios.get(`https://localhost:${port}/auth/users-page`);
                 setMessage(response.data); // Define a mensagem recebida da API
             } catch (err) {
                 // Não é necessário definir a mensagem de erro, pois a página de usuários não é acessível sem autenticação

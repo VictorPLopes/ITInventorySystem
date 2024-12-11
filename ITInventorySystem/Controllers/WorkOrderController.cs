@@ -6,23 +6,25 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;
 
+[Route("work-orders")]
+[ApiController]
 public class WorkOrderController(IWorkOrderInterface workOrderInterface) : Controller
 {
-    [HttpGet("GetAll")]
+    [HttpGet]
     public async Task<ActionResult<IEnumerable<WorkOrder>>> GetAll()
     {
         var workOrders = await workOrderInterface.GetAllAsync();
         return Ok(workOrders);
     }
 
-    [HttpGet("GetWorkOrder/{id:int}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<WorkOrder>> GetWorkOrder(int id)
     {
         var workOrder = await workOrderInterface.GetByIdAsync(id);
         return Ok(workOrder);
     }
 
-    [HttpPost("CreateWorkOrder")]
+    [HttpPost]
     public async Task<ActionResult<WorkOrder>> CreateWorkOrder([FromBody] WorkOrderCreateDto wo)
     {
         Console.WriteLine($"Received JSON: {JsonSerializer.Serialize(wo)}");
@@ -30,7 +32,7 @@ public class WorkOrderController(IWorkOrderInterface workOrderInterface) : Contr
         return Ok(workOrder);
     }
 
-    [HttpPut("UpdateWorkOrder")]
+    [HttpPut]
     public async Task<ActionResult> UpdateWorkOrder([FromBody] WorkOrderUpdateDto wo)
     {
         try
@@ -44,7 +46,7 @@ public class WorkOrderController(IWorkOrderInterface workOrderInterface) : Contr
         }
     }
 
-    [HttpDelete("DeleteWorkOrder/{id:int}")]
+    [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int id)
     {
         try

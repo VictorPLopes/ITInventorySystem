@@ -5,33 +5,35 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;
 
+[Route("users")]
+[ApiController]
 public class UserController(IUserInterface userInterface) : ControllerBase
 {
     //private readonly IUserInterface _userInterface;
 
-    [HttpGet("GetAllUsers")]
+    [HttpGet]
     public async Task<ActionResult<IEnumerable<User>>> GetAllUsers() => Ok(await userInterface.GetAllAsync());
 
-    [HttpGet("GetUser/{id:int}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<User>> GetUser(int id) => Ok(await userInterface.GetByIdAsync(id));
 
-    [HttpGet("GetUserByEmail/{email}")]
+    /*[HttpGet("{email}")]
     public async Task<ActionResult<User>> GetUserByEmail(string email) =>
-        Ok(await userInterface.GetByEmailAsync(email));
+        Ok(await userInterface.GetByEmailAsync(email));*/
 
     /*[HttpPost("CreateUser")]
     public async Task<ActionResult<User>> CreateUser(UserCreateDTO user) => Ok(await userInterface.AddAsync(user));*/
 
 
-    [HttpPost("CreateUser")]
+    [HttpPost]
     public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDto usr)
     {
         var user = await userInterface.AddAsync(usr);
         return Ok(user);
     }
 
-    [HttpPut("UpdateUser")]
-    public async Task<ActionResult> UpdateUser([FromBody] UserUpdateDto user)
+    [HttpPut]
+    public async Task<ActionResult> UpdateUser([FromBody] UserUpdateDto/**/ user)
     {
         try
         {
@@ -50,7 +52,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         }
     }
 
-    [HttpPut("UpdateUserPassword")]
+    [HttpPut("update-password")]
     public async Task<ActionResult> UpdateUserPassword([FromBody] UserUpdatePasswordDto user)
     {
         try
@@ -70,7 +72,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         }
     }
 
-    [HttpDelete("DeleteUser/{id:int}")]
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         try

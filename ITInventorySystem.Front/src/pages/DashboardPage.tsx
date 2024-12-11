@@ -10,7 +10,7 @@ const Dashboard = ({port}: { port: string }) => {
     useEffect(() => {
         const fetchDashboard = async () => {
             try {
-                const response = await axios.get(`https://localhost:${port}/Dashboard`);
+                const response = await axios.get(`https://localhost:${port}/auth/dashboard`);
                 setMessage(response.data); // Define a mensagem recebida da API
             } catch (err) {
                 setError('Usuário não autenticado.');

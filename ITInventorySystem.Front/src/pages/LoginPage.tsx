@@ -16,7 +16,7 @@ function LoginPage({port}: { port: string }) {
         // Função para chamar o endpoint protegido `painelControle`
         const fetchDashboard = async () => {
             try {
-                await axios.get(`https://localhost:${port}/Dashboard`);
+                await axios.get(`https://localhost:${port}/auth/dashboard`);
                 navigate('/dashboard');
             } catch (err) {
                 // Não faz nada, pois o usuário ainda não está autenticado
@@ -31,7 +31,7 @@ function LoginPage({port}: { port: string }) {
         setError('');
 
         try {
-            const response = await axios.post(`https://localhost:${port}/Login`, {
+            const response = await axios.post(`https://localhost:${port}/auth/login`, {
                 email,
                 password,
             });

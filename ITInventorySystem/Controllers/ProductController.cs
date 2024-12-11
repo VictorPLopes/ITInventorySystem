@@ -5,30 +5,32 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;
 
+[Route("products")]
+[ApiController]
 public class ProductController(IProductInterface productInterface) : ControllerBase
 {
-    [HttpGet("GetAllProducts")]
+    [HttpGet]
     public async Task<ActionResult<IEnumerable<Product>>> GetAllProducts()
     {
         var products = await productInterface.GetAllAsync();
         return Ok(products);
     }
 
-    [HttpGet("GetProduct/{id:int}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<Product>> GetProduct(int id)
     {
         var product = await productInterface.GetByIdAsync(id);
         return Ok(product);
     }
 
-    [HttpPost("CreateProduct")]
+    [HttpPost]
     public async Task<ActionResult<Product>> CreateProduct([FromBody] ProductCreateDto prod)
     {
         var product = await productInterface.AddAsync(prod);
         return Ok(product);
     }
 
-    [HttpPut("UpdateProduct")]
+    [HttpPut]
     public async Task<ActionResult> UpdateProduct([FromBody] ProductUpdateDto prod)
     {
         try
@@ -42,7 +44,7 @@ public class ProductController(IProductInterface productInterface) : ControllerB
         }
     }
 
-    [HttpDelete("DeleteProduct/{id:int}")]
+    [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         try

@@ -78,7 +78,7 @@ const UsersPage = ({port}: { port: string }) => {
     useEffect(() => {
         const fetchUsersPage = async () => {
             try {
-                const response = await axios.get(`https://localhost:${port}/UsersPage`);
+                const response = await axios.get(`https://localhost:${port}/auth/users-page`);
                 setMessage(response.data); // Define a mensagem recebida da API
             } catch (err) {
                 setError('Erro ao acessar a página de usuários. Verifique sua autenticação.');
@@ -93,7 +93,7 @@ const UsersPage = ({port}: { port: string }) => {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`https://localhost:${port}/GetAllUsers`);
+            const response = await axios.get(`https://localhost:${port}/users`);
             setUsers(response.data);
         } catch (err) {
             toast.error('Erro ao buscar os usuários.');
@@ -144,7 +144,7 @@ const UsersPage = ({port}: { port: string }) => {
 
     const handleSavePassword = async (userId: Value, newPassword: string) => {
         try {
-            await axios.put(`https://localhost:${port}/UpdateUserPassword`, {id: userId, newPassword: newPassword});
+            await axios.put(`https://localhost:${port}/users/update-password`, {id: userId, newPassword: newPassword});
             toast.success('Senha alterada com sucesso!');
             setShowChangePasswordModal(false);
         } catch (error: any) {
@@ -154,7 +154,7 @@ const UsersPage = ({port}: { port: string }) => {
     }
 
     const handleSaveUser = async (user: Partial<User>) => {
-        const apiEndpoint = isEdit ? `https://localhost:${port}/UpdateUser` : `https://localhost:${port}/CreateUser`;
+        const apiEndpoint = isEdit ? `https://localhost:${port}/users` : `https://localhost:${port}/users`;
 
         if (!user.name || !user.email) {
             toast.error("Nome e e-mail são obrigatórios.");
