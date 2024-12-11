@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ITInventorySystem.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241120201636_Initial")]
+    [Migration("20241208200336_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -196,6 +196,10 @@ namespace ITInventorySystem.Migrations
 
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");

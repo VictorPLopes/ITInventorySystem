@@ -4,13 +4,15 @@ import Swal from 'sweetalert2';
 import toast, {Toaster} from 'react-hot-toast';
 import {UserModal} from '../components/UserModal';
 import {UserTable} from '../components/UserTable';
+import {ChangePasswordModal} from '../components/ChangePasswordModal';
 import {Button, Col, Container, Row, Spinner} from 'react-bootstrap';
+import {Value} from 'classnames';
 
 interface User {
     id: number;
     name: string;
     email: string;
-    password: string;
+    password?: string;
     type: number;
     status: boolean;
     createdAt: string;
@@ -25,6 +27,7 @@ const UsersPage = ({port}: { port: string }) => {
     const [isEdit, setIsEdit] = useState<boolean>(false);
     const [message, setMessage] = useState<string>('');
     const [error, setError] = useState<string>('');
+    const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
     useEffect(() => {
         const fetchUsersPage = async () => {
@@ -88,21 +91,60 @@ const UsersPage = ({port}: { port: string }) => {
         });
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        window.location.href = '/';
+    const handleChangePassword = (user: User) => {
+        setCurrentUser(user);
+        setShowChangePasswordModal(true);
     };
+
+    const handleSavePassword = async (userId: Value, newPassword: string) => {
+        try {
+            await axios.put(`https://localhost:${port}/UpdateUserPassword`, {id: userId, newPassword: newPassword});
+            toast.success('Senha alterada com sucesso!');
+            setShowChangePasswordModal(false);
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || 'Erro ao alterar senha.';
+            toast.error(errorMessage);
+        }
+    }
 
     const handleSaveUser = async (user: Partial<User>) => {
         const apiEndpoint = isEdit ? `https://localhost:${port}/UpdateUser` : `https://localhost:${port}/CreateUser`;
 
+        if (!user.name || !user.email) {
+            toast.error("Nome e e-mail são obrigatórios.");
+            return;
+        }
+
+        // Mapeia apenas os campos necessários
+        const payload: any = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            type: user.type,
+            status: user.status
+        };
+
+        if (!isEdit && user.password) {
+            payload.password = user.password;
+        } else if (!isEdit && !user.password) {
+            toast.error("A senha é obrigatória.");
+            return;
+        }
+
         try {
-            await axios.post(apiEndpoint, user);
+            if (isEdit) {
+                await axios.put(apiEndpoint, payload);
+            } else {
+                await axios.post(apiEndpoint, payload);
+            }
             toast.success('Usuário salvo com sucesso!');
             setShowModal(false);
             await fetchUsers();
-        } catch {
-            toast.error('Erro ao salvar o usuário.');
+
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || 'Erro ao salvar o usuário.';
+            toast.error(errorMessage);
+
         }
     };
 
@@ -112,11 +154,6 @@ const UsersPage = ({port}: { port: string }) => {
             <Row>
                 <Col>
                     <h2 className="mb-4">Usuários Registrados</h2>
-                </Col>
-                <Col className="text-end">
-                    <Button variant="danger" onClick={handleLogout}>
-                        Sair
-                    </Button>
                 </Col>
             </Row>
             {message ? (<>
@@ -135,7 +172,8 @@ const UsersPage = ({port}: { port: string }) => {
                             </div>
                         ) : (
                             <div className="p-4 rounded shadow-lg bg-body-tertiary">
-                                <UserTable users={users} onEdit={handleEditUser} onDelete={handleDeleteUser}/>
+                                <UserTable users={users} onEdit={handleEditUser} onDelete={handleDeleteUser}
+                                           onChangePassword={handleChangePassword}/>
                             </div>
                         )}
                     </Col>
@@ -152,6 +190,14 @@ const UsersPage = ({port}: { port: string }) => {
                     onClose={() => setShowModal(false)}
                     onSave={handleSaveUser}
                     user={currentUser}
+                />
+            )}
+            {showChangePasswordModal && (
+                <ChangePasswordModal
+                    show={showChangePasswordModal}
+                    onClose={() => setShowChangePasswordModal(false)}
+                    onSave={handleSavePassword}
+                    user={{id: currentUser.id}}
                 />
             )}
         </Container>

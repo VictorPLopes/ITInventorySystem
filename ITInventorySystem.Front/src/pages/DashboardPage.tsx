@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Button, Col, Container, Row} from "react-bootstrap";
+import {Col, Container, Row} from "react-bootstrap";
 import axios from "../AxiosConfig";
 import {Toaster} from "react-hot-toast";
 
@@ -19,22 +19,13 @@ const Dashboard = ({port}: { port: string }) => {
         fetchDashboard();
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        window.location.href = '/';
-    };
-
     return (
+
         <Container className="mt-4">
             <Toaster position="top-right"/>
             <Row>
                 <Col>
                     <h2 className="mb-4">Dashboard</h2>
-                </Col>
-                <Col className="text-end">
-                    <Button variant="danger" onClick={handleLogout}>
-                        Sair
-                    </Button>
                 </Col>
             </Row>
             {message ? (<>

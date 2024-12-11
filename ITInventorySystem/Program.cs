@@ -17,9 +17,9 @@ builder.Services.AddControllers();
 var key = Encoding.ASCII.GetBytes(Settings.Secret);
 
 builder.Services.AddAuthorizationBuilder()
-    .SetDefaultPolicy(new AuthorizationPolicyBuilder()
-                            .RequireAuthenticatedUser()
-                            .Build());
+       .SetDefaultPolicy(new AuthorizationPolicyBuilder()
+                         .RequireAuthenticatedUser()
+                         .Build());
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
