@@ -63,6 +63,7 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                             value={formData.name || ''}
                             onChange={handleInputChange}
                             placeholder="Digite o nome"
+                            required={true}
                         />
                     </FormGroup>
                     <FormGroup className="mb-3">
@@ -73,6 +74,7 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                             value={formData.email || ''}
                             onChange={handleInputChange}
                             placeholder="Digite o e-mail"
+                            required={true}
                         />
                     </FormGroup>
                     {/* Renderiza os campos de senha apenas para criação */}
@@ -86,6 +88,7 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                                     value={formData.password || ''}
                                     onChange={handleInputChange}
                                     placeholder="Digite a senha"
+                                    required={true}
                                 />
                             </FormGroup>
                             <FormGroup className="mb-3">
@@ -95,6 +98,7 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                                     value={confirmPassword}
                                     onChange={handleConfirmPasswordChange}
                                     placeholder="Confirme a senha"
+                                    required={true}
                                 />
                             </FormGroup>
                         </>
@@ -105,6 +109,7 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                         <Form.Select
                             name="status"
                             value={formData.status ? 'Ativo' : 'Inativo'}
+                            required={true}
                             onChange={(e) =>
                                 setFormData({
                                     ...formData,
@@ -121,6 +126,7 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                         <Form.Select
                             name="type"
                             value={formData.type || 0}
+                            required={true}
                             onChange={(e) =>
                                 setFormData({
                                     ...formData,

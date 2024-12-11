@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from "../AxiosConfig";
 import Swal from 'sweetalert2';
 import toast, {Toaster} from 'react-hot-toast';
@@ -7,6 +7,8 @@ import {UserTable} from '../components/UserTable';
 import {ChangePasswordModal} from '../components/ChangePasswordModal';
 import {Button, Col, Container, Row, Spinner} from 'react-bootstrap';
 import {Value} from 'classnames';
+import {GenericTable} from "../components/GenericTable.tsx";
+import {MdLock} from "react-icons/md";
 
 interface User {
     id: number;
@@ -28,6 +30,51 @@ const UsersPage = ({port}: { port: string }) => {
     const [message, setMessage] = useState<string>('');
     const [error, setError] = useState<string>('');
     const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+
+    const columns = [
+        {
+            title: 'ID',
+            data: 'id'
+        },
+        {
+            title: 'Nome',
+            data: 'name'
+        },
+        {
+            title: 'E-mail',
+            data: 'email'
+        },
+        {
+            title: 'Tipo',
+            data: 'type',
+            /*
+            0: Master / root
+            1: Administrador
+            2: Técnico (usuário comum)
+            */
+            render: (data: number) => {
+                switch (data) {
+                    case 0:
+                        return 'Master (root)';
+                    case 1:
+                        return 'Administrador';
+                    case 2:
+                        return 'Técnico';
+                    default:
+                        return 'Desconhecido';
+                }
+            }
+        },
+        {
+            title: 'Status',
+            data: 'status',
+            render: (data: boolean) => data ? 'Ativo' : 'Inativo'
+        },
+        {
+            title: 'Ações',
+            name: 'actions'
+        },
+    ];
 
     useEffect(() => {
         const fetchUsersPage = async () => {
@@ -172,8 +219,16 @@ const UsersPage = ({port}: { port: string }) => {
                             </div>
                         ) : (
                             <div className="p-4 rounded shadow-lg bg-body-tertiary">
-                                <UserTable users={users} onEdit={handleEditUser} onDelete={handleDeleteUser}
-                                           onChangePassword={handleChangePassword}/>
+                                <GenericTable
+                                    data={users}
+                                    columns={columns}
+                                    actions={{
+                                        onEdit: handleEditUser,
+                                        onDelete: handleDeleteUser,
+                                        onExtra: handleChangePassword
+                                    }}
+                                    extraAction=<MdLock/>
+                                />
                             </div>
                         )}
                     </Col>
