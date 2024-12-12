@@ -1,14 +1,6 @@
 ﻿import React, {useState} from 'react';
 import {Button, Form, FormControl, FormGroup, FormLabel, Modal} from 'react-bootstrap';
-
-interface User {
-    id?: number;
-    name: string;
-    email: string;
-    password?: string; // Tornar opcional para usuários existentes
-    type: number;
-    status: boolean;
-}
+import User from "../types/User";
 
 interface UserModalProps {
     show: boolean;
@@ -125,7 +117,7 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                         <FormLabel>Tipo</FormLabel>
                         <Form.Select
                             name="type"
-                            value={formData.type || 0}
+                            value={formData.type || 2}
                             required={true}
                             onChange={(e) =>
                                 setFormData({

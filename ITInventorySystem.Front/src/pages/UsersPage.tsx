@@ -2,22 +2,12 @@ import {useEffect, useState} from "react";
 import axios from "../AxiosConfig";
 import Swal from "sweetalert2";
 import toast, {Toaster} from "react-hot-toast";
-import {UserModal} from "../components/UserModal";
-import {ChangePasswordModal} from "../components/ChangePasswordModal";
 import {Button, Col, Container, Row, Spinner} from "react-bootstrap";
 import {MdLock} from "react-icons/md";
 import {GenericTable} from "../components/GenericTable";
-
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    password?: string;
-    type: number;
-    status: boolean;
-    createdAt: string;
-    updatedAt: string | null;
-}
+import {UserModal} from "../components/UserModal";
+import {ChangePasswordModal} from "../components/ChangePasswordModal";
+import User from "../types/User";
 
 const API_ENDPOINTS = {
     usersPage: (port: string) => `https://localhost:${port}/auth/users-page`,
@@ -59,7 +49,7 @@ const UsersPage = ({port}: { port: string }) => {
     useEffect(() => {
         const checkAccess = async () => {
             try {
-                const response = await axios.get(API_ENDPOINTS.usersPage(port));
+                await axios.get(API_ENDPOINTS.usersPage(port));
                 setHasAccess(true); // Access granted
             } catch {
                 setHasAccess(false); // Access denied
@@ -85,7 +75,7 @@ const UsersPage = ({port}: { port: string }) => {
     };
 
     const handleAddUser = () => {
-        setCurrentUser({id: 0, name: "", email: "", type: 0, status: true});
+        setCurrentUser({id: 0, name: "", email: "", type: 2, status: true});
         setIsEdit(false);
         setShowModal(true);
     };
@@ -222,7 +212,7 @@ const UsersPage = ({port}: { port: string }) => {
                     show={showChangePasswordModal}
                     onClose={() => setShowChangePasswordModal(false)}
                     onSave={handleSavePassword}
-                    user={{id: currentUser.id}}
+                    user={{id: currentUser.id as number}}
                 />
             )}
         </Container>
