@@ -3,6 +3,7 @@ import {Route, Routes} from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/DashboardPage';
 import UsersPage from './pages/UsersPage';
+import ClientsPage from './pages/ClientsPage';
 import {Fragment, useEffect, useState} from "react";
 import './App.css';
 import Layout from './Layout/Layout';
@@ -47,8 +48,7 @@ function App() {
                 >
                     <Route path="/dashboard" element={<Dashboard port={port}/>}/>
                     <Route path="/users" element={<UsersPage port={port}/>}/>
-                    {/* Outras rotas que exigem o Layout com Sidebar */}
-                    {/* <Route path="/clients" element={<ClientsPage port={port}/>}/> */}
+                    <Route path="/clients" element={<ClientsPage port={port}/>}/>
                     {/* <Route path="/inventory" element={<InventoryPage port={port}/>}/> */}
                     {/* <Route path="/work-orders" element={<WorkOrdersPage port={port}/>}/> */}
                 </Route>

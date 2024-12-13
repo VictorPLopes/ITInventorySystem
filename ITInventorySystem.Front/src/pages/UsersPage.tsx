@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback} from "react";
 import axios from "../AxiosConfig";
 import Swal from "sweetalert2";
 import toast, {Toaster} from "react-hot-toast";
@@ -17,8 +17,9 @@ const API_ENDPOINTS = {
 };
 
 const UsersPage = ({port}: { port: string }) => {
+    // Estados principais da página
     const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [currentUser, setCurrentUser] = useState<Partial<User>>({});
     const [isEdit, setIsEdit] = useState(false);
@@ -45,24 +46,21 @@ const UsersPage = ({port}: { port: string }) => {
         {title: "Ações", name: "actions"},
     ];
 
-    // Fetch user data
+    // Verifica o acesso do usuário e busca os dados iniciais
     useEffect(() => {
         const checkAccess = async () => {
             try {
                 await axios.get(API_ENDPOINTS.usersPage(port));
-                setHasAccess(true); // Access granted
+                setHasAccess(true);
             } catch {
-                setHasAccess(false); // Access denied
+                setHasAccess(false);
             }
         };
 
         checkAccess();
-        if (hasAccess !== false) {
-            fetchUsers();
-        }
-    }, [port, hasAccess]);
+    }, [port]);
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         setLoading(true);
         try {
             const response = await axios.get(API_ENDPOINTS.users(port));
@@ -72,20 +70,27 @@ const UsersPage = ({port}: { port: string }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [port]);
 
+    useEffect(() => {
+        if (hasAccess) fetchUsers();
+    }, [hasAccess, fetchUsers]);
+
+    // Abre o modal para adicionar um novo usuário
     const handleAddUser = () => {
         setCurrentUser({id: 0, name: "", email: "", type: 2, status: true});
         setIsEdit(false);
         setShowModal(true);
     };
 
+    // Abre o modal para editar um usuário existente
     const handleEditUser = (user: User) => {
         setCurrentUser(user);
         setIsEdit(true);
         setShowModal(true);
     };
 
+    // Exclui um usuário com confirmação
     const handleDeleteUser = async (user: User) => {
         const confirmed = await Swal.fire({
             title: "Tem certeza?",
@@ -100,18 +105,20 @@ const UsersPage = ({port}: { port: string }) => {
             try {
                 await axios.delete(`${API_ENDPOINTS.users(port)}/${user.id}`);
                 toast.success("Usuário excluído com sucesso!");
-                fetchUsers();
+                await fetchUsers();
             } catch {
                 toast.error("Erro ao excluir o usuário.");
             }
         }
     };
 
+    // Abre o modal para alterar a senha do usuário
     const handleChangePassword = (user: User) => {
         setCurrentUser(user);
         setShowChangePasswordModal(true);
     };
 
+    // Salva a nova senha do usuário
     const handleSavePassword = async (userId: number, newPassword: string) => {
         try {
             await axios.put(API_ENDPOINTS.updatePassword(port, userId), {newPassword});
@@ -122,12 +129,8 @@ const UsersPage = ({port}: { port: string }) => {
         }
     };
 
+    // Salva as alterações de um usuário (novo ou existente)
     const handleSaveUser = async (user: Partial<User>) => {
-        if (!user.name || !user.email) {
-            toast.error("Nome e e-mail são obrigatórios.");
-            return;
-        }
-
         const endpoint = isEdit
             ? `${API_ENDPOINTS.users(port)}/${user.id}`
             : API_ENDPOINTS.users(port);
@@ -145,7 +148,7 @@ const UsersPage = ({port}: { port: string }) => {
             await axios[method](endpoint, payload);
             toast.success("Usuário salvo com sucesso!");
             setShowModal(false);
-            fetchUsers();
+            await fetchUsers();
         } catch (error: any) {
             toast.error(error.response?.data?.message || "Erro ao salvar o usuário.");
         }
