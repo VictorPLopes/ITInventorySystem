@@ -5,9 +5,9 @@ namespace ITInventorySystem.Repositories.Interfaces;
 
 public interface IProductInterface
 {
-    Task<Product> GetByIdAsync(int id);
+    Task<Product>              GetByIdAsync(int id);
     Task<IEnumerable<Product>> GetAllAsync();
-    Task<Product> AddAsync(ProductCreateDto product);
-    Task UpdateAsync(ProductUpdateDto product);
-    Task DeleteAsync(int id);
+    Task<Product>              AddAsync(ProductCreateDto product);
+    Task                       UpdateAsync(int           id, ProductUpdateDto product);
+    Task                       DeleteAsync(int           id);
 }

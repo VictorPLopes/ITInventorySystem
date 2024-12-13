@@ -15,11 +15,11 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
             // Inicializa a nova ordem de serviço
             var workOrder = new WorkOrder
             {
-                StartDate = workOrderDto.StartDate,
+                StartDate      = workOrderDto.StartDate,
                 UserInChargeId = workOrderDto.UserInChargeId,
-                ClientId = workOrderDto.ClientId,
-                Description = workOrderDto.Description,
-                WorkHours = workOrderDto.WorkHours
+                ClientId       = workOrderDto.ClientId,
+                Description    = workOrderDto.Description,
+                WorkHours      = workOrderDto.WorkHours
             };
 
             // Verifica a disponibilidade de produtos no estoque
@@ -46,7 +46,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                 // Adiciona o produto à ordem de serviço
                 var productInWorkOrder = new ProductsInWorkOrder
                 {
-                    ProductId = productDto.ProductId,
+                    ProductId       = productDto.ProductId,
                     ProductQuantity = productDto.Quantity
                 };
                 workOrder.ProductsInWorkOrder.Add(productInWorkOrder);
@@ -106,24 +106,24 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
         return workOrder;
     }
 
-    public async Task<WorkOrder> UpdateAsync(WorkOrderUpdateDto updateDto)
+    public async Task<WorkOrder> UpdateAsync(int id, WorkOrderUpdateDto updateDto)
     {
         // Carrega a ordem de serviço existente
         var workOrder = await context.WorkOrders
                                      .Include(wo => wo.ProductsInWorkOrder)
-                                     .FirstOrDefaultAsync(wo => wo.Id == updateDto.Id);
+                                     .FirstOrDefaultAsync(wo => wo.Id == id);
 
         if (workOrder == null)
-            throw new KeyNotFoundException($"WorkOrder with ID {updateDto.Id} not found.");
+            throw new KeyNotFoundException($"WorkOrder with ID {id} not found.");
 
         // Atualiza os campos básicos
-        workOrder.StartDate = updateDto.StartDate;
+        workOrder.StartDate      = updateDto.StartDate;
         workOrder.UserInChargeId = updateDto.UserInChargeId;
-        workOrder.ClientId = updateDto.ClientId;
-        workOrder.Description = updateDto.Description;
-        workOrder.WorkHours = updateDto.WorkHours;
-        workOrder.Status = updateDto.NewStatus;
-        workOrder.UpdatedAt = DateTime.Now;
+        workOrder.ClientId       = updateDto.ClientId;
+        workOrder.Description    = updateDto.Description;
+        workOrder.WorkHours      = updateDto.WorkHours;
+        workOrder.Status         = updateDto.NewStatus;
+        workOrder.UpdatedAt      = DateTime.Now;
 
         // Atualiza a lista de produtos associados
         var existingProducts = workOrder.ProductsInWorkOrder.ToList();
@@ -177,7 +177,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
                 var newProductInWorkOrder = new ProductsInWorkOrder
                 {
-                    ProductId = productDto.ProductId,
+                    ProductId       = productDto.ProductId,
                     ProductQuantity = productDto.Quantity
                 };
 

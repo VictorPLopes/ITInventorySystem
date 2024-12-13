@@ -1,14 +1,6 @@
-﻿import React, {useState} from 'react';
-import {Button, Form, FormControl, FormGroup, FormLabel, Modal} from 'react-bootstrap';
-
-interface User {
-    id?: number;
-    name: string;
-    email: string;
-    password?: string; // Tornar opcional para usuários existentes
-    type: number;
-    status: boolean;
-}
+﻿import React, { useState, useRef } from 'react';
+import { Button, Form, Modal } from 'react-bootstrap';
+import User from '../types/User';
 
 interface UserModalProps {
     show: boolean;
@@ -17,35 +9,56 @@ interface UserModalProps {
     user: Partial<User>;
 }
 
-export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user}) => {
+export const UserModal: React.FC<UserModalProps> = ({ show, onClose, onSave, user }) => {
     const [formData, setFormData] = useState<Partial<User>>(user);
-    const [confirmPassword, setConfirmPassword] = useState(''); // Estado para a confirmação da senha
-    const [error, setError] = useState(''); // Estado para mensagens de erro
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState(''); // For password mismatch errors
+    const [validated, setValidated] = useState(false);
 
-    const isEdit = Boolean(user.id); // Determina se é edição
+    const formRef = useRef<HTMLFormElement>(null); // To directly access the form element
 
-    // Manipula alterações nos campos do formulário
+    const isEdit = Boolean(user.id); // Determine if it's an edit action
+
+    // Handle input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | any>) => {
-        const {name, value} = e.target;
+        const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: name === 'type' ? parseInt(value, 10) : value,
         }));
     };
 
-    // Manipula a alteração do campo de confirmação de senha
     const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setConfirmPassword(e.target.value);
     };
 
-    // Verifica se as senhas correspondem antes de salvar
-    const handleSave = () => {
-        if (!isEdit && formData.password && formData.password !== confirmPassword) {
-            setError('As senhas não correspondem.');
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        const form = event.currentTarget;
+        event.preventDefault(); // Prevent default behavior
+        event.stopPropagation(); // Stop propagation
+
+        if (!form.checkValidity()) {
+            setValidated(true); // Trigger Bootstrap validation feedback
             return;
         }
+
+        if (!isEdit && formData.password && formData.password !== confirmPassword) {
+            setError('As senhas não correspondem. Tente novamente.');
+            setValidated(true);
+            return;
+        }
+
         setError('');
-        onSave(formData); // Chama a função de salvar
+        setValidated(true);
+        onSave(formData); // Call the save handler
+    };
+
+    const handleSave = () => {
+        if (formRef.current) {
+            // Trigger form submission programmatically
+            const event = new Event('submit', { bubbles: true, cancelable: true });
+            formRef.current.dispatchEvent(event);
+        }
     };
 
     return (
@@ -54,57 +67,78 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                 <Modal.Title>{isEdit ? 'Editar Usuário' : 'Novo Usuário'}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
-                    <FormGroup className="mb-3">
-                        <FormLabel>Nome</FormLabel>
-                        <FormControl
+                <Form
+                    noValidate
+                    validated={validated}
+                    onSubmit={handleSubmit}
+                    ref={formRef} // Attach the form reference
+                >
+                    <Form.Group className="mb-3">
+                        <Form.Label>Nome</Form.Label>
+                        <Form.Control
                             type="text"
                             name="name"
                             value={formData.name || ''}
                             onChange={handleInputChange}
                             placeholder="Digite o nome"
+                            required
                         />
-                    </FormGroup>
-                    <FormGroup className="mb-3">
-                        <FormLabel>E-mail</FormLabel>
-                        <FormControl
+                        <Form.Control.Feedback type="invalid">
+                            Por favor, insira um nome válido.
+                        </Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>E-mail</Form.Label>
+                        <Form.Control
                             type="email"
                             name="email"
                             value={formData.email || ''}
                             onChange={handleInputChange}
                             placeholder="Digite o e-mail"
+                            required
                         />
-                    </FormGroup>
-                    {/* Renderiza os campos de senha apenas para criação */}
+                        <Form.Control.Feedback type="invalid">
+                            Por favor, insira um e-mail válido.
+                        </Form.Control.Feedback>
+                    </Form.Group>
                     {!isEdit && (
                         <>
-                            <FormGroup className="mb-3">
-                                <FormLabel>Senha</FormLabel>
-                                <FormControl
+                            <Form.Group className="mb-3">
+                                <Form.Label>Senha</Form.Label>
+                                <Form.Control
                                     type="password"
                                     name="password"
                                     value={formData.password || ''}
                                     onChange={handleInputChange}
                                     placeholder="Digite a senha"
+                                    required
                                 />
-                            </FormGroup>
-                            <FormGroup className="mb-3">
-                                <FormLabel>Confirme a Senha</FormLabel>
-                                <FormControl
+                                <Form.Control.Feedback type="invalid">
+                                    Por favor, insira uma senha válida.
+                                </Form.Control.Feedback>
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Confirme a Senha</Form.Label>
+                                <Form.Control
                                     type="password"
                                     value={confirmPassword}
                                     onChange={handleConfirmPasswordChange}
                                     placeholder="Confirme a senha"
+                                    required
+                                    isInvalid={!!error} // Highlight this field if there's an error
                                 />
-                            </FormGroup>
+                                <Form.Control.Feedback type="invalid">
+                                    {error || 'Por favor, confirme sua senha.'}
+                                </Form.Control.Feedback>
+                            </Form.Group>
                         </>
                     )}
-                    {error && <p className="text-danger">{error}</p>}
-                    <FormGroup className="mb-3">
-                        <FormLabel>Status</FormLabel>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Status</Form.Label>
                         <Form.Select
                             name="status"
                             value={formData.status ? 'Ativo' : 'Inativo'}
+                            required
                             onChange={(e) =>
                                 setFormData({
                                     ...formData,
@@ -115,12 +149,13 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                             <option value="Ativo">Ativo</option>
                             <option value="Inativo">Inativo</option>
                         </Form.Select>
-                    </FormGroup>
-                    <FormGroup>
-                        <FormLabel>Tipo</FormLabel>
+                    </Form.Group>
+                    <Form.Group>
+                        <Form.Label>Tipo</Form.Label>
                         <Form.Select
                             name="type"
-                            value={formData.type || 0}
+                            value={formData.type || 2}
+                            required
                             onChange={(e) =>
                                 setFormData({
                                     ...formData,
@@ -131,7 +166,7 @@ export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user
                             <option value={2}>Técnico</option>
                             <option value={1}>Administrador</option>
                         </Form.Select>
-                    </FormGroup>
+                    </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>

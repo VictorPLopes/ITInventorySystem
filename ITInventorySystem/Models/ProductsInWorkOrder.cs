@@ -5,8 +5,8 @@ namespace ITInventorySystem.Models;
 
 public class ProductsInWorkOrder
 {
-    public int ProductId { get; set; }
-    public Product Product { get; set; }
+    public int     ProductId { get; set; }
+    public Product Product   { get; set; }
 
     public int WorkOrderId { get; set; }
 

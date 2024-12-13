@@ -2,7 +2,6 @@
 
 public class ClientUpdateDto
 {
-    public int Id { get; set; }
     public string IdDoc { get; set; } // CPF/CNPJ
 
     public string Name { get; set; } = string.Empty;

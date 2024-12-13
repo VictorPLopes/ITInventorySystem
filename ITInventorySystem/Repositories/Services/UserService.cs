@@ -17,11 +17,11 @@ public class UserService(AppDbContext context) : IUserInterface
 
         var newUser = new User
         {
-            Name = user.Name,
-            Email = user.Email,
+            Name         = user.Name,
+            Email        = user.Email,
             PasswordHash = passwordHash,
             PasswordSalt = passwordSalt,
-            Type = user.Type
+            Type         = user.Type
         };
 
         context.Users.Add(newUser);
@@ -52,20 +52,20 @@ public class UserService(AppDbContext context) : IUserInterface
         return user;
     }
 
-    public async Task<User> UpdateAsync(UserUpdateDto user)
+    public async Task<User> UpdateAsync(int id, UserUpdateDto user)
     {
-        if (await context.Users.AnyAsync(userDb => userDb.Email == user.Email && userDb.Id != user.Id))
+        if (await context.Users.AnyAsync(userDb => userDb.Email == user.Email && userDb.Id != id))
             throw new InvalidOperationException("Email already in use!");
 
-        var userDb = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == user.Id);
+        var userDb = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == id);
 
         if (userDb == null)
             throw new KeyNotFoundException("User not found!");
 
-        userDb.Name = user.Name;
-        userDb.Email = user.Email;
-        userDb.Type = user.Type;
-        userDb.Status = user.Status;
+        userDb.Name      = user.Name;
+        userDb.Email     = user.Email;
+        userDb.Type      = user.Type;
+        userDb.Status    = user.Status;
         userDb.UpdatedAt = DateTime.Now;
 
         context.Users.Update(userDb);
@@ -74,14 +74,14 @@ public class UserService(AppDbContext context) : IUserInterface
         return userDb;
     }
 
-    public async Task UpdatePasswordAsync(UserUpdatePasswordDto user)
+    public async Task UpdatePasswordAsync(int id, string newPassword)
     {
-        var userDb = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == user.Id);
+        var userDb = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == id);
 
         if (userDb == null)
             throw new KeyNotFoundException("User not found!");
 
-        HashPassword.Hash(user.NewPassword, out var passwordHash, out var passwordSalt);
+        HashPassword.Hash(newPassword, out var passwordHash, out var passwordSalt);
         userDb.PasswordHash = passwordHash;
         userDb.PasswordSalt = passwordSalt;
 

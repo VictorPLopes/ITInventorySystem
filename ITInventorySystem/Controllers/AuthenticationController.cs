@@ -6,31 +6,33 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;
 
+[Route("auth")]
+[ApiController]
 public class AuthenticationController(IAuthenticationInterface authenticationInterface) : ControllerBase
 {
-    [HttpPost("Login")]
+    [HttpPost("login")]
     public async Task<ActionResult<User>> Authenticate([FromBody] LoginRequest? loginRequest) =>
         loginRequest is null
             ? BadRequest("Dados de login inválidos.")
             : Ok(await authenticationInterface.Authenticate(loginRequest.Email, loginRequest.Password));
 
-    [HttpGet("Dashboard")]
+    [HttpGet("dashboard")]
     [Authorize]
     public string? Dashboard() => User.Identity?.Name;
 
-    [HttpGet("ClientsPage")]
+    [HttpGet("clients-page")]
     [Authorize]
     public string? ClientsPage() => User.Identity?.Name;
 
-    [HttpGet("InventoryPage")]
+    [HttpGet("inventory-page")]
     [Authorize]
     public string? InventoryPage() => User.Identity?.Name;
 
-    [HttpGet("WorkOrdersPage")]
+    [HttpGet("work-orders-page")]
     [Authorize]
     public string? WorkOrdersPage() => User.Identity?.Name;
 
-    [HttpGet("UsersPage")]
+    [HttpGet("users-page")]
     [Authorize(Roles = "Admin, Master")]
     public string? UsersPage() => User.Identity?.Name;
 }

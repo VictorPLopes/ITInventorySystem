@@ -5,37 +5,37 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;
 
-[Route("api/[controller]")]
+[Route("clients")]
 [ApiController]
 public class ClientController(IClientInterface clientInterface) : ControllerBase
 {
-    [HttpGet("GetAllClients")]
+    [HttpGet]
     public async Task<ActionResult<IEnumerable<Client>>> GetAllClients()
     {
         var clients = await clientInterface.GetAllAsync();
         return Ok(clients);
     }
 
-    [HttpGet("GetClient/{id:int}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<Client>> GetClient(int id)
     {
         var client = await clientInterface.GetByIdAsync(id);
         return Ok(client);
     }
 
-    [HttpPost("CreateClient")]
+    [HttpPost]
     public async Task<ActionResult<Client>> CreateClient([FromBody] ClientCreateDto clt)
     {
         var client = await clientInterface.AddAsync(clt);
         return Ok(client);
     }
 
-    [HttpPut("UpdateClient")]
-    public async Task<ActionResult> UpdateClient([FromBody] ClientUpdateDto clt)
+    [HttpPut("{id:int}")]
+    public async Task<ActionResult> UpdateClient(int id, [FromBody] ClientUpdateDto clt)
     {
         try
         {
-            await clientInterface.UpdateAsync(clt);
+            await clientInterface.UpdateAsync(id, clt);
             return NoContent();
         }
         catch (KeyNotFoundException ex)

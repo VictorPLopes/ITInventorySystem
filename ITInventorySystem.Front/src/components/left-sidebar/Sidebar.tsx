@@ -1,89 +1,67 @@
-import {Link} from "react-router-dom"
-import "./sidebar.css"
+import {Link} from "react-router-dom";
+import "./sidebar.css";
 import classNames from "classnames";
-import {Fragment} from "react/jsx-runtime";
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faBars, faBoxOpen, faFileLines, faHome, faUserGear, faUserTie} from '@fortawesome/free-solid-svg-icons';
-import {useEffect, useState} from "react";
-import axios from "../../AxiosConfig.tsx";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faBars, faBoxOpen, faFileLines, faHome, faUserGear, faUserTie,} from "@fortawesome/free-solid-svg-icons";
+import {Fragment, useEffect, useState} from "react";
+import axios from "../../AxiosConfig";
 import {Button} from "react-bootstrap";
 
+const API_ENDPOINTS = {
+    usersPage: (port: string) => `https://localhost:${port}/auth/users-page`,
+};
 
 type SidebarProps = {
-    isSidebarCollapsed: boolean
+    isSidebarCollapsed: boolean;
     changeIsSidebarCollapsed: (isSidebarCollapsed: boolean) => void;
     port: string;
-}
+};
 
 const Sidebar = ({
                      isSidebarCollapsed,
                      changeIsSidebarCollapsed,
-                     port
-
+                     port,
                  }: SidebarProps) => {
+    const [hasAdminAccess, setHasAdminAccess] = useState<boolean>(false);
+
     const items = [
-        {
-            routerLink: "dashboard",
-            icon: faHome,
-            label: "Dashboard",
-        },
-        {
-            routerLink: "products",
-            icon: faBoxOpen,
-            label: "Products",
-        },
-        {
-            routerLink: "clients",
-            icon: faUserTie,
-            label: "Clients",
-        },
-        {
-            routerLink: "workorder",
-            icon: faFileLines,
-            label: "Work Orders",
-        },
+        {routerLink: "dashboard", icon: faHome, label: "Dashboard"},
+        {routerLink: "products", icon: faBoxOpen, label: "Products"},
+        {routerLink: "clients", icon: faUserTie, label: "Clients"},
+        {routerLink: "workorder", icon: faFileLines, label: "Work Orders"},
     ];
 
-    const itemsAdmin = [
-        {
-            routerLink: "users",
-            icon: faUserGear,
-            label: "Users",
-        }
-    ]
+    const adminItems = [
+        {routerLink: "users", icon: faUserGear, label: "Users"},
+    ];
 
     const sidebarClasses = classNames({
         sidenav: true,
         "sidenav-collapsed": isSidebarCollapsed,
-    })
-    /*const closeSidenav = () => {
-        changeIsSidebarCollapsed(true);
-    }*/
+    });
 
-    const toggleCollapse = (): void => {
-        changeIsSidebarCollapsed(!isSidebarCollapsed)
-    }
-
-    const [message, setMessage] = useState<string>('');
+    const toggleCollapse = () => {
+        changeIsSidebarCollapsed(!isSidebarCollapsed);
+    };
 
     useEffect(() => {
-        const fetchUsersPage = async () => {
+        const checkAdminAccess = async () => {
             try {
-                const response = await axios.get(`https://localhost:${port}/UsersPage`);
-                setMessage(response.data); // Define a mensagem recebida da API
-            } catch (err) {
-                // Não é necessário definir a mensagem de erro, pois a página de usuários não é acessível sem autenticação
+                await axios.get(API_ENDPOINTS.usersPage(port));
+                setHasAdminAccess(true);
+            } catch {
+                setHasAdminAccess(false);
             }
         };
 
-        fetchUsersPage();
-    }, []);
+        checkAdminAccess();
+    }, [port]);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        window.location.href = '/';
+        localStorage.removeItem("token");
+        window.location.href = "/";
     };
-    
+
     return (
         <div className={sidebarClasses}>
             <div className="logo-container">
@@ -93,9 +71,6 @@ const Sidebar = ({
                 {!isSidebarCollapsed && (
                     <Fragment>
                         <div className="logo-text">Menu</div>
-                        {/*{<button className="btn-close" onClick={closeSidenav}>
-                            <FontAwesomeIcon icon={faTimes}/>
-                        </button>}*/}
                     </Fragment>
                 )
                 }
@@ -111,7 +86,7 @@ const Sidebar = ({
                         </Link>
                     </li>
                 ))}
-                {message && itemsAdmin.map(item => (
+                {hasAdminAccess && adminItems.map(item => (
                     <li key={item.label} className="sidenav-nav-item">
                         <Link className="sidenav-nav-link" to={item.routerLink}>
                             <FontAwesomeIcon icon={item.icon}

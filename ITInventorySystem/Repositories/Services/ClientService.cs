@@ -12,14 +12,14 @@ public class ClientService(AppDbContext context) : IClientInterface
     {
         var clt = new Client
         {
-            Name = client.Name,
-            IdDoc = client.IdDoc,
+            Name        = client.Name,
+            IdDoc       = client.IdDoc,
             PhoneNumber = client.PhoneNumber,
-            Email = client.Email,
-            State = client.State,
-            Street = client.Street,
-            City = client.City,
-            PostalCode = client.PostalCode
+            Email       = client.Email,
+            State       = client.State,
+            Street      = client.Street,
+            City        = client.City,
+            PostalCode  = client.PostalCode
         };
 
         context.Add(clt);
@@ -55,21 +55,21 @@ public class ClientService(AppDbContext context) : IClientInterface
         return client;
     }
 
-    public async Task UpdateAsync(ClientUpdateDto client)
+    public async Task UpdateAsync(int id, ClientUpdateDto client)
     {
         var clt = await context.Clients
-                               .FirstOrDefaultAsync(cltDb => cltDb.Id == client.Id);
+                               .FirstOrDefaultAsync(cltDb => cltDb.Id == id);
 
         if (clt == null) throw new KeyNotFoundException("Client not found!");
 
-        clt.Name = client.Name;
-        clt.Email = client.Email;
-        clt.IdDoc = client.IdDoc;
-        clt.State = client.State;
-        clt.Street = client.Street;
-        clt.City = client.City;
+        clt.Name       = client.Name;
+        clt.Email      = client.Email;
+        clt.IdDoc      = client.IdDoc;
+        clt.State      = client.State;
+        clt.Street     = client.Street;
+        clt.City       = client.City;
         clt.PostalCode = client.PostalCode;
-        clt.UpdatedAt = DateTime.Now;
+        clt.UpdatedAt  = DateTime.Now;
 
         context.Update(clt);
         await context.SaveChangesAsync();
