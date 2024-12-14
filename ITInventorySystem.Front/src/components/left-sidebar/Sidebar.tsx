@@ -26,13 +26,13 @@ const Sidebar = ({
 
     const items = [
         {routerLink: "dashboard", icon: faHome, label: "Dashboard"},
-        {routerLink: "products", icon: faBoxOpen, label: "Products"},
-        {routerLink: "clients", icon: faUserTie, label: "Clients"},
-        {routerLink: "workorder", icon: faFileLines, label: "Work Orders"},
+        {routerLink: "inventory", icon: faBoxOpen, label: "Inventário"},
+        {routerLink: "clients", icon: faUserTie, label: "Clientes"},
+        {routerLink: "workorder", icon: faFileLines, label: "Ordens de Serviço"},
     ];
 
     const adminItems = [
-        {routerLink: "users", icon: faUserGear, label: "Users"},
+        {routerLink: "users", icon: faUserGear, label: "Usuários"},
     ];
 
     const sidebarClasses = classNames({
