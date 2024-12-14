@@ -1,10 +1,12 @@
-export default interface Product {
+interface Product {
     id?: number;
     name: string;
     quantity: number;
-    description?: string;
-    category?: string;
+    description: string;
+    category: string;
     costPrice: number;
     salePrice: number;
-    brandManufacturerName?: string;
+    brandManufacturerName: string;
+    createdAt?: string;
+    updatedAt?: string | null;
 }
