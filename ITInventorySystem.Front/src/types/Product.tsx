@@ -1,4 +1,4 @@
-﻿interface Product {
+interface Product {
     id?: number;
     name: string;
     quantity: number;
@@ -10,5 +10,3 @@
     createdAt?: string;
     updatedAt?: string | null;
 }
-
-export default Product;

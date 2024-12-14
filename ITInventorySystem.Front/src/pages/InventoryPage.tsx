@@ -1,4 +1,4 @@
-﻿import {useEffect, useState, useCallback} from "react";
+import {useEffect, useState, useCallback} from "react";
 import axios from "../AxiosConfig";
 import Swal from "sweetalert2";
 import toast, {Toaster} from "react-hot-toast";

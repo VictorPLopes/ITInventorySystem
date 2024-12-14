@@ -62,14 +62,15 @@ public class ClientService(AppDbContext context) : IClientInterface
 
         if (clt == null) throw new KeyNotFoundException("Client not found!");
 
-        clt.Name       = client.Name;
-        clt.Email      = client.Email;
-        clt.IdDoc      = client.IdDoc;
-        clt.State      = client.State;
-        clt.Street     = client.Street;
-        clt.City       = client.City;
-        clt.PostalCode = client.PostalCode;
-        clt.UpdatedAt  = DateTime.Now;
+        clt.Name        = client.Name;
+        clt.Email       = client.Email;
+        clt.IdDoc       = client.IdDoc;
+        clt.State       = client.State;
+        clt.Street      = client.Street;
+        clt.City        = client.City;
+        clt.PostalCode  = client.PostalCode;
+        clt.PhoneNumber = client.PhoneNumber;
+        clt.UpdatedAt   = DateTime.Now;
 
         context.Update(clt);
         await context.SaveChangesAsync();

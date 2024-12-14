@@ -21,7 +21,13 @@ interface GenericTableProps<T> {
 export const GenericTable = <T, >({data, columns, actions, extraAction}: GenericTableProps<T>) => {
     return (
         <DataTable
-            options={{language}}
+            options={{
+                language,
+                paging: true, // Habilitar paginação
+                searching: true, // Habilitar campo de busca
+                ordering: true, // Permitir ordenação                
+            }}
+            className="table table-hover" // Classes do Bootstrap
             columns={columns}
             data={data}
             slots={{
@@ -48,3 +54,4 @@ export const GenericTable = <T, >({data, columns, actions, extraAction}: Generic
         />
     );
 };
+
