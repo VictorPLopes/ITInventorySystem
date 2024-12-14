@@ -10,6 +10,8 @@ public class ProductService(AppDbContext context) : IProductInterface
 {
     public async Task<Product> AddAsync(ProductCreateDto product)
     {
+        ValidateProductData(product.Quantity, product.CostPrice, product.SalePrice);
+
         var prod = new Product
         {
             Name                  = product.Name,
@@ -47,7 +49,6 @@ public class ProductService(AppDbContext context) : IProductInterface
 
     public async Task<IEnumerable<Product>> GetAllAsync() => await context.Products.ToListAsync();
 
-
     public async Task<Product> GetByIdAsync(int id)
     {
         var product = await context.Products.FindAsync(id);
@@ -57,6 +58,8 @@ public class ProductService(AppDbContext context) : IProductInterface
 
     public async Task UpdateAsync(int id, ProductUpdateDto product)
     {
+        ValidateProductData(product.Quantity, product.CostPrice, product.SalePrice);
+
         var prod = await context.Products
                                 .FirstOrDefaultAsync(prodDb => prodDb.Id == id);
 
@@ -73,5 +76,17 @@ public class ProductService(AppDbContext context) : IProductInterface
 
         context.Products.Update(prod);
         await context.SaveChangesAsync();
+    }
+
+    private void ValidateProductData(int quantity, decimal costPrice, decimal salePrice)
+    {
+        if (quantity < 0)
+            throw new ArgumentException("Quantity cannot be negative.");
+
+        if (costPrice < 0)
+            throw new ArgumentException("Cost price cannot be negative.");
+
+        if (salePrice < 0)
+            throw new ArgumentException("Sale price cannot be negative.");
     }
 }

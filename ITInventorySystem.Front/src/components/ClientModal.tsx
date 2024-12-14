@@ -12,6 +12,7 @@ interface ClientModalProps {
 export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave, client }) => {
     const [formData, setFormData] = useState<Partial<Client>>(client);
     const [validated, setValidated] = useState(false);
+    const [cepError, setCepError] = useState<string>(""); // Para mensagens de erro relacionadas ao CEP
     const formRef = useRef<HTMLFormElement>(null);
 
     const isEdit = Boolean(client.id);
@@ -24,28 +25,57 @@ export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave,
 
     // Formatters
     const formatCPFOrCNPJ = (value: string) => {
-        const numbers = value.replace(/\D/g, ""); // Remove all non-numeric characters
+        // Remove todos os caracteres que não são números
+        const numbers = value.replace(/\D/g, "");
+    
         if (numbers.length <= 11) {
-            // CPF format: XXX.XXX.XXX-XX
-            return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+            // Limita ao formato CPF e impede mais de 11 números
+            return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14);
         }
-        // CNPJ format: XX.XXX.XXX/XXXX-XX
-        return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+    
+        // Limita ao formato CNPJ e impede mais de 14 números
+        return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5").substring(0, 18);
     };
 
     const formatCEP = (value: string) => {
         const numbers = value.replace(/\D/g, "");
-        return numbers.replace(/(\d{5})(\d{3})/, "$1-$2");
+        return numbers.replace(/(\d{5})(\d{3})/, "$1-$2").substring(0,9);
     };
 
     const formatPhone = (value: string) => {
+        // Remove todos os caracteres que não são números
         const numbers = value.replace(/\D/g, "");
+    
         if (numbers.length <= 10) {
-            // Landline: +XX XXXX-XXXX
-            return numbers.replace(/(\d{2})(\d{4})(\d{4})/, "+$1 $2-$3");
+            // Formato para telefones fixos: +XX XXXX-XXXX
+            return numbers.replace(/(\d{2})(\d{4})(\d{0,4})/, "+$1 $2-$3").substr(0, 15);
         }
-        // Mobile: +XX XXXXX-XXXX
-        return numbers.replace(/(\d{2})(\d{5})(\d{4})/, "+$1 $2-$3");
+    
+        // Formato para telefones móveis: +XX XXXXX-XXXX
+        return numbers.replace(/(\d{2})(\d{5})(\d{0,4})/, "+$1 $2-$3").substr(0, 16);
+    };
+
+    const fetchAddressByCep = async (cep: string) => {
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const data = await response.json();
+
+            if (data.erro) {
+                setCepError("CEP não encontrado.");
+                return;
+            }
+
+            // Atualiza os campos de endereço automaticamente
+            setFormData((prev) => ({
+                ...prev,
+                street: data.logradouro || "",
+                city: data.localidade || "",
+                state: data.uf || "",
+            }));
+            setCepError(""); // Limpa o erro
+        } catch (error) {
+            setCepError("Erro ao buscar o endereço. Tente novamente.");
+        }
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | any>) => {
@@ -57,6 +87,10 @@ export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave,
                 formattedValue = formatCPFOrCNPJ(value);
             } else if (name === "postalCode") {
                 formattedValue = formatCEP(value);
+                formattedValue = formatCEP(value);
+                if (formattedValue.length === 9) {
+                    fetchAddressByCep(formattedValue.replace(/\D/g, "")); // Busca o endereço ao completar o CEP
+                }
             } else if (name === "phoneNumber") {
                 formattedValue = formatPhone(value);
             }
@@ -112,7 +146,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave,
                             value={formData.idDoc || ""}
                             onChange={handleInputChange}
                             placeholder="Digite o CPF ou CNPJ"
-                            required
+                            required                            
                         />
                         <Form.Control.Feedback type="invalid">
                             Por favor, insira um documento válido.
@@ -144,6 +178,21 @@ export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave,
                         />
                         <Form.Control.Feedback type="invalid">
                             Por favor, insira um e-mail válido.
+                        </Form.Control.Feedback>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>CEP</Form.Label>
+                        <Form.Control
+                            type="text"
+                            name="postalCode"
+                            value={formData.postalCode || ""}
+                            onChange={handleInputChange}
+                            placeholder="Digite o CEP"
+                            required
+                        />
+                        {cepError && <div className="text-danger">{cepError}</div>}
+                        <Form.Control.Feedback type="invalid">
+                            Por favor, insira um CEP válido.
                         </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
@@ -192,23 +241,9 @@ export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave,
                         <Form.Control.Feedback type="invalid">
                             Por favor, selecione um estado válido.
                         </Form.Control.Feedback>
-                    </Form.Group>
+                    </Form.Group>                    
                     <Form.Group className="mb-3">
-                        <Form.Label>CEP</Form.Label>
-                        <Form.Control
-                            type="text"
-                            name="postalCode"
-                            value={formData.postalCode || ""}
-                            onChange={handleInputChange}
-                            placeholder="Digite o CEP"
-                            required
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            Por favor, insira um CEP válido.
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Telefone</Form.Label>
+                        <Form.Label>Telefone (DDD + Número)</Form.Label>
                         <Form.Control
                             type="text"
                             name="phoneNumber"

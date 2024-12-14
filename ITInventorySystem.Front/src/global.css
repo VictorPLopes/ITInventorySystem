@@ -11,3 +11,20 @@
 body {
     margin: 0;
 }
+
+.table {
+    width: 100%; /* Garante que a tabela ocupe a largura total do container */
+    word-wrap: break-word; /* Quebra textos longos */
+}
+
+.table thead th {
+    text-align: start; /* Centraliza os cabeçalhos */
+    background-color: #004183; /* Cor de fundo personalizada */
+    color: #ffffff; /* Cor do texto */
+}
+
+.table td, .table th {
+    vertical-align: middle; /* Alinha verticalmente o conteúdo */
+    text-align: start;
+}
+
