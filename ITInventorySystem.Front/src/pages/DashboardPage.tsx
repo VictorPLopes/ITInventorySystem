@@ -1,51 +1,211 @@
-import {useEffect, useState} from "react";
-import {Col, Container, Row} from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
 import axios from "../AxiosConfig";
-import {Toaster} from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
+import { Bar } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+import { FaUsers, FaBoxOpen, FaClipboardList } from "react-icons/fa";
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const API_ENDPOINTS = {
-    dashboard: (port: string) => `https://localhost:${port}/auth/dashboard`,
+    dashboard: (port: string) => `https://localhost:${port}/dashboard/summary`,
+    topProducts: (port: string) => `https://localhost:${port}/dashboard/top-products`,
 };
 
-const DashboardPage = ({port}: { port: string }) => {
-    const [message, setMessage] = useState<string>("");
-    const [error, setError] = useState<string>("");
+const DashboardPage = ({ port }: { port: string }) => {
+    const [topProducts, setTopProducts] = useState<any[]>([]);
+    const [dashboardSummary, setDashboardSummary] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string>("");
 
     useEffect(() => {
-        const fetchDashboard = async () => {
+        const fetchData = async () => {
+            setLoading(true);
             try {
-                const response = await axios.get(API_ENDPOINTS.dashboard(port));
-                setMessage(response.data);
-            } catch {
-                setError("Usuário não autenticado.");
+                const [topProductsResponse, dashboardResponse] = await Promise.all([
+                    axios.get(API_ENDPOINTS.topProducts(port)),
+                    axios.get(API_ENDPOINTS.dashboard(port)),
+                ]);
+
+                setTopProducts(topProductsResponse.data);
+                setDashboardSummary(dashboardResponse.data);
+            } catch (err) {
+                console.error("Erro ao carregar os dados do dashboard:", err);
+                setError("Erro ao carregar os dados do dashboard.");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchDashboard();
+        fetchData();
     }, [port]);
 
-    return (
-        <Container className="mt-4">
-            <Toaster position="top-right"/>
-            <Row>
-                <Col>
-                    <h2 className="mb-4">Dashboard</h2>
-                </Col>
-            </Row>
-            {loading ? (
-                <p>Carregando...</p>
-            ) : message ? (
-                <Row className="mb-4">
-                    <Col className="text-center">
-                        <p>EM CONSTRUÇÃO</p>
+    const barChartData = {
+        labels: topProducts.map((product) => product.productName),
+        datasets: [
+            {
+                label: "Quantidade Utilizada",
+                data: topProducts.map((product) => product.totalQuantity),
+                backgroundColor: ["#0d6efd", "#6610f2", "#6f42c1", "#d63384", "#fd7e14"],
+            },
+        ],
+    };
+
+    if (loading) {
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: "50vh" }}>
+                <Spinner animation="border" role="status" variant="primary">
+                    <span className="visually-hidden">Carregando...</span>
+                </Spinner>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <Container className="mt-4">
+                <Toaster position="top-right" />
+                <Row>
+                    <Col>
+                        <p className="text-danger text-center">{error}</p>
                     </Col>
                 </Row>
-            ) : (
-                <p>{error}</p>
+            </Container>
+        );
+    }
+
+    return (
+        <Container fluid className="mt-4">
+            <Toaster position="top-right" />
+            <Row>
+                <Col>
+                    <h2 className="mb-4 text-primary">📊 Dashboard</h2>
+                </Col>
+            </Row>
+
+            {/* Resumo do Dashboard */}
+            {dashboardSummary && (
+                <Row className="mb-4">
+                    <Col md={3}>
+                        <Card className="text-center shadow border-0 bg-light">
+                            <Card.Body>
+                                <FaBoxOpen size={40} className="text-primary mb-2" />
+                                <Card.Title className="fw-bold">Total de Produtos</Card.Title>
+                                <h3 className="text-primary">{dashboardSummary.productCount || 0}</h3>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    <Col md={3}>
+                        <Card className="text-center shadow border-0 bg-light">
+                            <Card.Body>
+                                <FaUsers size={40} className="text-success mb-2" />
+                                <Card.Title className="fw-bold">Total de Clientes</Card.Title>
+                                <h3 className="text-success">{dashboardSummary.clientCount || 0}</h3>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    <Col md={3}>
+                        <Card className="text-center shadow border-0 bg-light">
+                            <Card.Body>
+                                <FaUsers size={40} className="text-info mb-2" />
+                                <Card.Title className="fw-bold">Total de Usuários</Card.Title>
+                                <h3 className="text-info">{dashboardSummary.userCount || 0}</h3>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                    <Col md={3}>
+                        <Card className="text-center shadow border-0 bg-light">
+                            <Card.Body>
+                                <FaClipboardList size={40} className="text-warning mb-2" />
+                                <Card.Title className="fw-bold">Total de Ordens</Card.Title>
+                                <h3 className="text-warning">{dashboardSummary.workOrderCount || 0}</h3>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
             )}
+
+            {/* Produtos Mais Utilizados */}
+            {/* Produtos Mais Utilizados */}
+<Row>
+    <Col md={6}>
+        <h4 className="mb-3 text-secondary">Produtos Mais Utilizados</h4>
+        {topProducts.length > 0 ? (
+            topProducts.map((product, index) => (
+                <Card key={product.productId} className="mb-3 shadow border-0 bg-white">
+                    <Card.Body className="d-flex align-items-center">
+                        {/* Ícone ou Número Representativo */}
+                        <div
+                            className="me-3"
+                            style={{
+                                width: 50,
+                                height: 50,
+                                backgroundColor: "#f8f9fa",
+                                borderRadius: "50%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                            }}
+                        >
+                            <span style={{ fontSize: "1.5rem", color: "#6c757d" }}>{index + 1}</span>
+                        </div>
+                        {/* Detalhes do Produto */}
+                        <div>
+                            <Card.Title className="fw-bold text-primary">
+                                {product.productName}
+                            </Card.Title>
+                            <p className="mb-1 text-muted">
+                                Código do Produto: <strong>{product.productId}</strong>
+                            </p>
+                            <p className="mb-0 text-muted">
+                                Quantidade Utilizada: <strong>{product.totalQuantity}</strong>
+                            </p>
+                        </div>
+                    </Card.Body>
+                </Card>
+            ))
+        ) : (
+            <p>Nenhum produto foi utilizado em ordens de serviço.</p>
+        )}
+    </Col>
+    <Col md={6}>
+        <h4 className="mb-3 text-secondary">Gráfico de Produtos Mais Utilizados</h4>
+        <div className="p-3 shadow bg-light rounded">
+            <Bar
+                data={barChartData}
+                options={{
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: "Produtos Mais Utilizados",
+                            font: {
+                                size: 16,
+                                weight: "bold",
+                            },
+                        },
+                        legend: {
+                            display: false,
+                        },
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false,
+                            },
+                        },
+                        y: {
+                            grid: {
+                                color: "#e0e0e0",
+                            },
+                        },
+                    },
+                }}
+            />
+        </div>
+    </Col>
+</Row>
+
         </Container>
     );
 };

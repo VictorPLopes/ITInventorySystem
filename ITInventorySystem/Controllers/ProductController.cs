@@ -19,28 +19,52 @@ public class ProductController(IProductInterface productInterface) : ControllerB
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Product>> GetProduct(int id)
     {
-        var product = await productInterface.GetByIdAsync(id);
-        return Ok(product);
+        try
+        {
+            var product = await productInterface.GetByIdAsync(id);
+            return Ok(product);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message); // Retorna 404 se o produto não for encontrado
+        }
     }
 
     [HttpPost]
     public async Task<ActionResult<Product>> CreateProduct([FromBody] ProductCreateDto prod)
     {
-        var product = await productInterface.AddAsync(prod);
-        return Ok(product);
+        if (!ModelState.IsValid) // Validações básicas no DTO
+            return BadRequest(ModelState);
+
+        try
+        {
+            var product = await productInterface.AddAsync(prod);
+            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product); // Retorna 201 Created com localização
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message }); // Validações específicas (ex: valores negativos)
+        }
     }
 
     [HttpPut("{id:int}")]
     public async Task<ActionResult> UpdateProduct(int id, [FromBody] ProductUpdateDto prod)
     {
+        if (!ModelState.IsValid) // Validações básicas no DTO
+            return BadRequest(ModelState);
+
         try
         {
             await productInterface.UpdateAsync(id, prod);
-            return NoContent();
+            return NoContent(); // Retorna 204 No Content em caso de sucesso
         }
         catch (KeyNotFoundException ex)
         {
-            return NotFound(ex.Message); // Retorna 404 se o produto não foi encontrado
+            return NotFound(new { message = ex.Message }); // Retorna 404 se o produto não for encontrado
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message }); // Validações específicas
         }
     }
 
