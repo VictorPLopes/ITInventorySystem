@@ -1,5 +1,5 @@
-﻿import React, { useState, useRef } from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+﻿import React, {useRef, useState} from 'react';
+import {Button, Form, Modal} from 'react-bootstrap';
 import User from '../types/User';
 
 interface UserModalProps {
@@ -9,7 +9,7 @@ interface UserModalProps {
     user: Partial<User>;
 }
 
-export const UserModal: React.FC<UserModalProps> = ({ show, onClose, onSave, user }) => {
+export const UserModal: React.FC<UserModalProps> = ({show, onClose, onSave, user}) => {
     const [formData, setFormData] = useState<Partial<User>>(user);
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState(''); // For password mismatch errors
@@ -21,7 +21,7 @@ export const UserModal: React.FC<UserModalProps> = ({ show, onClose, onSave, use
 
     // Handle input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | any>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: name === 'type' ? parseInt(value, 10) : value,
@@ -56,7 +56,7 @@ export const UserModal: React.FC<UserModalProps> = ({ show, onClose, onSave, use
     const handleSave = () => {
         if (formRef.current) {
             // Trigger form submission programmatically
-            const event = new Event('submit', { bubbles: true, cancelable: true });
+            const event = new Event('submit', {bubbles: true, cancelable: true});
             formRef.current.dispatchEvent(event);
         }
     };

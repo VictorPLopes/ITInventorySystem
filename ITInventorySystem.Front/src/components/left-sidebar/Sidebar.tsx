@@ -28,7 +28,7 @@ const Sidebar = ({
         {routerLink: "dashboard", icon: faHome, label: "Dashboard"},
         {routerLink: "inventory", icon: faBoxOpen, label: "Inventário"},
         {routerLink: "clients", icon: faUserTie, label: "Clientes"},
-        {routerLink: "workorder", icon: faFileLines, label: "Ordens de Serviço"},
+        {routerLink: "work-orders", icon: faFileLines, label: "Ordens de Serviço"},
     ];
 
     const adminItems = [

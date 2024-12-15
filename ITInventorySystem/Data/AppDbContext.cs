@@ -13,7 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(opt
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Configuração da tabela de junção ProductsInWorkOrder
+        // Configuração da tabela de junção Products
         modelBuilder.Entity<ProductsInWorkOrder>()
                     .HasKey(pw => new { pw.ProductId, pw.WorkOrderId }); // Define chave composta
 
@@ -24,7 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(opt
 
         modelBuilder.Entity<ProductsInWorkOrder>()
                     .HasOne(pw => pw.WorkOrder)
-                    .WithMany(w => w.ProductsInWorkOrder)
+                    .WithMany(w => w.Products)
                     .HasForeignKey(pw => pw.WorkOrderId);
 
 

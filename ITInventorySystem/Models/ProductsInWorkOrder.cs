@@ -12,7 +12,7 @@ public class ProductsInWorkOrder
 
     [JsonIgnore] public WorkOrder WorkOrder { get; set; }
 
-    public int ProductQuantity { get; set; }
+    public int Quantity { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public DateTime CreatedAt { get; set; }

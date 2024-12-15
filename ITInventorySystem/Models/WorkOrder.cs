@@ -24,7 +24,7 @@ public class WorkOrder
 
     public EWorkOrderStatus Status { get; set; } = EWorkOrderStatus.Pending;
 
-    public ICollection<ProductsInWorkOrder> ProductsInWorkOrder { get; set; } =
+    public ICollection<ProductsInWorkOrder> Products { get; set; } =
         new List<ProductsInWorkOrder>(); // Uma ordem de serviço pode ter vários produtos
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

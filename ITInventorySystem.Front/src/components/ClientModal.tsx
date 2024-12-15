@@ -1,5 +1,5 @@
-﻿import React, { useState, useRef } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+﻿import React, {useRef, useState} from "react";
+import {Button, Form, Modal} from "react-bootstrap";
 import Client from "../types/Client";
 
 interface ClientModalProps {
@@ -9,7 +9,7 @@ interface ClientModalProps {
     client: Partial<Client>;
 }
 
-export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave, client }) => {
+export const ClientModal: React.FC<ClientModalProps> = ({show, onClose, onSave, client}) => {
     const [formData, setFormData] = useState<Partial<Client>>(client);
     const [validated, setValidated] = useState(false);
     const [cepError, setCepError] = useState<string>(""); // Para mensagens de erro relacionadas ao CEP
@@ -27,30 +27,30 @@ export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave,
     const formatCPFOrCNPJ = (value: string) => {
         // Remove todos os caracteres que não são números
         const numbers = value.replace(/\D/g, "");
-    
+
         if (numbers.length <= 11) {
             // Limita ao formato CPF e impede mais de 11 números
             return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14);
         }
-    
+
         // Limita ao formato CNPJ e impede mais de 14 números
         return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5").substring(0, 18);
     };
 
     const formatCEP = (value: string) => {
         const numbers = value.replace(/\D/g, "");
-        return numbers.replace(/(\d{5})(\d{3})/, "$1-$2").substring(0,9);
+        return numbers.replace(/(\d{5})(\d{3})/, "$1-$2").substring(0, 9);
     };
 
     const formatPhone = (value: string) => {
         // Remove todos os caracteres que não são números
         const numbers = value.replace(/\D/g, "");
-    
+
         if (numbers.length <= 10) {
             // Formato para telefones fixos: +XX XXXX-XXXX
             return numbers.replace(/(\d{2})(\d{4})(\d{0,4})/, "+$1 $2-$3").substr(0, 15);
         }
-    
+
         // Formato para telefones móveis: +XX XXXXX-XXXX
         return numbers.replace(/(\d{2})(\d{5})(\d{0,4})/, "+$1 $2-$3").substr(0, 16);
     };
@@ -79,7 +79,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave,
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | any>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData((prev) => {
             let formattedValue = value;
 
@@ -126,7 +126,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave,
 
     const handleSave = () => {
         if (formRef.current) {
-            const event = new Event("submit", { bubbles: true, cancelable: true });
+            const event = new Event("submit", {bubbles: true, cancelable: true});
             formRef.current.dispatchEvent(event);
         }
     };
@@ -146,7 +146,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave,
                             value={formData.idDoc || ""}
                             onChange={handleInputChange}
                             placeholder="Digite o CPF ou CNPJ"
-                            required                            
+                            required
                         />
                         <Form.Control.Feedback type="invalid">
                             Por favor, insira um documento válido.
@@ -241,7 +241,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({ show, onClose, onSave,
                         <Form.Control.Feedback type="invalid">
                             Por favor, selecione um estado válido.
                         </Form.Control.Feedback>
-                    </Form.Group>                    
+                    </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Telefone (DDD + Número)</Form.Label>
                         <Form.Control

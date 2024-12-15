@@ -46,10 +46,10 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                 // Adiciona o produto à ordem de serviço
                 var productInWorkOrder = new ProductsInWorkOrder
                 {
-                    ProductId       = productDto.ProductId,
-                    ProductQuantity = productDto.Quantity
+                    ProductId = productDto.ProductId,
+                    Quantity  = productDto.Quantity
                 };
-                workOrder.ProductsInWorkOrder.Add(productInWorkOrder);
+                workOrder.Products.Add(productInWorkOrder);
             }
 
             // Adiciona a ordem de serviço ao banco de dados
@@ -87,7 +87,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
         await context.WorkOrders
                      .Include(w => w.Client)
                      .Include(w => w.UserInCharge)
-                     .Include(w => w.ProductsInWorkOrder)
+                     .Include(w => w.Products)
                      .ThenInclude(p => p.Product)
                      .ToListAsync();
 
@@ -96,7 +96,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
         var workOrder = await context.WorkOrders
                                      .Include(w => w.Client)
                                      .Include(w => w.UserInCharge)
-                                     .Include(x => x.ProductsInWorkOrder)
+                                     .Include(x => x.Products)
                                      .ThenInclude(p => p.Product)
                                      .FirstOrDefaultAsync(w => w.Id == id);
 
@@ -110,7 +110,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
     {
         // Carrega a ordem de serviço existente
         var workOrder = await context.WorkOrders
-                                     .Include(wo => wo.ProductsInWorkOrder)
+                                     .Include(wo => wo.Products)
                                      .FirstOrDefaultAsync(wo => wo.Id == id);
 
         if (workOrder == null)
@@ -126,7 +126,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
         workOrder.UpdatedAt      = DateTime.Now;
 
         // Atualiza a lista de produtos associados
-        var existingProducts = workOrder.ProductsInWorkOrder.ToList();
+        var existingProducts = workOrder.Products.ToList();
 
         // Processa os produtos do DTO
         foreach (var productDto in updateDto.Products)
@@ -147,10 +147,10 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
             if (existingProduct != null)
             {
                 // Produto já existe na ordem: Atualiza a quantidade
-                if (productDto.Quantity > existingProduct.ProductQuantity)
+                if (productDto.Quantity > existingProduct.Quantity)
                 {
                     // Reduz o estoque apenas se a quantidade aumentou
-                    var additionalQuantity = productDto.Quantity - existingProduct.ProductQuantity;
+                    var additionalQuantity = productDto.Quantity - existingProduct.Quantity;
                     if (product.Quantity < additionalQuantity)
                         throw new
                             InvalidOperationException($"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested Additional: {additionalQuantity}");
@@ -160,11 +160,11 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                 else
                 {
                     // Devolve o estoque se a quantidade foi reduzida
-                    var quantityToReturn = existingProduct.ProductQuantity - productDto.Quantity;
+                    var quantityToReturn = existingProduct.Quantity - productDto.Quantity;
                     product.Quantity += quantityToReturn;
                 }
 
-                existingProduct.ProductQuantity = productDto.Quantity;
+                existingProduct.Quantity = productDto.Quantity;
             }
             else
             {
@@ -177,8 +177,8 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
                 var newProductInWorkOrder = new ProductsInWorkOrder
                 {
-                    ProductId       = productDto.ProductId,
-                    ProductQuantity = productDto.Quantity
+                    ProductId = productDto.ProductId,
+                    Quantity  = productDto.Quantity
                 };
 
                 context.ProductsInWorkOrder.Add(newProductInWorkOrder);
@@ -195,7 +195,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
             var product = await context.Products.FindAsync(productToRemove.ProductId);
             if (product != null)
                 // Devolve o estoque
-                product.Quantity += productToRemove.ProductQuantity;
+                product.Quantity += productToRemove.Quantity;
             context.ProductsInWorkOrder.Remove(productToRemove);
         }
 

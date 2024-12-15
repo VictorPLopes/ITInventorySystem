@@ -5,6 +5,7 @@ import Dashboard from './pages/DashboardPage';
 import UsersPage from './pages/UsersPage';
 import ClientsPage from './pages/ClientsPage';
 import InventoryPage from './pages/InventoryPage';
+import WorkOrdersPage from './pages/WorkOrdersPage';
 import {Fragment, useEffect, useState} from "react";
 import './App.css';
 import Layout from './Layout/Layout';
@@ -51,7 +52,7 @@ function App() {
                     <Route path="/users" element={<UsersPage port={port}/>}/>
                     <Route path="/clients" element={<ClientsPage port={port}/>}/>
                     <Route path="/inventory" element={<InventoryPage port={port}/>}/>
-                    {/* <Route path="/work-orders" element={<WorkOrdersPage port={port}/>}/> */}
+                    <Route path="/work-orders" element={<WorkOrdersPage port={port}/>}/>
                 </Route>
             </Routes>
         </Fragment>

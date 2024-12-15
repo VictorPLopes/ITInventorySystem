@@ -39,7 +39,8 @@ public class ProductController(IProductInterface productInterface) : ControllerB
         try
         {
             var product = await productInterface.AddAsync(prod);
-            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product); // Retorna 201 Created com localização
+            return CreatedAtAction(nameof(GetProduct), new { id = product.Id },
+                                   product); // Retorna 201 Created com localização
         }
         catch (ArgumentException ex)
         {

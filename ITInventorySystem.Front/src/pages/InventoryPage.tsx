@@ -1,4 +1,4 @@
-import {useEffect, useState, useCallback} from "react";
+import {useCallback, useEffect, useState} from "react";
 import axios from "../AxiosConfig";
 import Swal from "sweetalert2";
 import toast, {Toaster} from "react-hot-toast";
@@ -12,8 +12,6 @@ import Product from "../types/Product";
 const API_ENDPOINTS = {
     inventoryPage: (port: string) => `https://localhost:${port}/auth/inventory-page`,
     products: (port: string) => `https://localhost:${port}/products`,
-    inOutProduct: (port: string, productId: number) =>
-        `https://localhost:${port}/products/${productId}/in-out`,
 };
 
 const InventoryPage = ({port}: { port: string }) => {
@@ -153,7 +151,7 @@ const InventoryPage = ({port}: { port: string }) => {
         try {
             // Update the product quantity directly
             const updatedProducts = products.map((p) =>
-                p.id === productId ? { ...p, quantity: p.quantity + quantity } : p
+                p.id === productId ? {...p, quantity: p.quantity + quantity} : p
             );
             setProducts(updatedProducts);
 

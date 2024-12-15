@@ -1,6 +1,4 @@
-﻿using ITInventorySystem.DTO.Client;
-using ITInventorySystem.Models;
-using ITInventorySystem.Repositories.Interfaces;
+﻿using ITInventorySystem.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;

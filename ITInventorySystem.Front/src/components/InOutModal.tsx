@@ -1,5 +1,5 @@
-﻿import React, { useState } from "react";
-import { Button, Form, FormControl, FormGroup, FormLabel, Modal } from "react-bootstrap";
+﻿import React, {useState} from "react";
+import {Button, Form, FormControl, FormGroup, FormLabel, Modal} from "react-bootstrap";
 
 interface InOutModalProps {
     show: boolean;
@@ -8,7 +8,7 @@ interface InOutModalProps {
     product: { id: number };
 }
 
-export const InOutModal: React.FC<InOutModalProps> = ({ show, onClose, onSave, product }) => {
+export const InOutModal: React.FC<InOutModalProps> = ({show, onClose, onSave, product}) => {
     const [quantity, setQuantity] = useState<number | null>(null);
     const [operation, setOperation] = useState<string>("entrada");
     const [error, setError] = useState("");

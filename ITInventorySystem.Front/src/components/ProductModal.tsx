@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Button, Form, Modal } from "react-bootstrap";
+import React, {useState} from "react";
+import {Button, Form, Modal} from "react-bootstrap";
 import Product from "../types/Product";
 
 interface ProductModalProps {
@@ -9,7 +9,7 @@ interface ProductModalProps {
     product: Partial<Product>;
 }
 
-export const ProductModal: React.FC<ProductModalProps> = ({ show, onClose, onSave, product }) => {
+export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave, product}) => {
     const [formData, setFormData] = useState<Partial<Product>>(product);
     const [errors, setErrors] = useState<Record<string, string>>({}); // Gerencia os erros por campo
     const [categories] = useState<string[]>([
@@ -58,10 +58,10 @@ export const ProductModal: React.FC<ProductModalProps> = ({ show, onClose, onSav
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
 
         // Remove erros do campo corrigido
-        setErrors((prev) => ({ ...prev, [name]: "" }));
+        setErrors((prev) => ({...prev, [name]: ""}));
 
         setFormData((prev) => ({
             ...prev,
@@ -74,7 +74,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({ show, onClose, onSav
         setCustomCategory(value);
 
         // Atualiza o valor no formData
-        setErrors((prev) => ({ ...prev, category: "" })); // Remove erros do campo de categoria
+        setErrors((prev) => ({...prev, category: ""})); // Remove erros do campo de categoria
         setFormData((prev) => ({
             ...prev,
             category: value,
@@ -86,11 +86,11 @@ export const ProductModal: React.FC<ProductModalProps> = ({ show, onClose, onSav
 
         if (value === "custom") {
             setIsCustomCategory(true); // Mostra o campo de input
-            setFormData((prev) => ({ ...prev, category: "" })); // Reseta a categoria no formData
+            setFormData((prev) => ({...prev, category: ""})); // Reseta a categoria no formData
         } else {
             setIsCustomCategory(false); // Esconde o campo de input
-            setErrors((prev) => ({ ...prev, category: "" })); // Remove erros de categoria
-            setFormData((prev) => ({ ...prev, category: value })); // Define a categoria selecionada
+            setErrors((prev) => ({...prev, category: ""})); // Remove erros de categoria
+            setFormData((prev) => ({...prev, category: value})); // Define a categoria selecionada
         }
     };
 
