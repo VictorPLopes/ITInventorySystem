@@ -43,6 +43,7 @@ export const InOutModal: React.FC<InOutModalProps> = ({show, onClose, onSave, pr
                         <FormControl
                             type="number"
                             value={quantity || 1}
+                            max={formData.quantity}
                             onChange={(e) => setQuantity(Math.max(parseInt(e.target.value, 10), 1) || 1)}
                             placeholder="Digite a quantidade"
                         />

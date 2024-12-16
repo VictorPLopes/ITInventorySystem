@@ -56,7 +56,7 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                 setClients(clientsRes.data);
 
                 // Filtrar produtos com quantidade > 0
-                const availableProducts = productsRes.data.filter((p: any) => p.quantity > 0);
+                const availableProducts = productsRes.data.filter((p: any) => p.quantity > 0 || formData.products?.some((fp: any) => fp.productId === p.id));
                 setProducts(availableProducts);
             } catch {
                 setFetchError("Erro ao carregar dados iniciais.");
