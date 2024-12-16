@@ -11,7 +11,7 @@ interface InOutModalProps {
 
 export const InOutModal: React.FC<InOutModalProps> = ({show, onClose, onSave, product}) => {
     const [formData] = useState<Partial<Product>>(product);
-    const [quantity, setQuantity] = useState<number | null>(null);
+    const [quantity, setQuantity] = useState<number | null>(1);
     const [operation, setOperation] = useState<string>("entrada");
     const [error, setError] = useState("");
 
@@ -43,7 +43,7 @@ export const InOutModal: React.FC<InOutModalProps> = ({show, onClose, onSave, pr
                         <FormControl
                             type="number"
                             value={quantity || 1}
-                            max={formData.quantity}
+                            max = {operation == "saída" ? formData.quantity : ""}
                             onChange={(e) => setQuantity(Math.max(parseInt(e.target.value, 10), 1) || 1)}
                             placeholder="Digite a quantidade"
                         />
