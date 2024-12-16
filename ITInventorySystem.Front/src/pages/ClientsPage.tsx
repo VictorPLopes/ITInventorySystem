@@ -23,14 +23,35 @@ const ClientsPage = ({port}: { port: string }) => {
 
     const columns = [
         {title: "ID", data: "id"},
-        {title: "Documento", data: "idDoc"},
+        {
+            title: "Documento",
+            data: "idDoc",
+            render: (data: string) => {
+                // Formata como CPF ou CNPJ
+                return data.length <= 11 ? data.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14) : data.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5").substring(0, 18);
+            }
+        },
         {title: "Nome", data: "name"},
         {title: "E-mail", data: "email"},
         {title: "Endereço", data: "street"},
         {title: "Cidade", data: "city"},
         {title: "Estado", data: "state"},
-        {title: "CEP", data: "postalCode"},
-        {title: "Telefone", data: "phoneNumber"},
+        {
+            title: "CEP",
+            data: "postalCode",
+            render: (data: string) => {
+                // Formata como CEP
+                return data.replace(/(\d{5})(\d{3})/, "$1-$2").substring(0, 9);
+            }
+        },
+        {
+            title: "Telefone",
+            data: "phoneNumber",
+            render: (data: string) => {
+                // Formata como telefone fixo ou celular
+                return data.length <= 12 ? data.replace(/(\d{2})(\d{2})(\d{4})(\d{0,4})/, "+$1 ($2) $3-$4").substr(0, 18) : data.replace(/(\d{2})(\d{2})(\d{5})(\d{0,4})/, "+$1 ($2) $3-$4").substr(0, 19);
+            }
+        },
         {title: "Ações", name: "actions"},
     ];
 
@@ -164,12 +185,12 @@ const ClientsPage = ({port}: { port: string }) => {
                                     className="d-flex justify-content-center align-items-center"
                                     style={{minHeight: "300px"}}
                                 >
-                                    <Spinner animation="border" role="status" variant="primary" />
+                                    <Spinner animation="border" role="status" variant="primary"/>
                                 </div>
                             ) : (
                                 <div
                                     className="table-container p-4 rounded shadow-lg bg-body-tertiary"
-                                    style={{ overflowX: "auto", width: "100%" }}
+                                    style={{overflowX: "auto", width: "100%"}}
                                 >
                                     <GenericTable
                                         data={clients}

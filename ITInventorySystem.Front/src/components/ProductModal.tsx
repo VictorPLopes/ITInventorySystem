@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import Product from "../types/Product";
 
@@ -11,8 +11,13 @@ interface ProductModalProps {
 
 export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave, product}) => {
     const [formData, setFormData] = useState<Partial<Product>>(product);
-    const [errors, setErrors] = useState<Record<string, string>>({}); // Gerencia os erros por campo
-    const [categories] = useState<string[]>([
+    const [validated, setValidated] = useState(false);
+    const [isCustomCategory, setIsCustomCategory] = useState(false);
+    const [customCategory, setCustomCategory] = useState<string>("");
+    const formRef = useRef<HTMLFormElement>(null);
+
+    // Lista de categorias disponíveis
+    const categories = [
         "Desktops",
         "Notebooks",
         "Monitores",
@@ -26,87 +31,72 @@ export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave
         "Processadores",
         "Fontes de Energia",
         "Gabinetes",
-    ]);
-    const [isCustomCategory, setIsCustomCategory] = useState(false);
-    const [customCategory, setCustomCategory] = useState<string>("");
+    ];
 
-    const validateFields = (): boolean => {
-        const newErrors: Record<string, string> = {};
-
-        if (!formData.name || formData.name.trim() === "") {
-            newErrors.name = "O nome é obrigatório.";
-        }
-
-        if (formData.quantity == null || formData.quantity < 0) {
-            newErrors.quantity = "A quantidade deve ser maior ou igual a zero.";
-        }
-
-        if (formData.costPrice == null || formData.costPrice < 0) {
-            newErrors.costPrice = "O preço de custo deve ser maior ou igual a zero.";
-        }
-
-        if (formData.salePrice == null || formData.salePrice < 0) {
-            newErrors.salePrice = "O preço de venda deve ser maior ou igual a zero.";
-        }
-
-        if (!formData.category || formData.category.trim() === "") {
-            newErrors.category = "A categoria é obrigatória.";
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
+    // Atualiza os campos do formulário
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const {name, value} = e.target;
-
-        // Remove erros do campo corrigido
-        setErrors((prev) => ({...prev, [name]: ""}));
-
         setFormData((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: name === "quantity" ? Math.max(0, parseInt(value) || 0) : value,
+            [name]: name === "costPrice" || name === "salePrice" ? Math.max(0, parseFloat(value) || 0) : value,
         }));
     };
 
+    // Manipula a categoria personalizada
     const handleCustomCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setCustomCategory(value);
 
-        // Atualiza o valor no formData
-        setErrors((prev) => ({...prev, category: ""})); // Remove erros do campo de categoria
+        // Atualiza o formData com a categoria personalizada
         setFormData((prev) => ({
             ...prev,
             category: value,
         }));
     };
 
+    // Seleção de categoria (padrão ou personalizada)
     const handleCategorySelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const value = e.target.value;
 
         if (value === "custom") {
-            setIsCustomCategory(true); // Mostra o campo de input
-            setFormData((prev) => ({...prev, category: ""})); // Reseta a categoria no formData
+            setIsCustomCategory(true); // Mostra o campo para categoria personalizada
+            setFormData((prev) => ({...prev, category: ""})); // Limpa a categoria anterior
         } else {
-            setIsCustomCategory(false); // Esconde o campo de input
-            setErrors((prev) => ({...prev, category: ""})); // Remove erros de categoria
-            setFormData((prev) => ({...prev, category: value})); // Define a categoria selecionada
+            setIsCustomCategory(false); // Esconde o campo personalizado
+            setFormData((prev) => ({...prev, category: value})); // Atualiza com a categoria selecionada
         }
     };
 
-    const handleSave = () => {
-        if (validateFields()) {
-            onSave(formData); // Salva os dados apenas se estiverem válidos
+    // Valida os campos antes de salvar
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (formRef.current?.checkValidity()) {
+            onSave(formData); // Salva os dados somente se válidos
+        } else {
+            setValidated(true);
         }
     };
+
+    // Simula o envio do formulário para forçar a validação
+    const handleSave = () => {
+        if (formRef.current) {
+            const event = new Event("submit", {bubbles: true, cancelable: true});
+            formRef.current.dispatchEvent(event);
+        }
+    };
+
+    const isEdit = Boolean(product.id);
 
     return (
         <Modal show={show} onHide={onClose}>
             <Modal.Header closeButton>
-                <Modal.Title>{product.id ? "Editar Produto" : "Novo Produto"}</Modal.Title>
+                <Modal.Title>{isEdit ? "Editar Produto" : "Novo Produto"}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
+                <Form noValidate validated={validated} onSubmit={handleSubmit} ref={formRef}>
                     <Form.Group className="mb-3">
                         <Form.Label>Nome</Form.Label>
                         <Form.Control
@@ -115,10 +105,13 @@ export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave
                             value={formData.name || ""}
                             onChange={handleInputChange}
                             placeholder="Digite o nome do produto"
-                            isInvalid={!!errors.name}
+                            required
                         />
-                        <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Por favor, insira um nome válido.
+                        </Form.Control.Feedback>
                     </Form.Group>
+
                     <Form.Group className="mb-3">
                         <Form.Label>Quantidade</Form.Label>
                         <Form.Control
@@ -127,10 +120,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave
                             value={formData.quantity || ""}
                             onChange={handleInputChange}
                             placeholder="Digite a quantidade"
-                            isInvalid={!!errors.quantity}
+                            min="0"
+                            required
                         />
-                        <Form.Control.Feedback type="invalid">{errors.quantity}</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Por favor, insira uma quantidade válida.
+                        </Form.Control.Feedback>
                     </Form.Group>
+
                     <Form.Group className="mb-3">
                         <Form.Label>Descrição</Form.Label>
                         <Form.Control
@@ -141,12 +138,13 @@ export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave
                             placeholder="Digite a descrição"
                         />
                     </Form.Group>
+
                     <Form.Group className="mb-3">
                         <Form.Label>Categoria</Form.Label>
                         <Form.Select
                             value={isCustomCategory ? "custom" : formData.category || ""}
                             onChange={handleCategorySelection}
-                            isInvalid={!!errors.category}
+                            required
                         >
                             <option value="">Selecione uma categoria</option>
                             {categories.map((category, index) => (
@@ -163,11 +161,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave
                                 placeholder="Digite a nova categoria"
                                 value={customCategory}
                                 onChange={handleCustomCategoryChange}
-                                isInvalid={!!errors.category}
+                                required
                             />
                         )}
-                        <Form.Control.Feedback type="invalid">{errors.category}</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Por favor, insira uma categoria válida.
+                        </Form.Control.Feedback>
                     </Form.Group>
+
                     <Form.Group className="mb-3">
                         <Form.Label>Preço de Custo</Form.Label>
                         <Form.Control
@@ -177,10 +178,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave
                             value={formData.costPrice || ""}
                             onChange={handleInputChange}
                             placeholder="Digite o preço de custo"
-                            isInvalid={!!errors.costPrice}
+                            min="0"
+                            required
                         />
-                        <Form.Control.Feedback type="invalid">{errors.costPrice}</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Por favor, insira um preço de custo válido.
+                        </Form.Control.Feedback>
                     </Form.Group>
+
                     <Form.Group className="mb-3">
                         <Form.Label>Preço de Venda</Form.Label>
                         <Form.Control
@@ -190,10 +195,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave
                             value={formData.salePrice || ""}
                             onChange={handleInputChange}
                             placeholder="Digite o preço de venda"
-                            isInvalid={!!errors.salePrice}
+                            min="0"
+                            required
                         />
-                        <Form.Control.Feedback type="invalid">{errors.salePrice}</Form.Control.Feedback>
+                        <Form.Control.Feedback type="invalid">
+                            Por favor, insira um preço de venda válido.
+                        </Form.Control.Feedback>
                     </Form.Group>
+
                     <Form.Group className="mb-3">
                         <Form.Label>Marca/Fabricante</Form.Label>
                         <Form.Control

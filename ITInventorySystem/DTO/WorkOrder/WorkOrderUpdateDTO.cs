@@ -9,6 +9,6 @@ public class WorkOrderUpdateDto
     public int                           ClientId       { get; set; } // ID do cliente
     public string?                       Description    { get; set; }
     public decimal                       WorkHours      { get; set; }
-    public EWorkOrderStatus              NewStatus      { get; set; }
+    public EWorkOrderStatus              Status      { get; set; }
     public List<WorkOrderProductInfoDto> Products       { get; set; } = new();
 }

@@ -9,10 +9,16 @@ interface ClientModalProps {
     client: Partial<Client>;
 }
 
-export const ClientModal: React.FC<ClientModalProps> = ({show, onClose, onSave, client}) => {
+export const ClientModal: React.FC<ClientModalProps> = ({
+                                                            show,
+                                                            onClose,
+                                                            onSave,
+                                                            client,
+                                                        }) => {
     const [formData, setFormData] = useState<Partial<Client>>(client);
     const [validated, setValidated] = useState(false);
     const [cepError, setCepError] = useState<string>(""); // Para mensagens de erro relacionadas ao CEP
+    const [docError, setDocError] = useState<string>(""); // Para mensagens de erro relacionadas ao CPF/CNPJ
     const formRef = useRef<HTMLFormElement>(null);
 
     const isEdit = Boolean(client.id);
@@ -23,38 +29,93 @@ export const ClientModal: React.FC<ClientModalProps> = ({show, onClose, onSave, 
         "RS", "RO", "RR", "SC", "SP", "SE", "TO",
     ];
 
-    // Formatters
+    // Função para formatar CPF ou CNPJ
     const formatCPFOrCNPJ = (value: string) => {
-        // Remove todos os caracteres que não são números
         const numbers = value.replace(/\D/g, "");
-
-        if (numbers.length <= 11) {
-            // Limita ao formato CPF e impede mais de 11 números
-            return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14);
-        }
-
-        // Limita ao formato CNPJ e impede mais de 14 números
-        return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5").substring(0, 18);
+        return numbers.length <= 11
+            ? numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14)
+            : numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5").substring(0, 18);
     };
 
+    // Função para formatar CEP
     const formatCEP = (value: string) => {
         const numbers = value.replace(/\D/g, "");
         return numbers.replace(/(\d{5})(\d{3})/, "$1-$2").substring(0, 9);
     };
 
+    // Função para formatar telefone
     const formatPhone = (value: string) => {
-        // Remove todos os caracteres que não são números
         const numbers = value.replace(/\D/g, "");
-
-        if (numbers.length <= 10) {
-            // Formato para telefones fixos: +XX XXXX-XXXX
-            return numbers.replace(/(\d{2})(\d{4})(\d{0,4})/, "+$1 $2-$3").substr(0, 15);
-        }
-
-        // Formato para telefones móveis: +XX XXXXX-XXXX
-        return numbers.replace(/(\d{2})(\d{5})(\d{0,4})/, "+$1 $2-$3").substr(0, 16);
+        return numbers.length <= 12
+            ? numbers.replace(/(\d{2})(\d{2})(\d{4})(\d{0,4})/, "+$1 ($2) $3-$4").substr(0, 18)
+            : numbers.replace(/(\d{2})(\d{2})(\d{5})(\d{0,4})/, "+$1 ($2) $3-$4").substr(0, 19);
     };
 
+    // Validações de CPF
+    const isValidCPF = (cpf: string) => {
+        if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+
+        let sum = 0;
+        for (let i = 0; i < 9; i++) {
+            sum += parseInt(cpf.charAt(i)) * (10 - i);
+        }
+        let remainder = (sum * 10) % 11;
+        if (remainder === 10 || remainder === 11) remainder = 0;
+        if (remainder !== parseInt(cpf.charAt(9))) return false;
+
+        sum = 0;
+        for (let i = 0; i < 10; i++) {
+            sum += parseInt(cpf.charAt(i)) * (11 - i);
+        }
+        remainder = (sum * 10) % 11;
+        if (remainder === 10 || remainder === 11) remainder = 0;
+        return remainder === parseInt(cpf.charAt(10));
+    };
+
+    // Validações de CNPJ
+    const isValidCNPJ = (cnpj: string) => {
+        if (cnpj.length !== 14) return false;
+
+        let length = cnpj.length - 2;
+        let numbers = cnpj.substring(0, length);
+        let digits = cnpj.substring(length);
+        let sum = 0;
+        let pos = length - 7;
+
+        for (let i = length; i >= 1; i--) {
+            sum += parseInt(numbers.charAt(length - i)) * pos--;
+            if (pos < 2) pos = 9;
+        }
+
+        let result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+        if (result !== parseInt(digits.charAt(0))) return false;
+
+        length += 1;
+        numbers = cnpj.substring(0, length);
+        sum = 0;
+        pos = length - 7;
+
+        for (let i = length; i >= 1; i--) {
+            sum += parseInt(numbers.charAt(length - i)) * pos--;
+            if (pos < 2) pos = 9;
+        }
+
+        result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
+        return result === parseInt(digits.charAt(1));
+    };
+
+    const validateCPFOrCNPJ = (idDoc: string) => {
+        const cleaned: string = idDoc.replace(/\D/g, "");
+        if (isValidCPF(cleaned) || isValidCNPJ(cleaned)) {
+            setDocError("");
+            return true;
+        } else {
+            setDocError("CPF ou CNPJ inválido.");
+            return false;
+        }
+    };
+
+    // Busca endereço baseado no CEP
     const fetchAddressByCep = async (cep: string) => {
         try {
             const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
@@ -65,7 +126,6 @@ export const ClientModal: React.FC<ClientModalProps> = ({show, onClose, onSave, 
                 return;
             }
 
-            // Atualiza os campos de endereço automaticamente
             setFormData((prev) => ({
                 ...prev,
                 street: data.logradouro || "",
@@ -78,18 +138,19 @@ export const ClientModal: React.FC<ClientModalProps> = ({show, onClose, onSave, 
         }
     };
 
+    // Manipulação das mudanças nos campos
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | any>) => {
         const {name, value} = e.target;
         setFormData((prev) => {
             let formattedValue = value;
 
             if (name === "idDoc") {
+                validateCPFOrCNPJ(value);
                 formattedValue = formatCPFOrCNPJ(value);
             } else if (name === "postalCode") {
                 formattedValue = formatCEP(value);
-                formattedValue = formatCEP(value);
                 if (formattedValue.length === 9) {
-                    fetchAddressByCep(formattedValue.replace(/\D/g, "")); // Busca o endereço ao completar o CEP
+                    fetchAddressByCep(formattedValue.replace(/\D/g, ""));
                 }
             } else if (name === "phoneNumber") {
                 formattedValue = formatPhone(value);
@@ -102,26 +163,28 @@ export const ClientModal: React.FC<ClientModalProps> = ({show, onClose, onSave, 
         });
     };
 
+    // Validações antes de enviar o formulário
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        const form = event.currentTarget;
         event.preventDefault();
         event.stopPropagation();
 
-        if (!form.checkValidity()) {
+        const idDocValid = !docError && formData.idDoc;
+        const cepValid = !cepError && formData.postalCode;
+
+        if (!idDocValid || !cepValid || !formRef.current?.checkValidity()) {
             setValidated(true);
             return;
         }
 
-        // Clean up formatted fields before saving
         const cleanedData = {
             ...formData,
-            idDoc: formData.idDoc?.replace(/\D/g, ""), // Only numbers
-            postalCode: formData.postalCode?.replace(/\D/g, ""), // Only numbers
-            phoneNumber: formData.phoneNumber?.replace(/\D/g, ""), // Only numbers
+            idDoc: formData.idDoc?.replace(/\D/g, ""),
+            postalCode: formData.postalCode?.replace(/\D/g, ""),
+            phoneNumber: formData.phoneNumber?.replace(/\D/g, ""),
         };
 
         setValidated(true);
-        onSave(cleanedData); // Pass cleaned data to onSave
+        onSave(cleanedData);
     };
 
     const handleSave = () => {
@@ -146,10 +209,11 @@ export const ClientModal: React.FC<ClientModalProps> = ({show, onClose, onSave, 
                             value={formData.idDoc || ""}
                             onChange={handleInputChange}
                             placeholder="Digite o CPF ou CNPJ"
+                            isInvalid={validated && (docError !== "" || !formData.idDoc)}
                             required
                         />
                         <Form.Control.Feedback type="invalid">
-                            Por favor, insira um documento válido.
+                            Documento inválido.
                         </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
@@ -188,12 +252,13 @@ export const ClientModal: React.FC<ClientModalProps> = ({show, onClose, onSave, 
                             value={formData.postalCode || ""}
                             onChange={handleInputChange}
                             placeholder="Digite o CEP"
+                            isInvalid={validated && (cepError !== "" || !formData.postalCode)}
                             required
                         />
-                        {cepError && <div className="text-danger">{cepError}</div>}
                         <Form.Control.Feedback type="invalid">
-                            Por favor, insira um CEP válido.
+                            {cepError || "Por favor, insira um CEP válido."}
                         </Form.Control.Feedback>
+
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Endereço</Form.Label>
@@ -243,7 +308,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({show, onClose, onSave, 
                         </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Telefone (DDD + Número)</Form.Label>
+                        <Form.Label>Telefone (DDI + DDD + Número)</Form.Label>
                         <Form.Control
                             type="text"
                             name="phoneNumber"

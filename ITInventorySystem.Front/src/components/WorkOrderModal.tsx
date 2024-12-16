@@ -1,4 +1,4 @@
-﻿import React, {useEffect, useState} from "react";
+﻿import React, {useEffect, useRef, useState} from "react";
 import {Button, Form, Modal, Spinner} from "react-bootstrap";
 import axios from "../AxiosConfig";
 import WorkOrder from "../types/WorkOrder";
@@ -28,13 +28,23 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
     const [users, setUsers] = useState<{ id: number; name: string }[]>([]);
     const [clients, setClients] = useState<{ id: number; name: string }[]>([]);
     const [products, setProducts] = useState<{ id: number; name: string; quantity: number }[]>([]);
+    const [validated, setValidated] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [fetchError, setFetchError] = useState<string>("");
+    const formRef = useRef<HTMLFormElement>(null);
 
-    // Fetch initial data
+    const isEdit = Boolean(workOrder.id);
+
+    // Buscar dados iniciais
     useEffect(() => {
+        setFormData({
+            ...workOrder,
+            status: workOrder.status ?? 2, // 2 como status padrão (Pendente)
+        });
+        
         const fetchData = async () => {
             setLoading(true);
+            setFetchError("");
             try {
                 const [usersRes, clientsRes, productsRes] = await Promise.all([
                     axios.get(API_ENDPOINTS.users(port)),
@@ -45,30 +55,31 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                 setUsers(usersRes.data);
                 setClients(clientsRes.data);
 
-                // Filter products with quantity > 0
+                // Filtrar produtos com quantidade > 0
                 const availableProducts = productsRes.data.filter((p: any) => p.quantity > 0);
                 setProducts(availableProducts);
             } catch {
-                setErrors((prev) => ({...prev, fetch: "Erro ao carregar dados iniciais."}));
+                setFetchError("Erro ao carregar dados iniciais.");
             } finally {
                 setLoading(false);
             }
         };
 
         if (show) fetchData();
-    }, [show, port]);
+    }, [show, port, workOrder]);
 
+    // Manipular mudanças nos campos do formulário
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
         const {name, value} = e.target;
-
         setFormData((prev) => ({
             ...prev,
             [name]: name === "workHours" ? Math.max(1, parseInt(value) || 1) : value,
         }));
     };
 
+    // Manipular mudanças de quantidade de produtos
     const handleProductChange = (productId: number, quantity: number) => {
         const existingProducts = formData.products || [];
         const updatedProducts =
@@ -88,21 +99,16 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
         }));
     };
 
+    // Validação dos campos
     const validateFields = (): boolean => {
-        const newErrors: Record<string, string> = {};
-
-        if (!formData.startDate) newErrors.startDate = "A data de abertura é obrigatória.";
-        if (!formData.userInChargeId) newErrors.userInChargeId = "O responsável é obrigatório.";
-        if (!formData.clientId) newErrors.clientId = "O cliente é obrigatório.";
-        if (!formData.workHours || formData.workHours <= 0)
-            newErrors.workHours = "A carga horária é obrigatória.";
-        if (!formData.description || formData.description.trim() === "")
-            newErrors.description = "A descrição é obrigatória.";
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        if (!formRef.current?.checkValidity()) {
+            setValidated(true);
+            return false;
+        }
+        return true;
     };
 
+    // Salvar formulário
     const handleSave = () => {
         if (validateFields()) {
             onSave(formData);
@@ -113,7 +119,7 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
         <Modal show={show} onHide={onClose} size="lg">
             <Modal.Header closeButton>
                 <Modal.Title>
-                    {formData.id ? "Editar Ordem de Serviço" : "Nova Ordem de Serviço"}
+                    {isEdit ? "Editar Ordem de Serviço" : "Nova Ordem de Serviço"}
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -122,8 +128,12 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                         <Spinner animation="border"/>
                     </div>
                 ) : (
-                    <Form>
-                        {errors.fetch && <p className="text-danger">{errors.fetch}</p>}
+                    <Form noValidate validated={validated} ref={formRef}>
+                        {fetchError && (
+                            <div className="alert alert-danger" role="alert">
+                                {fetchError}
+                            </div>
+                        )}
                         <Form.Group className="mb-3">
                             <Form.Label>Data de Abertura</Form.Label>
                             <Form.Control
@@ -131,10 +141,10 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                 name="startDate"
                                 value={formData.startDate || ""}
                                 onChange={handleInputChange}
-                                isInvalid={!!errors.startDate}
+                                required
                             />
                             <Form.Control.Feedback type="invalid">
-                                {errors.startDate}
+                                Por favor, insira uma data de abertura válida.
                             </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3">
@@ -143,17 +153,17 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                 name="userInChargeId"
                                 value={formData.userInChargeId || ""}
                                 onChange={handleInputChange}
-                                isInvalid={!!errors.userInChargeId}
+                                required
                             >
                                 <option value="">Selecione um responsável</option>
                                 {users.map((user) => (
                                     <option key={user.id} value={user.id}>
-                                        {user.name}
+                                        {user.id} | {user.name}
                                     </option>
                                 ))}
                             </Form.Select>
                             <Form.Control.Feedback type="invalid">
-                                {errors.userInChargeId}
+                                Por favor, selecione um responsável.
                             </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3">
@@ -162,17 +172,17 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                 name="clientId"
                                 value={formData.clientId || ""}
                                 onChange={handleInputChange}
-                                isInvalid={!!errors.clientId}
+                                required
                             >
                                 <option value="">Selecione um cliente</option>
                                 {clients.map((client) => (
                                     <option key={client.id} value={client.id}>
-                                        {client.name}
+                                        {client.id} | {client.name}
                                     </option>
                                 ))}
                             </Form.Select>
                             <Form.Control.Feedback type="invalid">
-                                {errors.clientId}
+                                Por favor, selecione um cliente.
                             </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3">
@@ -182,10 +192,10 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                 name="description"
                                 value={formData.description || ""}
                                 onChange={handleInputChange}
-                                isInvalid={!!errors.description}
+                                required
                             />
                             <Form.Control.Feedback type="invalid">
-                                {errors.description}
+                                Por favor, insira uma descrição.
                             </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3">
@@ -195,10 +205,11 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                 name="workHours"
                                 value={formData.workHours || ""}
                                 onChange={handleInputChange}
-                                isInvalid={!!errors.workHours}
+                                min="1"
+                                required
                             />
                             <Form.Control.Feedback type="invalid">
-                                {errors.workHours}
+                                Por favor, insira uma carga horária válida.
                             </Form.Control.Feedback>
                         </Form.Group>
                         <Form.Group className="mb-3">
@@ -209,20 +220,14 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                 );
                                 const quantity = selectedProduct?.quantity || 0;
                                 return (
-                                    <div
-                                        key={product.id}
-                                        className="d-flex align-items-center mb-2"
-                                    >
+                                    <div key={product.id} className="d-flex align-items-center mb-2">
                                         <Form.Check
                                             type="checkbox"
                                             id={`product-${product.id}`}
-                                            label={product.name}
+                                            label={`${product.id} | ${product.name}`}
                                             checked={!!selectedProduct}
                                             onChange={(e) =>
-                                                handleProductChange(
-                                                    product.id,
-                                                    e.target.checked ? 1 : 0
-                                                )
+                                                handleProductChange(product.id, e.target.checked ? 1 : 0)
                                             }
                                         />
                                         <Form.Control
@@ -231,10 +236,7 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                             max={product.quantity}
                                             value={selectedProduct ? quantity : ""}
                                             onChange={(e) =>
-                                                handleProductChange(
-                                                    product.id,
-                                                    parseInt(e.target.value, 10) || 0
-                                                )
+                                                handleProductChange(product.id, parseInt(e.target.value, 10) || 0)
                                             }
                                             className="ms-3"
                                             style={{width: "80px"}}
@@ -244,6 +246,24 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                 );
                             })}
                         </Form.Group>
+                        {isEdit ? <Form.Group className="mb-3">
+                            <Form.Label>Status</Form.Label>
+                            <Form.Select
+                                name="status"
+                                value={formData.status ?? workOrder.status ?? 2} // Default to current workOrder.status or "Pendente"
+                                required
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        status: parseInt(e.target.value, 10),
+                                    })
+                                }
+                            >
+                                <option value={2}>Pendente</option>
+                                <option value={1}>Em andamento</option>
+                                <option value={0}>Concluída</option>
+                            </Form.Select>
+                        </Form.Group> : null}
                     </Form>
                 )}
             </Modal.Body>

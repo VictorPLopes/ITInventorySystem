@@ -1,14 +1,16 @@
 ﻿import React, {useState} from "react";
 import {Button, Form, FormControl, FormGroup, FormLabel, Modal} from "react-bootstrap";
+import Product from "../types/Product";
 
 interface InOutModalProps {
     show: boolean;
     onClose: () => void;
-    onSave: (productId: number, quantity: number) => void;
-    product: { id: number };
+    onSave: (product: Partial<Product>, quantity: number) => void;
+    product: Partial<Product>;
 }
 
 export const InOutModal: React.FC<InOutModalProps> = ({show, onClose, onSave, product}) => {
+    const [formData] = useState<Partial<Product>>(product);
     const [quantity, setQuantity] = useState<number | null>(null);
     const [operation, setOperation] = useState<string>("entrada");
     const [error, setError] = useState("");
@@ -23,9 +25,9 @@ export const InOutModal: React.FC<InOutModalProps> = ({show, onClose, onSave, pr
 
         // Handle entry or exit
         if (operation === "entrada") {
-            onSave(product.id, quantity); // Positive quantity for "entrada"
+            onSave(formData, quantity); // Positive quantity for "entrada"
         } else if (operation === "saída") {
-            onSave(product.id, -quantity); // Negative quantity for "saída"
+            onSave(formData, -quantity); // Negative quantity for "saída"
         }
     };
 
@@ -40,8 +42,8 @@ export const InOutModal: React.FC<InOutModalProps> = ({show, onClose, onSave, pr
                         <FormLabel>Quantidade</FormLabel>
                         <FormControl
                             type="number"
-                            value={quantity || ""}
-                            onChange={(e) => setQuantity(parseInt(e.target.value, 10) || null)}
+                            value={quantity || 1}
+                            onChange={(e) => setQuantity(Math.max(parseInt(e.target.value, 10), 1) || 1)}
                             placeholder="Digite a quantidade"
                         />
                     </FormGroup>
@@ -65,7 +67,6 @@ export const InOutModal: React.FC<InOutModalProps> = ({show, onClose, onSave, pr
                 <Button
                     variant="primary"
                     onClick={handleSave}
-                    disabled={!quantity || quantity <= 0}
                 >
                     Salvar
                 </Button>

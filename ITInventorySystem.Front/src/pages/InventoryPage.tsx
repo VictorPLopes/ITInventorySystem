@@ -29,8 +29,16 @@ const InventoryPage = ({port}: { port: string }) => {
         {title: "Nome", data: "name"},
         {title: "Quantidade", data: "quantity"},
         {title: "Descrição", data: "description"},
-        {title: "Preço (Custo)", data: "costPrice"},
-        {title: "Preço (Venda)", data: "salePrice"},
+        {
+            title: "Preço (Custo)",
+            data: "costPrice",
+            render: (data: number) => `R$ ${data.toFixed(2)}`,
+        },
+        {
+            title: "Preço (Venda)",
+            data: "salePrice",
+            render: (data: number) => `R$ ${data.toFixed(2)}`,
+        },
         {title: "Marca / Fabricante", data: "brandManufacturerName"},
         {title: "Ações", name: "actions"},
     ];
@@ -133,32 +141,26 @@ const InventoryPage = ({port}: { port: string }) => {
         }
     };
 
-    // Save product in/out operations
-    const handleSaveInOut = async (productId: number, quantity: number) => {
-        const product = products.find((p) => p.id === productId);
+    // Salva a movimentação de entrada ou saída de um produto
+    const handleSaveInOut = async (product: Partial<Product>, quantity: number) => {
+        const endpoint = `${API_ENDPOINTS.products(port)}/${product.id}`;
 
-        if (!product) {
-            toast.error("Produto não encontrado.");
-            return;
-        }
-
-        // Check if it's an exit and there's enough quantity
-        if (quantity < 0 && product.quantity + quantity < 0) {
+        // Checa se a quantidade é suficiente para saída
+        if (quantity < 0 && product.quantity as number + quantity < 0) {
             toast.error("Quantidade insuficiente para saída.");
             return;
         }
 
-        try {
-            // Update the product quantity directly
-            const updatedProducts = products.map((p) =>
-                p.id === productId ? {...p, quantity: p.quantity + quantity} : p
-            );
-            setProducts(updatedProducts);
+        product.quantity = product.quantity as number + quantity;
 
+        try {
+            // Atualiza a quantidade do produto
+            await axios.put(endpoint, product);
             toast.success("Movimentação realizada com sucesso!");
             setShowInOutModal(false);
-        } catch {
-            toast.error("Erro ao realizar a movimentação.");
+            await fetchProducts();
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || "Erro ao movimentar o produto.");
         }
     };
 
@@ -226,7 +228,7 @@ const InventoryPage = ({port}: { port: string }) => {
                     show={showInOutModal}
                     onClose={() => setShowInOutModal(false)}
                     onSave={handleSaveInOut}
-                    product={{id: currentProduct.id as number}}
+                    product={currentProduct}
                 />
             )}
         </Container>

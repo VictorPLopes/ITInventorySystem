@@ -79,8 +79,7 @@ const WorkOrdersPage = ({port}: { port: string }) => {
             userInChargeId: 0,
             clientId: 0,
             description: "",
-            workHours: 1,
-            status: 2,
+            workHours: 0,
             products: [],
         });
         setIsEdit(false);

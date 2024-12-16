@@ -122,7 +122,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
         workOrder.ClientId       = updateDto.ClientId;
         workOrder.Description    = updateDto.Description;
         workOrder.WorkHours      = updateDto.WorkHours;
-        workOrder.Status         = updateDto.NewStatus;
+        workOrder.Status         = updateDto.Status;
         workOrder.UpdatedAt      = DateTime.Now;
 
         // Atualiza a lista de produtos associados
