@@ -164,10 +164,13 @@ const ClientsPage = ({port}: { port: string }) => {
                                     className="d-flex justify-content-center align-items-center"
                                     style={{minHeight: "300px"}}
                                 >
-                                    <Spinner animation="border" role="status" variant="primary"/>
+                                    <Spinner animation="border" role="status" variant="primary" />
                                 </div>
                             ) : (
-                                <div className="p-4 rounded shadow-lg bg-body-tertiary">
+                                <div
+                                    className="table-container p-4 rounded shadow-lg bg-body-tertiary"
+                                    style={{ overflowX: "auto", width: "100%" }}
+                                >
                                     <GenericTable
                                         data={clients}
                                         columns={columns}
@@ -180,6 +183,7 @@ const ClientsPage = ({port}: { port: string }) => {
                             )}
                         </Col>
                     </Row>
+
                 </>
             ) : (
                 <p>Erro ao acessar a página de clientes. Verifique sua autenticação.</p>

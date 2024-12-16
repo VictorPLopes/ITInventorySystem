@@ -27,7 +27,7 @@ export const GenericTable = <T, >({data, columns, actions, extraAction}: Generic
                 searching: true, // Habilitar campo de busca
                 ordering: true, // Permitir ordenação                
             }}
-            className="table table-hover" // Classes do Bootstrap
+            className="table table-hove table-responsive" // Classes do Bootstrap
             columns={columns}
             data={data}
             slots={{

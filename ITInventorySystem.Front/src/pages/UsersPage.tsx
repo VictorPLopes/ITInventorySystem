@@ -183,7 +183,10 @@ const UsersPage = ({port}: { port: string }) => {
                                     <Spinner animation="border" role="status" variant="primary"/>
                                 </div>
                             ) : (
-                                <div className="p-4 rounded shadow-lg bg-body-tertiary">
+                                <div
+                                    className="table-container p-4 rounded shadow-lg bg-body-tertiary"
+                                    style={{overflowX: "auto", width: "100%"}}
+                                >
                                     <GenericTable
                                         data={users}
                                         columns={columns}
