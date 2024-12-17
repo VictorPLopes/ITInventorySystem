@@ -2,12 +2,14 @@
 using ITInventorySystem.DTO.WorkOrder;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;
 
 [Route("work-orders")]
 [ApiController]
+[Authorize]
 public class WorkOrderController(IWorkOrderInterface workOrderInterface) : Controller
 {
     [HttpGet]

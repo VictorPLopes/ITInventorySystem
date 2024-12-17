@@ -1,12 +1,14 @@
 ﻿using ITInventorySystem.DTO.Products;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;
 
 [Route("products")]
 [ApiController]
+[Authorize]
 public class ProductController(IProductInterface productInterface) : ControllerBase
 {
     [HttpGet]

@@ -52,7 +52,33 @@ builder.Services.AddCors(options =>
 
 // Configuração do Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme.\n\nEnter 'Bearer <your-token>' in the text box below.\n\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"",
+        Name = "Authorization", // Name of the HTTP header
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header, // The location where the token is sent
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http, // Type of the scheme
+        Scheme = "Bearer" // Scheme name
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id   = "Bearer"
+                }
+            },
+            [] // No scopes are required for now
+        }
+    });
+});
+
 
 // Injeção de dependências para os serviços
 builder.Services.AddScoped<IUserInterface, UserService>();

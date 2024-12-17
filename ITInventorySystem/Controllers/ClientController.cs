@@ -1,12 +1,14 @@
 ﻿using ITInventorySystem.DTO.Client;
 using ITInventorySystem.Models;
 using ITInventorySystem.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ITInventorySystem.Controllers;
 
 [Route("clients")]
 [ApiController]
+[Authorize]
 public class ClientController(IClientInterface clientInterface) : ControllerBase
 {
     [HttpGet]
