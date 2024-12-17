@@ -1,12 +1,14 @@
 ﻿import React, {useRef, useState} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import User from "../types/User";
+import JwtUser from "../types/JwtUser.tsx";
 
 interface UserModalProps {
     show: boolean;
     onClose: () => void;
     onSave: (user: Partial<User>) => void;
     user: Partial<User>;
+    loggedUser: JwtUser | null;
 }
 
 export const UserModal: React.FC<UserModalProps> = ({
@@ -14,6 +16,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                                                         onClose,
                                                         onSave,
                                                         user,
+                                                        loggedUser,
                                                     }) => {
     const [formData, setFormData] = useState<Partial<User>>(user);
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -162,7 +165,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                         </Form.Control.Feedback>
                     </Form.Group>
 
-                    <Form.Group>
+                    {loggedUser?.role === "Master" ? <Form.Group>
                         <Form.Label>Tipo</Form.Label>
                         <Form.Select
                             name="type"
@@ -181,7 +184,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                         <Form.Control.Feedback type="invalid">
                             Por favor, selecione um tipo válido.
                         </Form.Control.Feedback>
-                    </Form.Group>
+                    </Form.Group> : null}
                 </Form>
             </Modal.Body>
             <Modal.Footer>

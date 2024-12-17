@@ -8,6 +8,7 @@ import {GenericTable} from "../components/GenericTable";
 import {UserModal} from "../components/UserModal";
 import {ChangePasswordModal} from "../components/ChangePasswordModal";
 import User from "../types/User";
+import JwtUser from "../types/JwtUser";
 
 const API_ENDPOINTS = {
     usersPage: (port: string) => `https://localhost:${port}/auth/users-page`,
@@ -16,7 +17,7 @@ const API_ENDPOINTS = {
         `https://localhost:${port}/users/${userId}/update-password`,
 };
 
-const UsersPage = ({port}: { port: string }) => {
+const UsersPage = ({port, loggedUser}: { port: string, loggedUser: JwtUser | null}) => {
     // Estados principais da página
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
@@ -85,6 +86,15 @@ const UsersPage = ({port}: { port: string }) => {
 
     // Abre o modal para editar um usuário existente
     const handleEditUser = (user: User) => {
+        // Verifica se o usuário logado é um administrador e se o usuário a ser editado é um técnico
+        if (
+            loggedUser?.role === "Admin" &&
+            (user.type <= 1 || user.id === parseInt(loggedUser.nameid, 10))
+        ) {
+            toast.error("Você não pode editar este usuário!");
+            return;
+        }
+        
         setCurrentUser(user);
         setIsEdit(true);
         setShowModal(true);
@@ -92,6 +102,15 @@ const UsersPage = ({port}: { port: string }) => {
 
     // Exclui um usuário com confirmação
     const handleDeleteUser = async (user: User) => {
+        // Verifica se o usuário logado é um administrador e se o usuário a ser editado é um técnico
+        if (
+            loggedUser?.role === "Admin" &&
+            (user.type <= 1 || user.id === parseInt(loggedUser.nameid, 10))
+        ) {
+            toast.error("Você não pode deletar este usuário!");
+            return;
+        }
+        
         const confirmed = await Swal.fire({
             title: "Tem certeza?",
             text: "Você não poderá desfazer esta ação!",
@@ -114,6 +133,14 @@ const UsersPage = ({port}: { port: string }) => {
 
     // Abre o modal para alterar a senha do usuário
     const handleChangePassword = (user: User) => {
+        // Verifica se o usuário logado é um administrador e se o usuário a ser editado é um técnico
+        if (
+            loggedUser?.role === "Admin" &&
+            (user.type <= 1 || user.id === parseInt(loggedUser.nameid, 10))
+        ) {
+            toast.error("Você não pode editar a senha deste usuário!");
+            return;
+        }
         setCurrentUser(user);
         setShowChangePasswordModal(true);
     };
@@ -211,6 +238,7 @@ const UsersPage = ({port}: { port: string }) => {
                     onClose={() => setShowModal(false)}
                     onSave={handleSaveUser}
                     user={currentUser}
+                    loggedUser={loggedUser}
                 />
             )}
             {showChangePasswordModal && (

@@ -10,14 +10,19 @@ import {Fragment, useEffect, useState} from "react";
 import './App.css';
 import Layout from './Layout/Layout';
 import '@fortawesome/fontawesome-free/css/all.css';
+import JwtUser from "./types/JwtUser";
 
 
 function App() {
     let port: string = "44307"
-
-
+    
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
     const [screenWidth, setScreenWidth] = useState<number>(window.innerWidth);
+    const [loggedUser, setLoggedUser] = useState<null | JwtUser>(null);
+    
+    const saveLoggedUser = (user: JwtUser) => {
+        setLoggedUser(user);
+    }
 
     useEffect(() => {
         const updateSize = () => {
@@ -35,7 +40,7 @@ function App() {
         <Fragment>
             <Routes>
                 {/* Página de Login - Não usa o layout com a sidebar */}
-                <Route path="*" element={<LoginPage port={port}/>}/>
+                <Route path="*" element={<LoginPage port={port} onLogin={saveLoggedUser}/>}/>
 
                 {/* Rotas com layout que inclui a sidebar */}
                 <Route
@@ -45,11 +50,12 @@ function App() {
                             screenWidth={screenWidth}
                             isSidebarCollapsed={isSidebarCollapsed}
                             setIsSidebarCollapsed={setIsSidebarCollapsed}
+                            loggedUser={loggedUser}
                         />
                     }
                 >
                     <Route path="/dashboard" element={<Dashboard port={port}/>}/>
-                    <Route path="/users" element={<UsersPage port={port}/>}/>
+                    <Route path="/users" element={<UsersPage port={port} loggedUser={loggedUser}/>}/>
                     <Route path="/clients" element={<ClientsPage port={port}/>}/>
                     <Route path="/inventory" element={<InventoryPage port={port}/>}/>
                     <Route path="/work-orders" element={<WorkOrdersPage port={port}/>}/>
