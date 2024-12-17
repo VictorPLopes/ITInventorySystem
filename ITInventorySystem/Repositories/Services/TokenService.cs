@@ -22,10 +22,10 @@ public static class TokenService
 
             {
                 Subject = new ClaimsIdentity([
-                                                 new Claim(ClaimTypes.Name,  user.Name),
-                                                 new Claim(ClaimTypes.Role,  user.Type.ToString()),
-                                                 new Claim(ClaimTypes.Email, user.Email),
-                                                 new Claim("id",             id)
+                                                 new Claim(ClaimTypes.Name,           user.Name),
+                                                 new Claim(ClaimTypes.Role,           user.Type.ToString()),
+                                                 new Claim(ClaimTypes.Email,          user.Email),
+                                                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                                              ]),
                 Expires = DateTime.UtcNow.AddHours(8),
                 SigningCredentials =

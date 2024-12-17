@@ -53,7 +53,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
             case "Admin":
             {
                 var targetUser = await userInterface.GetByIdAsync(id);
-                if (targetUser.Type <= (EPrivilegeType)1) // 1: Admin, 0: Master
+                if (targetUser.Type <= (EPrivilegeType)1 || user.Type <= (EPrivilegeType)1) // 1: Admin, 0: Master
                     return Forbid("Admins não podem editar Admins ou Masters.");
                 break;
             }
