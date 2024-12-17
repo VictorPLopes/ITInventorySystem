@@ -1,5 +1,5 @@
 import React, {useRef, useState} from "react";
-import {Button, Form, Modal} from "react-bootstrap";
+import {Button, Col, Form, Modal, Row} from "react-bootstrap";
 import Product from "../types/Product";
 
 interface ProductModalProps {
@@ -168,40 +168,42 @@ export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave
                             Por favor, insira uma categoria válida.
                         </Form.Control.Feedback>
                     </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Preço de Custo</Form.Label>
-                        <Form.Control
-                            type="number"
-                            step="0.01"
-                            name="costPrice"
-                            value={formData.costPrice || ""}
-                            onChange={handleInputChange}
-                            placeholder="Digite o preço de custo"
-                            min="0"
-                            required
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            Por favor, insira um preço de custo válido.
-                        </Form.Control.Feedback>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label>Preço de Venda</Form.Label>
-                        <Form.Control
-                            type="number"
-                            step="0.01"
-                            name="salePrice"
-                            value={formData.salePrice || ""}
-                            onChange={handleInputChange}
-                            placeholder="Digite o preço de venda"
-                            min="0"
-                            required
-                        />
-                        <Form.Control.Feedback type="invalid">
-                            Por favor, insira um preço de venda válido.
-                        </Form.Control.Feedback>
-                    </Form.Group>
+                    
+                    <Row className="mb-3">
+                        <Form.Group as={Col}>
+                            <Form.Label>Preço de Custo (R$)</Form.Label>
+                            <Form.Control
+                                type="number"
+                                step="0.01"
+                                name="costPrice"
+                                value={formData.costPrice || ""}
+                                onChange={handleInputChange}
+                                placeholder="Digite o preço de custo"
+                                min="0"
+                                required
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                Por favor, insira um preço de custo válido.
+                            </Form.Control.Feedback>
+                        </Form.Group>
+    
+                        <Form.Group as={Col}>
+                            <Form.Label>Preço de Venda (R$)</Form.Label>
+                            <Form.Control
+                                type="number"
+                                step="0.01"
+                                name="salePrice"
+                                value={formData.salePrice || ""}
+                                onChange={handleInputChange}
+                                placeholder="Digite o preço de venda"
+                                min="0"
+                                required
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                Por favor, insira um preço de venda válido.
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                    </Row>
 
                     <Form.Group className="mb-3">
                         <Form.Label>Marca/Fabricante</Form.Label>

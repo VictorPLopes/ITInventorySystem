@@ -1,5 +1,5 @@
 ﻿import React, {useRef, useState} from "react";
-import {Button, Form, Modal} from "react-bootstrap";
+import {Button, Col, Form, Modal, Row} from "react-bootstrap";
 import User from "../types/User";
 import JwtUser from "../types/JwtUser.tsx";
 
@@ -144,47 +144,50 @@ export const UserModal: React.FC<UserModalProps> = ({
                         </>
                     )}
 
-                    <Form.Group className="mb-3">
-                        <Form.Label>Status</Form.Label>
-                        <Form.Select
-                            name="status"
-                            value={formData.status ? "Ativo" : "Inativo"}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    status: e.target.value === "Ativo",
-                                })
-                            }
-                            required
-                        >
-                            <option value="Ativo">Ativo</option>
-                            <option value="Inativo">Inativo</option>
-                        </Form.Select>
-                        <Form.Control.Feedback type="invalid">
-                            Por favor, selecione um status válido.
-                        </Form.Control.Feedback>
-                    </Form.Group>
-                    {/* Só permite selecionar o cargo se o usuário logado for Master e se não estiver tentando editar outro Master*/}
-                    {loggedUser?.role === "Master" && formData.type != 0 ? <Form.Group> 
-                        <Form.Label>Tipo</Form.Label>
-                        <Form.Select
-                            name="type"
-                            value={formData.type || 2}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    type: parseInt(e.target.value, 10),
-                                })
-                            }
-                            required
-                        >
-                            <option value={2}>Técnico</option>
-                            <option value={1}>Administrador</option>
-                        </Form.Select>
-                        <Form.Control.Feedback type="invalid">
-                            Por favor, selecione um tipo válido.
-                        </Form.Control.Feedback>
-                    </Form.Group> : null}
+                    <Row className="mb-3">
+                        <Form.Group as={Col}>
+                            <Form.Label>Status</Form.Label>
+                            <Form.Select
+                                name="status"
+                                value={formData.status ? "Ativo" : "Inativo"}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        status: e.target.value === "Ativo",
+                                    })
+                                }
+                                required
+                            >
+                                <option value="Ativo">Ativo</option>
+                                <option value="Inativo">Inativo</option>
+                            </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Por favor, selecione um status válido.
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        
+                        {/* Só permite selecionar o cargo se o usuário logado for Master e se não estiver tentando editar outro Master*/}
+                        {loggedUser?.role === "Master" && formData.type != 0 ? <Form.Group as={Col}> 
+                            <Form.Label>Tipo</Form.Label>
+                            <Form.Select
+                                name="type"
+                                value={formData.type || 2}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        type: parseInt(e.target.value, 10),
+                                    })
+                                }
+                                required
+                            >
+                                <option value={2}>Técnico</option>
+                                <option value={1}>Administrador</option>
+                            </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                                Por favor, selecione um tipo válido.
+                            </Form.Control.Feedback>
+                        </Form.Group> : null}
+                    </Row>
                 </Form>
             </Modal.Body>
             <Modal.Footer>

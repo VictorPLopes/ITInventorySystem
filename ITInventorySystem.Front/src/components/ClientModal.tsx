@@ -308,7 +308,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
                         </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Telefone (DDI + DDD + Número)</Form.Label>
+                        <Form.Label>Telefone (Código do País + DDD + Número)</Form.Label>
                         <Form.Control
                             type="text"
                             name="phoneNumber"
