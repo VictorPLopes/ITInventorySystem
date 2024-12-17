@@ -15,7 +15,7 @@ const API_ENDPOINTS = {
 };
 
 const InventoryPage = ({port}: { port: string }) => {
-    // Page state management
+    // Estados principais da página
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -43,7 +43,7 @@ const InventoryPage = ({port}: { port: string }) => {
         {title: "Ações", name: "actions"},
     ];
 
-    // Check access to the products page
+    // Verifica o acesso do usuário e busca os dados iniciais
     useEffect(() => {
         const checkAccess = async () => {
             try {
@@ -57,7 +57,7 @@ const InventoryPage = ({port}: { port: string }) => {
         checkAccess();
     }, [port]);
 
-    // Fetch products from the server
+    // Busca os produtos registrados
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         try {
@@ -74,7 +74,7 @@ const InventoryPage = ({port}: { port: string }) => {
         if (hasAccess) fetchProducts();
     }, [hasAccess, fetchProducts]);
 
-    // Open modal to add a new product
+    // Abre o modal para adicionar um novo produto
     const handleAddProduct = () => {
         setCurrentProduct({
             id: 0,
@@ -89,20 +89,20 @@ const InventoryPage = ({port}: { port: string }) => {
         setShowModal(true);
     };
 
-    // Open modal to edit an existing product
+    // Abre o modal para editar um produto existente
     const handleEditProduct = (product: Product) => {
         setCurrentProduct(product);
         setIsEdit(true);
         setShowModal(true);
     };
 
-    // Open modal for product in/out operations
+    // Abre o modal para movimentar a quantidade de um produto
     const handleInOutProduct = (product: Product) => {
         setCurrentProduct(product);
         setShowInOutModal(true);
     };
 
-    // Delete a product with confirmation
+    // Exclui um produto com confirmação
     const handleDeleteProduct = async (product: Product) => {
         const confirmed = await Swal.fire({
             title: "Tem certeza?",
@@ -124,7 +124,7 @@ const InventoryPage = ({port}: { port: string }) => {
         }
     };
 
-    // Save a new or edited product
+    // Salva as alterações de um produto (novo ou existente)
     const handleSaveProduct = async (product: Partial<Product>) => {
         const endpoint = isEdit
             ? `${API_ENDPOINTS.products(port)}/${product.id}`

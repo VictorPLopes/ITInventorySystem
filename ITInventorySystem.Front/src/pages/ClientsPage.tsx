@@ -69,6 +69,7 @@ const ClientsPage = ({port}: { port: string }) => {
         checkAccess();
     }, [port]);
 
+    // Busca os clientes registrados
     const fetchClients = useCallback(async () => {
         setLoading(true);
         try {

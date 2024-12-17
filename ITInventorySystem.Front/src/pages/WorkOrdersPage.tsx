@@ -14,7 +14,7 @@ const API_ENDPOINTS = {
 };
 
 const WorkOrdersPage = ({port}: { port: string }) => {
-    // Page state management
+    // Estados principais da página
     const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -40,7 +40,7 @@ const WorkOrdersPage = ({port}: { port: string }) => {
         {title: "Ações", name: "actions"},
     ];
 
-    // Check access to the workOrders page
+    // Verifica o acesso do usuário e busca os dados iniciais
     useEffect(() => {
         const checkAccess = async () => {
             try {
@@ -54,7 +54,7 @@ const WorkOrdersPage = ({port}: { port: string }) => {
         checkAccess();
     }, [port]);
 
-    // Fetch workOrders from the server
+    // Busca as ordens de serviço registradas
     const fetchWorkOrders = useCallback(async () => {
         setLoading(true);
         try {
@@ -71,7 +71,7 @@ const WorkOrdersPage = ({port}: { port: string }) => {
         if (hasAccess) fetchWorkOrders();
     }, [hasAccess, fetchWorkOrders]);
 
-    // Open modal to add a new workOrder
+    // Abre o modal para adicionar uma nova ordem de serviço
     const handleAddWorkOrder = () => {
         setCurrentWorkOrder({
             id: 0,
@@ -86,20 +86,20 @@ const WorkOrdersPage = ({port}: { port: string }) => {
         setShowModal(true);
     };
 
-    // Open modal to edit an existing workOrder
+    // Abre o modal para editar uma ordem de serviço existente
     const handleEditWorkOrder = (workOrder: WorkOrder) => {
         setCurrentWorkOrder(workOrder);
         setIsEdit(true);
         setShowModal(true);
     };
 
-    // Export a Work Order as a PDF invoice
+    // Exporta uma ordem de serviço para PDF
     const handleExportWorkOrder = (workOrder: WorkOrder) => {
         setCurrentWorkOrder(workOrder);
         // TODO: Implement PDF export
     };
 
-    // Delete a workOrder with confirmation
+    // Exclui uma ordem de serviço com confirmação
     const handleDeleteWorkOrder = async (workOrder: WorkOrder) => {
         const confirmed = await Swal.fire({
             title: "Tem certeza?",
@@ -121,7 +121,7 @@ const WorkOrdersPage = ({port}: { port: string }) => {
         }
     };
 
-    // Save a new or edited workOrder
+    // Salva as alterações de uma ordem de serviço (nova ou existente)
     const handleSaveWorkOrder = async (workOrder: Partial<WorkOrder>) => {
         const endpoint = isEdit
             ? `${API_ENDPOINTS.workOrders(port)}/${workOrder.id}`

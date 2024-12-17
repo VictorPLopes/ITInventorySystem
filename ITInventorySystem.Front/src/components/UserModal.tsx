@@ -164,8 +164,8 @@ export const UserModal: React.FC<UserModalProps> = ({
                             Por favor, selecione um status válido.
                         </Form.Control.Feedback>
                     </Form.Group>
-
-                    {loggedUser?.role === "Master" ? <Form.Group>
+                    {/* Só permite selecionar o cargo se o usuário logado for Master e se não estiver tentando editar outro Master*/}
+                    {loggedUser?.role === "Master" && formData.type != 0 ? <Form.Group> 
                         <Form.Label>Tipo</Form.Label>
                         <Form.Select
                             name="type"

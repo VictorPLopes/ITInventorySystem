@@ -24,7 +24,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<User>> GetUser(int id) => Ok(await userInterface.GetByIdAsync(id));
-    
+
     [HttpPost]
     public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDto usr)
     {
@@ -41,7 +41,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<ActionResult> UpdateUser(int id, [FromBody] UserUpdateDto user)
     {
-        var currentUserId = GetCurrentUserId();
+        var currentUserId   = GetCurrentUserId();
         var currentUserRole = GetCurrentUserRole();
 
         switch (currentUserRole)
@@ -110,7 +110,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
     {
         var currentUserId   = GetCurrentUserId();
         var currentUserRole = GetCurrentUserRole();
-        
+
         // Ninguém, nem mesmo o root, pode deletar a si mesmo
         if (id == currentUserId)
             return Forbid("Você não pode deletar a si mesmo.");
@@ -121,7 +121,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
             if (targetUser.Type <= (EPrivilegeType)1) // 1: Admin, 0: Master
                 return Forbid("Admins não podem deletar Admins ou Masters.");
         }
-        
+
         try
         {
             await userInterface.DeleteAsync(id);

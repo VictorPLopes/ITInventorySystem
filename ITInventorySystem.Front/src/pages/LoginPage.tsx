@@ -23,7 +23,7 @@ const LoginPage = ({port, onLogin}: { port: string, onLogin: any}) => {
         if (!token) return null;
 
         try {
-            return jwtDecode(token) as JwtUser; // Returns an object with user ID and role
+            return jwtDecode(token) as JwtUser; // Retorna o usuário logado decodificado
         } catch {
             return null;
         }
@@ -38,7 +38,7 @@ const LoginPage = ({port, onLogin}: { port: string, onLogin: any}) => {
                     onLogin(currentUser);
                 navigate("/dashboard");
             } catch {
-                // User is not authenticated
+                // Usuário não autenticado
             }
         };
 
