@@ -66,16 +66,16 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         }
         catch (KeyNotFoundException)
         {
-            return NotFound(new { message = "User not found" });
+            return NotFound(new { message = "Usuário não encontrado" });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "An error occurred", error = ex.Message });
+            return StatusCode(500, new { message = "Um erro ocorreu ao editar o usuário", error = ex.Message });
         }
     }
 
-    [HttpPut("{id:int}/update-password")]
-    public async Task<ActionResult> UpdateUserPassword(int id, [FromBody] UserUpdatePasswordDTO user)
+    [HttpPost("{id:int}/update-password")]
+    public async Task<ActionResult> UpdateUserPassword(int id, [FromBody] UserUpdatePasswordDto user)
     {
         var currentUserId   = GetCurrentUserId();
         var currentUserRole = GetCurrentUserRole();
@@ -91,19 +91,47 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         try
         {
             await userInterface.UpdatePasswordAsync(id, user.NewPassword);
-            return Ok(new { message = "User password updated successfully" });
+            return Ok(new { message = "Senha do usuário atualizada com sucesso" });
         }
         catch (KeyNotFoundException)
         {
             // Caso o usuário não seja encontrado, retorna um status 404 Not Found
-            return NotFound(new { message = "User not found" });
+            return NotFound(new { message = "Usuário não encontrado" });
         }
         catch (Exception ex)
         {
             // Para outros tipos de erro, retorna um status 500 Internal Server Error
-            return StatusCode(500, new { message = "An error occurred while updating the user", error = ex.Message });
+            return StatusCode(500, new { message = "Um erro ocorreu ao editar a senha do usuário", error = ex.Message });
         }
     }
+
+    [HttpPost("{id:int}/update-my-password")]
+    [Authorize(Roles = "User, Admin, Master")]
+    public async Task<ActionResult> UpdateMyPassword(int id, [FromBody] UserUpdateMyPasswordDto user)
+    {
+        var currentUserId = GetCurrentUserId();
+        
+        // Usuários comuns não podem editar a senha de outros usuários
+        if (currentUserId != id)
+            return Forbid("Você não tem permissão para editar a senha de outro usuário.");
+
+        try
+        {
+            await userInterface.UpdateMyPasswordAsync(id, user.OldPassword, user.NewPassword);
+            return Ok(new { message = "Senha do usuário atualizada com sucesso" });
+        }
+        catch (KeyNotFoundException)
+        {
+            // Caso o usuário não seja encontrado, retorna um status 404 Not Found
+            return NotFound(new { message = "Usuário não encontrado" });
+        }
+        catch (Exception ex)
+        {
+            // Para outros tipos de erro, retorna um status 500 Internal Server Error
+            return StatusCode(500, new { message = "Um erro ocorreu ao editar a senha do usuário", error = ex.Message });
+        }
+    }
+    
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
@@ -125,17 +153,17 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         try
         {
             await userInterface.DeleteAsync(id);
-            return Ok(new { message = "User deleted successfully" });
+            return Ok(new { message = "Usuário deletado com sucesso" });
         }
         catch (KeyNotFoundException)
         {
             // Caso o usuário não seja encontrado, retorna um status 404 Not Found
-            return NotFound(new { message = "User not found" });
+            return NotFound(new { message = "Usuário não encontrado" });
         }
         catch (Exception ex)
         {
             // Para outros tipos de erro, retorna um status 500 Internal Server Error
-            return StatusCode(500, new { message = "An error occurred while deleting the user", error = ex.Message });
+            return StatusCode(500, new { message = "Um erro ocorreu ao deletar o usuário", error = ex.Message });
         }
     }
 }

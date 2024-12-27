@@ -5,7 +5,9 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBars, faBoxOpen, faFileLines, faHome, faUserGear, faUserTie,} from "@fortawesome/free-solid-svg-icons";
 import {Fragment, useEffect, useState} from "react";
 import axios from "../../AxiosConfig";
-import {Button} from "react-bootstrap";
+import JwtUser from "../../types/JwtUser.tsx";
+import LoggedUserModal from "../LoggedUserModal";
+import {jwtDecode} from "jwt-decode";
 
 const API_ENDPOINTS = {
     usersPage: (port: string) => `https://localhost:${port}/auth/users-page`,
@@ -15,14 +17,17 @@ type SidebarProps = {
     isSidebarCollapsed: boolean;
     changeIsSidebarCollapsed: (isSidebarCollapsed: boolean) => void;
     port: string;
+    loggedUser: JwtUser | null;
 };
 
 const Sidebar = ({
                      isSidebarCollapsed,
                      changeIsSidebarCollapsed,
                      port,
+                     loggedUser,
                  }: SidebarProps) => {
     const [hasAdminAccess, setHasAdminAccess] = useState<boolean>(false);
+    const [showModal, setShowModal] = useState(false);
 
     const items = [
         {routerLink: "dashboard", icon: faHome, label: "Dashboard"},
@@ -57,10 +62,28 @@ const Sidebar = ({
         checkAdminAccess();
     }, [port]);
 
+    const getCurrentUser = () => {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+
+        try {
+            return jwtDecode(token) as JwtUser; // Retorna o usuário logado decodificado
+        } catch {
+            return null;
+        }
+    };
+
+    if (!loggedUser)
+        loggedUser = getCurrentUser();
+
     const handleLogout = () => {
         localStorage.removeItem("token");
         window.location.href = "/";
     };
+    
+    const handleShowUser = () => {
+        setShowModal(true);
+    }
 
     return (
         <div className={sidebarClasses}>
@@ -95,10 +118,21 @@ const Sidebar = ({
                         </Link>
                     </li>
                 ))}
-                <Button variant="danger" onClick={handleLogout} className="w-100">
-                    Sair
-                </Button>
+                <hr/>
+                <div className="sidenav-nav-item">
+                    <span className="sidenav-nav-link-user sidenav-nav-link" onClick={handleShowUser}>
+                        <FontAwesomeIcon icon={faUserTie} className="sidenav-link-icon"/>
+                        {!isSidebarCollapsed && <span className="sidenav-link-text">{loggedUser?.unique_name}</span>}
+                    </span>
+                </div>
             </div>
+            <LoggedUserModal
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                loggedUser={loggedUser}
+                onLogout={handleLogout}
+                port={port}
+            />
         </div>
     )
 

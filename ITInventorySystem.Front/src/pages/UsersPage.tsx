@@ -9,6 +9,7 @@ import {UserModal} from "../components/UserModal";
 import {ChangePasswordModal} from "../components/ChangePasswordModal";
 import User from "../types/User";
 import JwtUser from "../types/JwtUser";
+import {jwtDecode} from "jwt-decode";
 
 const API_ENDPOINTS = {
     usersPage: (port: string) => `https://localhost:${port}/auth/users-page`,
@@ -72,6 +73,20 @@ const UsersPage = ({port, loggedUser}: { port: string, loggedUser: JwtUser | nul
             setLoading(false);
         }
     }, [port]);
+
+    const getCurrentUser = () => {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+
+        try {
+            return jwtDecode(token) as JwtUser; // Retorna o usuário logado decodificado
+        } catch {
+            return null;
+        }
+    };
+    
+    if (!loggedUser)
+        loggedUser = getCurrentUser();
 
     useEffect(() => {
         if (hasAccess) fetchUsers();
@@ -146,7 +161,7 @@ const UsersPage = ({port, loggedUser}: { port: string, loggedUser: JwtUser | nul
     // Salva a nova senha do usuário
     const handleSavePassword = async (userId: number, newPassword: string) => {
         try {
-            await axios.put(API_ENDPOINTS.updatePassword(port, userId), {newPassword});
+            await axios.post(API_ENDPOINTS.updatePassword(port, userId), {newPassword});
             toast.success("Senha alterada com sucesso!");
             setShowChangePasswordModal(false);
         } catch (error: any) {

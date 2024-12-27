@@ -2,7 +2,8 @@ import {Outlet} from "react-router-dom";
 import "./layout.css";
 import classNames from "classnames";
 import Sidebar from "../components/left-sidebar/Sidebar";
-import JwtUser from "../types/JwtUser.tsx"; // Importando a Sidebar
+import JwtUser from "../types/JwtUser.tsx";
+import {jwtDecode} from "jwt-decode"; // Importando a Sidebar
 
 type LayoutProps = {
     port: string;
@@ -18,12 +19,27 @@ const Layout = ({port, isSidebarCollapsed, screenWidth, setIsSidebarCollapsed, l
         "body-trimmed": !isSidebarCollapsed && screenWidth > 768, // Aplica o estilo quando a sidebar não está colapsada e a tela é maior que 768px
     });
 
+    const getCurrentUser = () => {
+        const token = localStorage.getItem("token");
+        if (!token) return null;
+
+        try {
+            return jwtDecode(token) as JwtUser; // Retorna o usuário logado decodificado
+        } catch {
+            return null;
+        }
+    };
+
+    if (!loggedUser)
+        loggedUser = getCurrentUser();
+
     return (
         <div className="layout-container">
             <Sidebar
                 isSidebarCollapsed={isSidebarCollapsed}
                 changeIsSidebarCollapsed={setIsSidebarCollapsed}
                 port={port}
+                loggedUser={loggedUser}
             />
 
             {/* O conteúdo principal da página será renderizado aqui */}
