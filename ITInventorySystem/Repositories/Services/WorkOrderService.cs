@@ -90,6 +90,15 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                      .Include(w => w.Products)
                      .ThenInclude(p => p.Product)
                      .ToListAsync();
+    
+    public async Task<IEnumerable<WorkOrder>> GetByClientIdAsync(int clientId) =>
+        await context.WorkOrders
+                     .Include(w => w.Client)
+                     .Include(w => w.UserInCharge)
+                     .Include(w => w.Products)
+                     .ThenInclude(p => p.Product)
+                     .Where(w => w.ClientId == clientId)
+                     .ToListAsync();
 
     public async Task<WorkOrder> GetByIdAsync(int id)
     {
