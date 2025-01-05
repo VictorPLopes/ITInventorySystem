@@ -6,6 +6,9 @@ import {Button, Col, Container, Row, Spinner} from "react-bootstrap";
 import {GenericTable} from "../components/GenericTable";
 import {ClientModal} from "../components/ClientModal";
 import Client from "../types/Client";
+import {formatCep, formatDoc, formatPhone} from "../utils/formatUtils.ts";
+import {generateClientReport} from "../utils/pdfUtils.ts";
+import {MdPrint} from "react-icons/md";
 
 const API_ENDPOINTS = {
     clientsPage: (port: string) => `https://localhost:${port}/auth/clients-page`,
@@ -28,7 +31,7 @@ const ClientsPage = ({port}: { port: string }) => {
             data: "idDoc",
             render: (data: string) => {
                 // Formata como CPF ou CNPJ
-                return data.length <= 11 ? data.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14) : data.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5").substring(0, 18);
+                return formatDoc(data);
             }
         },
         {title: "Nome", data: "name"},
@@ -41,7 +44,7 @@ const ClientsPage = ({port}: { port: string }) => {
             data: "postalCode",
             render: (data: string) => {
                 // Formata como CEP
-                return data.replace(/(\d{5})(\d{3})/, "$1-$2").substring(0, 9);
+                return formatCep(data);
             }
         },
         {
@@ -49,7 +52,7 @@ const ClientsPage = ({port}: { port: string }) => {
             data: "phoneNumber",
             render: (data: string) => {
                 // Formata como telefone fixo ou celular
-                return data.length <= 12 ? data.replace(/(\d{2})(\d{2})(\d{4})(\d{0,4})/, "+$1 ($2) $3-$4").substr(0, 18) : data.replace(/(\d{2})(\d{2})(\d{5})(\d{0,4})/, "+$1 ($2) $3-$4").substr(0, 19);
+                return formatPhone(data);
             }
         },
         {title: "Ações", name: "actions"},
@@ -131,6 +134,11 @@ const ClientsPage = ({port}: { port: string }) => {
             }
         }
     };
+    
+    // Exporta um relatório em PDF com as informações do cliente e suas ordens de serviço
+    const handleExportReport = async (client: Client) => {
+        await generateClientReport(client, port);
+    };
 
     // Salva as alterações de um cliente (novo ou existente)
     const handleSaveClient = async (client: Partial<Client>) => {
@@ -199,7 +207,9 @@ const ClientsPage = ({port}: { port: string }) => {
                                         actions={{
                                             onEdit: handleEditClient,
                                             onDelete: handleDeleteClient,
+                                            onExtra: handleExportReport,
                                         }}
+                                        extraAction={<MdPrint/>}
                                     />
                                 </div>
                             )}

@@ -1,6 +1,7 @@
 ﻿import React, {useRef, useState} from "react";
 import {Button, Form, Modal} from "react-bootstrap";
 import Client from "../types/Client";
+import {formatCep, formatDoc, formatPhone} from "../utils/formatUtils.ts";
 
 interface ClientModalProps {
     show: boolean;
@@ -28,28 +29,6 @@ export const ClientModal: React.FC<ClientModalProps> = ({
         "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
         "RS", "RO", "RR", "SC", "SP", "SE", "TO",
     ];
-
-    // Função para formatar CPF ou CNPJ
-    const formatCPFOrCNPJ = (value: string) => {
-        const numbers = value.replace(/\D/g, "");
-        return numbers.length <= 11
-            ? numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4").substring(0, 14)
-            : numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5").substring(0, 18);
-    };
-
-    // Função para formatar CEP
-    const formatCEP = (value: string) => {
-        const numbers = value.replace(/\D/g, "");
-        return numbers.replace(/(\d{5})(\d{3})/, "$1-$2").substring(0, 9);
-    };
-
-    // Função para formatar telefone
-    const formatPhone = (value: string) => {
-        const numbers = value.replace(/\D/g, "");
-        return numbers.length <= 12
-            ? numbers.replace(/(\d{2})(\d{2})(\d{4})(\d{0,4})/, "+$1 ($2) $3-$4").substr(0, 18)
-            : numbers.replace(/(\d{2})(\d{2})(\d{5})(\d{0,4})/, "+$1 ($2) $3-$4").substr(0, 19);
-    };
 
     // Validações de CPF
     const isValidCPF = (cpf: string) => {
@@ -146,9 +125,9 @@ export const ClientModal: React.FC<ClientModalProps> = ({
 
             if (name === "idDoc") {
                 validateCPFOrCNPJ(value);
-                formattedValue = formatCPFOrCNPJ(value);
+                formattedValue = formatDoc(value);
             } else if (name === "postalCode") {
-                formattedValue = formatCEP(value);
+                formattedValue = formatCep(value);
                 if (formattedValue.length === 9) {
                     fetchAddressByCep(formattedValue.replace(/\D/g, ""));
                 }
@@ -308,7 +287,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
                         </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
-                        <Form.Label>Telefone (Código do País + DDD + Número)</Form.Label>
+                        <Form.Label>Telefone (DDD + Número)</Form.Label>
                         <Form.Control
                             type="text"
                             name="phoneNumber"

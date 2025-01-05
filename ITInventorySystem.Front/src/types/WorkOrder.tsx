@@ -7,7 +7,7 @@ interface WorkOrder {
     clientId: number;
     description: string;
     workHours: number;
-    status?: number;
+    status: number;
     products?: Array<ProductsInWorkOrder>;
     createdAt?: string;
     updatedAt?: string | null;
