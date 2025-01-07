@@ -24,6 +24,10 @@ const LoggedUserModal: React.FC<LoggedUserModalProps> = ({
         setShowChangePasswordModal(true);
     };
 
+    const handleCancelChangePassword = () => {
+        setShowChangePasswordModal(false);
+    }
+    
     const handleCloseChangePassword = () => {
         setShowChangePasswordModal(false);
         onLogout();
@@ -52,7 +56,8 @@ const LoggedUserModal: React.FC<LoggedUserModalProps> = ({
             {showChangePasswordModal && (
                 <ChangePasswordModal
                     show={showChangePasswordModal}
-                    onClose={handleCloseChangePassword}
+                    onChangePassword={handleCloseChangePassword}
+                    onCancel={handleCancelChangePassword}
                     loggedUser={loggedUser}
                     port={port}
                 />

@@ -5,14 +5,16 @@ import {Button, Form, Modal} from "react-bootstrap";
 
 interface ChangePasswordModalProps {
     show: boolean;
-    onClose: () => void;
+    onChangePassword: () => void;
+    onCancel: () => void;
     loggedUser: JwtUser | null;
     port: string;
 }
 
 const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                                                                      show,
-                                                                     onClose,
+                                                                     onChangePassword,
+                                                                     onCancel,
                                                                      loggedUser,
                                                                      port,
                                                                  }) => {
@@ -26,14 +28,14 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         try {
             const endpoint = `https://localhost:${port}/users/${loggedUser.nameid}/update-my-password`;
             await axios.post(endpoint, { oldPassword, newPassword });
-            onClose();
+            onChangePassword();
         } catch (err) {
             setError("Erro ao alterar a senha. Verifique as credenciais e tente novamente.");
         }
     };
 
     return (
-        <Modal show={show} onHide={onClose}>
+        <Modal show={show} onHide={onCancel}>
             <Modal.Header closeButton>
                 <Modal.Title>Alterar Senha</Modal.Title>
             </Modal.Header>
@@ -63,7 +65,7 @@ const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={onClose}>
+                <Button variant="secondary" onClick={onCancel}>
                     Cancelar
                 </Button>
                 <Button variant="primary" onClick={handleChangePassword}>
