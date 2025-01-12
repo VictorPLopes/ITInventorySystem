@@ -7,6 +7,7 @@ import {MdPictureAsPdf} from "react-icons/md";
 import {GenericTable} from "../components/GenericTable";
 import {WorkOrderModal} from "../components/WorkOrderModal";
 import WorkOrder from "../types/WorkOrder";
+import {generateWorkOrderReport} from "../utils/pdfUtils.ts";
 
 const API_ENDPOINTS = {
     workOrdersPage: (port: string) => `https://localhost:${port}/auth/work-orders-page`,
@@ -94,9 +95,8 @@ const WorkOrdersPage = ({port}: { port: string }) => {
     };
 
     // Exporta uma ordem de serviço para PDF
-    const handleExportWorkOrder = (workOrder: WorkOrder) => {
-        setCurrentWorkOrder(workOrder);
-        // TODO: Implement PDF export
+    const handleExportWorkOrder = async (workOrder: WorkOrder) => {
+        await generateWorkOrderReport(workOrder, port);
     };
 
     // Exclui uma ordem de serviço com confirmação
