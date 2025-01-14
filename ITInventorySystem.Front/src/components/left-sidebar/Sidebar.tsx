@@ -6,7 +6,6 @@ import {faBars, faBoxOpen, faFileLines, faHome, faUserGear, faUserTie, faArrowRi
 import {Fragment, useEffect, useState} from "react";
 import axios from "../../AxiosConfig";
 import JwtUser from "../../types/JwtUser.tsx";
-import LoggedUserModal from "../LoggedUserModal";
 import {jwtDecode} from "jwt-decode";
 
 const API_ENDPOINTS = {
@@ -27,8 +26,7 @@ const Sidebar = ({
                      loggedUser,
                  }: SidebarProps) => {
     const [hasAdminAccess, setHasAdminAccess] = useState<boolean>(false);
-    const [showModal, setShowModal] = useState(false);
-
+    
     const items = [
         {routerLink: "dashboard", icon: faHome, label: "Dashboard"},
         {routerLink: "inventory", icon: faBoxOpen, label: "Inventário"},
@@ -79,11 +77,8 @@ const Sidebar = ({
     const handleLogout = () => {
         localStorage.removeItem("token");
         window.location.href = "/";
-    };
+    };   
     
-    const handleShowUser = () => {
-        setShowModal(true);
-    }
 
     return (
         <div className={sidebarClasses}>
@@ -130,11 +125,7 @@ const Sidebar = ({
                         <FontAwesomeIcon icon={faArrowRightFromBracket} className="logout-icon" />
                     </button>
                 </div>
-
-
-
-            </div>
-            
+            </div>            
         </div>
     )
 

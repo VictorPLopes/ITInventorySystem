@@ -27,7 +27,18 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
 
     const columns = [
         { title: "ID", data: "id" },
-        { title: "Abertura", data: "startDate" },
+        {
+            title: "Data de Abertura", 
+            data: "startDate",
+            render: (data: string) => {
+                const date = new Date(data);
+                return new Intl.DateTimeFormat("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                }).format(date);
+            }
+        },
         {
             title: "Responsável",
             data: "userInChargeId",
