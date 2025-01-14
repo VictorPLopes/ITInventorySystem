@@ -2,6 +2,6 @@
 
 public interface IDashboardService
 {
-    Task<object>              GetSummaryAsync();
+    Task<object> GetSummaryAsync();
     Task<IEnumerable<object>> GetTopProductsAsync();
 }

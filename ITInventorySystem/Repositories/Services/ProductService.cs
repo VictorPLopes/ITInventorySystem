@@ -38,7 +38,7 @@ public class ProductService(AppDbContext context) : IProductInterface
 
             if (prod == null) throw new KeyNotFoundException("Product not found!");
 
-            context.Products.Remove(prod);
+            prod.IsDeleted = true;  
             await context.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -47,7 +47,16 @@ public class ProductService(AppDbContext context) : IProductInterface
         }
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync() => await context.Products.ToListAsync();
+    public async Task<IEnumerable<Product>> GetAllAsync(bool includeDeleted = false)
+    {
+        if (includeDeleted)
+        {
+            return await context.Products.ToListAsync();
+        } 
+        
+        return await context.Products.Where(p => !p.IsDeleted).ToListAsync();
+    }
+
 
     public async Task<Product> GetByIdAsync(int id)
     {
@@ -61,7 +70,7 @@ public class ProductService(AppDbContext context) : IProductInterface
         ValidateProductData(product.Quantity, product.CostPrice, product.SalePrice);
 
         var prod = await context.Products
-                                .FirstOrDefaultAsync(prodDb => prodDb.Id == id);
+                                .FirstOrDefaultAsync(prodDb => prodDb.Id == id && !prodDb.IsDeleted);
 
         if (prod == null) throw new KeyNotFoundException("Product not found!");
 

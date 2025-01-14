@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ITInventorySystem.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241215160521_Initial")]
-    partial class Initial
+    [Migration("20250113011902_SoftDeletion")]
+    partial class SoftDeletion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,6 +51,9 @@ namespace ITInventorySystem.Migrations
                         .IsRequired()
                         .HasMaxLength(14)
                         .HasColumnType("nvarchar(14)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -118,6 +121,9 @@ namespace ITInventorySystem.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -180,6 +186,9 @@ namespace ITInventorySystem.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -264,7 +273,7 @@ namespace ITInventorySystem.Migrations
                     b.HasOne("ITInventorySystem.Models.Product", "Product")
                         .WithMany("ProductsInWorkOrder")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ITInventorySystem.Models.WorkOrder", "WorkOrder")
@@ -283,13 +292,13 @@ namespace ITInventorySystem.Migrations
                     b.HasOne("ITInventorySystem.Models.Client", "Client")
                         .WithMany("WorkOrders")
                         .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ITInventorySystem.Models.User", "UserInCharge")
                         .WithMany("WorkOrders")
                         .HasForeignKey("UserInChargeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Client");

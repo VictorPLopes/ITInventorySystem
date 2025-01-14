@@ -10,7 +10,7 @@ namespace ITInventorySystem.Controllers;
 
 [Route("users")]
 [ApiController]
-[Authorize(Roles = "Admin, Master")]
+[Authorize(Roles = "Admin, Master, Standard")]
 public class UserController(IUserInterface userInterface) : ControllerBase
 {
     private int GetCurrentUserId() =>
@@ -21,10 +21,24 @@ public class UserController(IUserInterface userInterface) : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<User>>> GetAllUsers() => Ok(await userInterface.GetAllAsync());
+    
+    [HttpGet("all")]
+    public async Task<ActionResult<IEnumerable<User>>> GetAllUsersIncludingDeleted() => Ok(await userInterface.GetAllAsync(true));
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<User>> GetUser(int id) => Ok(await userInterface.GetByIdAsync(id));
 
+    [HttpPost("setup")]
+    [AllowAnonymous]
+    public async Task<ActionResult<User>> SetupFirstAdmin([FromBody] UserCreateDto userDto)
+    {
+        var existingAdmin = await userInterface.GetAllAsync();
+        if (existingAdmin.Any(u => u.Type == EPrivilegeType.Admin || u.Type == EPrivilegeType.Master))
+            return Forbid("O sistema já foi configurado.");
+
+        var user = await userInterface.AddAsync(userDto);
+        return Ok(user);
+    }
     [HttpPost]
     public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDto usr)
     {
@@ -106,7 +120,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
     }
 
     [HttpPost("{id:int}/update-my-password")]
-    [Authorize(Roles = "User, Admin, Master")]
+    [Authorize(Roles = "Standard, Admin, Master")]
     public async Task<ActionResult> UpdateMyPassword(int id, [FromBody] UserUpdateMyPasswordDto user)
     {
         var currentUserId = GetCurrentUserId();

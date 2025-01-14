@@ -1,0 +1,108 @@
+/* Contêiner Principal */
+.profile-page-container {
+    max-width: 600px;
+    margin: 50px auto;
+    font-family: Arial, sans-serif;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Estilo das Abas */
+  .profile-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+  }
+  
+  .profile-tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    background: none;
+    border: none;
+    color: #666;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
+    border-bottom: 2px solid transparent;
+  }
+  
+  .profile-tab.active {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+  }
+  
+  .profile-tab:hover {
+    color: #0056b3;
+  }
+  
+  /* Conteúdo da Aba */
+  .profile-content {
+    margin-top: 20px;
+  }
+  
+  .profile-content h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  /* Campos do Formulário */
+  .profile-field {
+    margin-bottom: 15px;
+  }
+  
+  .profile-field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #666;
+  }
+  
+  .profile-field input {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #f9f9f9;
+  }
+  
+  .profile-field input:focus {
+    border-color: #007bff;
+    box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+  }
+  
+  /* Botões */
+  .save-button,
+  .logout-button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .save-button:hover,
+  .logout-button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Mensagens */
+  .error-message {
+    color: #d9534f;
+    margin-top: 10px;
+  }
+  
+  .success-message {
+    color: #5cb85c;
+    margin-top: 10px;
+  }
+  

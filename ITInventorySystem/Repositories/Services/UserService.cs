@@ -30,7 +30,14 @@ public class UserService(AppDbContext context) : IUserInterface
         return newUser;
     }
 
-    public async Task<IEnumerable<User>> GetAllAsync() => await context.Users.ToListAsync();
+    public async Task<IEnumerable<User>> GetAllAsync(bool includeDeleted)
+    {
+        if (includeDeleted)
+            return await context.Users.ToListAsync();
+        
+        return await context.Users.Where(userDb => !userDb.IsDeleted).ToListAsync();
+
+    } 
 
     public async Task<User> GetByIdAsync(int id)
     {
@@ -116,7 +123,7 @@ public class UserService(AppDbContext context) : IUserInterface
             if (user == null)
                 throw new KeyNotFoundException("User not found!");
 
-            context.Users.Remove(user);
+            user.IsDeleted = true;
             await context.SaveChangesAsync();
         }
         catch (Exception e)

@@ -10,9 +10,9 @@ public class DashboardService(AppDbContext context) : IDashboardService
     {
         var summary = new
         {
-            UserCount      = await context.Users.CountAsync(),
-            ProductCount   = await context.Products.CountAsync(),
-            ClientCount    = await context.Clients.CountAsync(),
+            UserCount      = await context.Users.CountAsync(u => !u.IsDeleted),
+            ProductCount   = await context.Products.CountAsync(p => !p.IsDeleted),
+            ClientCount    = await context.Clients.CountAsync(c => !c.IsDeleted),
             WorkOrderCount = await context.WorkOrders.CountAsync()
         };
 
@@ -22,6 +22,7 @@ public class DashboardService(AppDbContext context) : IDashboardService
     public async Task<IEnumerable<object>> GetTopProductsAsync()
     {
         var topProducts = await context.ProductsInWorkOrder
+                                       .Where(p => !p.Product.IsDeleted)
                                        .GroupBy(p => p.ProductId)
                                        .Select(x => new
                                        {

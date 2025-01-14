@@ -1,21 +1,24 @@
-﻿import {useCallback, useEffect, useState} from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import axios from "../AxiosConfig";
 import Swal from "sweetalert2";
-import toast, {Toaster} from "react-hot-toast";
-import {Button, Col, Container, Row, Spinner} from "react-bootstrap";
-import {MdPictureAsPdf} from "react-icons/md";
-import {GenericTable} from "../components/GenericTable";
-import {WorkOrderModal} from "../components/WorkOrderModal";
+import toast, { Toaster } from "react-hot-toast";
+import { Button, Col, Container, Row, Spinner } from "react-bootstrap";
+import { MdPictureAsPdf } from "react-icons/md";
+import { GenericTable } from "../components/GenericTable";
+import { WorkOrderModal } from "../components/WorkOrderModal";
 import WorkOrder from "../types/WorkOrder";
 
 const API_ENDPOINTS = {
     workOrdersPage: (port: string) => `https://localhost:${port}/auth/work-orders-page`,
-    workOrders: (port: string) => `https://localhost:${port}/work-orders`
+    workOrders: (port: string) => `https://localhost:${port}/work-orders`,
+    users: (port: string) => `https://localhost:${port}/users/all`,
+    clients: (port: string) => `https://localhost:${port}/clients/all`,
 };
 
-const WorkOrdersPage = ({port}: { port: string }) => {
-    // Estados principais da página
+const WorkOrdersPage = ({ port }: { port: string }) => {
     const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
+    const [users, setUsers] = useState<{ id: number; name: string }[]>([]);
+    const [clients, setClients] = useState<{ id: number; name: string }[]>([]);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [currentWorkOrder, setCurrentWorkOrder] = useState<Partial<WorkOrder>>({});
@@ -23,12 +26,26 @@ const WorkOrdersPage = ({port}: { port: string }) => {
     const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
     const columns = [
-        {title: "ID", data: "id"},
-        {title: "Abertura", data: "startDate"},
-        {title: "Responsável", data: "userInChargeId"},
-        {title: "Cliente", data: "clientId"},
-        {title: "Descrição", data: "description"},
-        {title: "Carga Horária", data: "workHours"},
+        { title: "ID", data: "id" },
+        { title: "Abertura", data: "startDate" },
+        {
+            title: "Responsável",
+            data: "userInChargeId",
+            render: (data: number) => {
+                const user = users.find((u) => u.id === data);
+                return user ? user.name : "Desconhecido";
+            },
+        },
+        {
+            title: "Cliente",
+            data: "clientId",
+            render: (data: number) => {
+                const client = clients.find((c) => c.id === data);
+                return client ? client.name : "Desconhecido";
+            },
+        },
+        { title: "Descrição", data: "description" },
+        { title: "Carga Horária", data: "workHours" },
         {
             title: "Status",
             data: "status",
@@ -37,10 +54,9 @@ const WorkOrdersPage = ({port}: { port: string }) => {
                 return status[data] || "Desconhecido";
             },
         },
-        {title: "Ações", name: "actions"},
+        { title: "Ações", name: "actions" },
     ];
 
-    // Verifica o acesso do usuário e busca os dados iniciais
     useEffect(() => {
         const checkAccess = async () => {
             try {
@@ -54,12 +70,18 @@ const WorkOrdersPage = ({port}: { port: string }) => {
         checkAccess();
     }, [port]);
 
-    // Busca as ordens de serviço registradas
     const fetchWorkOrders = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await axios.get(API_ENDPOINTS.workOrders(port));
-            setWorkOrders(response.data);
+            const [workOrdersRes, usersRes, clientsRes] = await Promise.all([
+                axios.get(API_ENDPOINTS.workOrders(port)),
+                axios.get(API_ENDPOINTS.users(port)),
+                axios.get(API_ENDPOINTS.clients(port)),
+            ]);
+
+            setWorkOrders(workOrdersRes.data);
+            setUsers(usersRes.data);
+            setClients(clientsRes.data);
         } catch {
             toast.error("Erro ao buscar as ordens de serviço.");
         } finally {
@@ -71,7 +93,6 @@ const WorkOrdersPage = ({port}: { port: string }) => {
         if (hasAccess) fetchWorkOrders();
     }, [hasAccess, fetchWorkOrders]);
 
-    // Abre o modal para adicionar uma nova ordem de serviço
     const handleAddWorkOrder = () => {
         setCurrentWorkOrder({
             id: 0,
@@ -86,20 +107,17 @@ const WorkOrdersPage = ({port}: { port: string }) => {
         setShowModal(true);
     };
 
-    // Abre o modal para editar uma ordem de serviço existente
     const handleEditWorkOrder = (workOrder: WorkOrder) => {
         setCurrentWorkOrder(workOrder);
         setIsEdit(true);
         setShowModal(true);
     };
 
-    // Exporta uma ordem de serviço para PDF
     const handleExportWorkOrder = (workOrder: WorkOrder) => {
         setCurrentWorkOrder(workOrder);
         // TODO: Implement PDF export
     };
 
-    // Exclui uma ordem de serviço com confirmação
     const handleDeleteWorkOrder = async (workOrder: WorkOrder) => {
         const confirmed = await Swal.fire({
             title: "Tem certeza?",
@@ -116,12 +134,11 @@ const WorkOrdersPage = ({port}: { port: string }) => {
                 toast.success("Ordem de Serviço excluída com sucesso!");
                 await fetchWorkOrders();
             } catch {
-                toast.error("Erro ao excluir a produto.");
+                toast.error("Erro ao excluir a ordem de serviço.");
             }
         }
     };
 
-    // Salva as alterações de uma ordem de serviço (nova ou existente)
     const handleSaveWorkOrder = async (workOrder: Partial<WorkOrder>) => {
         const endpoint = isEdit
             ? `${API_ENDPOINTS.workOrders(port)}/${workOrder.id}`
@@ -140,7 +157,7 @@ const WorkOrdersPage = ({port}: { port: string }) => {
 
     return (
         <Container className="mt-4">
-            <Toaster position="top-right"/>
+            <Toaster position="top-right" />
             <Row>
                 <Col>
                     <h2 className="mb-4">Ordens de Serviço Registradas</h2>
@@ -162,14 +179,14 @@ const WorkOrdersPage = ({port}: { port: string }) => {
                             {loading ? (
                                 <div
                                     className="d-flex justify-content-center align-items-center"
-                                    style={{minHeight: "300px"}}
+                                    style={{ minHeight: "300px" }}
                                 >
-                                    <Spinner animation="border" role="status" variant="primary"/>
+                                    <Spinner animation="border" role="status" variant="primary" />
                                 </div>
                             ) : (
                                 <div
                                     className="table-container p-4 rounded shadow-lg bg-body-tertiary"
-                                    style={{overflowX: "auto", width: "100%"}}
+                                    style={{ overflowX: "auto", width: "100%" }}
                                 >
                                     <GenericTable
                                         data={workOrders}
@@ -179,7 +196,7 @@ const WorkOrdersPage = ({port}: { port: string }) => {
                                             onDelete: handleDeleteWorkOrder,
                                             onExtra: handleExportWorkOrder,
                                         }}
-                                        extraAction={<MdPictureAsPdf/>}
+                                        extraAction={<MdPictureAsPdf />}
                                     />
                                 </div>
                             )}

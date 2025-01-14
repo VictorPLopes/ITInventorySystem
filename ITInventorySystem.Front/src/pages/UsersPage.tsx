@@ -104,7 +104,7 @@ const UsersPage = ({port, loggedUser}: { port: string, loggedUser: JwtUser | nul
         // Verifica se o usuário logado é um administrador e se o usuário a ser editado é um técnico
         if (
             loggedUser?.role === "Admin" &&
-            (user.type <= 1 || user.id === parseInt(loggedUser.nameid, 10))
+            (user.type < 1 || user.id === parseInt(loggedUser.nameid, 10))
         ) {
             toast.error("Você não pode editar este usuário!");
             return;
@@ -121,8 +121,8 @@ const UsersPage = ({port, loggedUser}: { port: string, loggedUser: JwtUser | nul
         if (loggedUser && user.id === parseInt(loggedUser.nameid, 10))
             return toast.error("Você não pode excluir a si mesmo!");
         // Verifica se o usuário logado é um administrador e se o usuário a ser editado é um técnico
-        if (loggedUser?.role === "Admin" && user.type <= 1)
-            return toast.error("Você não pode dele ar este usuário!");
+        if (loggedUser?.role === "Admin" && user.type < 1)
+            return toast.error("Você não pode deletar este usuário!");
         
         const confirmed = await Swal.fire({
             title: "Tem certeza?",
@@ -149,7 +149,7 @@ const UsersPage = ({port, loggedUser}: { port: string, loggedUser: JwtUser | nul
         // Verifica se o usuário logado é um administrador e se o usuário a ser editado é um técnico
         if (
             loggedUser?.role === "Admin" &&
-            (user.type <= 1 || user.id === parseInt(loggedUser.nameid, 10))
+            (user.type < 1 || user.id === parseInt(loggedUser.nameid, 10))
         ) {
             toast.error("Você não pode editar a senha deste usuário!");
             return;

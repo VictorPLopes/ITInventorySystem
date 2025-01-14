@@ -17,6 +17,13 @@ public class ClientController(IClientInterface clientInterface) : ControllerBase
         var clients = await clientInterface.GetAllAsync();
         return Ok(clients);
     }
+    
+    [HttpGet("all")]
+    public async Task<ActionResult<IEnumerable<Client>>> GetAllClientsIncludingDeleted()
+    {
+        var clients = await clientInterface.GetAllAsync(true);
+        return Ok(clients);
+    }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<Client>> GetClient(int id)

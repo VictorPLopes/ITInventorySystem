@@ -2,7 +2,7 @@ import {Link} from "react-router-dom";
 import "./sidebar.css";
 import classNames from "classnames";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faBars, faBoxOpen, faFileLines, faHome, faUserGear, faUserTie,} from "@fortawesome/free-solid-svg-icons";
+import {faBars, faBoxOpen, faFileLines, faHome, faUserGear, faUserTie, faArrowRightFromBracket} from "@fortawesome/free-solid-svg-icons";
 import {Fragment, useEffect, useState} from "react";
 import axios from "../../AxiosConfig";
 import JwtUser from "../../types/JwtUser.tsx";
@@ -119,20 +119,22 @@ const Sidebar = ({
                     </li>
                 ))}
                 <hr/>
-                <div className="sidenav-nav-item">
-                    <span className="sidenav-nav-link-user sidenav-nav-link" onClick={handleShowUser}>
-                        <FontAwesomeIcon icon={faUserTie} className="sidenav-link-icon"/>
-                        {!isSidebarCollapsed && <span className="sidenav-link-text">{loggedUser?.unique_name}</span>}
-                    </span>
+                <div className="sidenav-nav-item user-section">
+                    <Link to="/profile" className="user-info">
+                        <div className="user-avatar">
+                            <span>{loggedUser?.unique_name.charAt(0).toUpperCase()}</span> {/* Avatar com a inicial do nome */}
+                        </div>
+                        <span className="user-name">{loggedUser?.unique_name}</span> {/* Nome do usuário */}
+                    </Link>
+                    <button className="logout-button" onClick={handleLogout}>
+                        <FontAwesomeIcon icon={faArrowRightFromBracket} className="logout-icon" />
+                    </button>
                 </div>
+
+
+
             </div>
-            <LoggedUserModal
-                show={showModal}
-                onClose={() => setShowModal(false)}
-                loggedUser={loggedUser}
-                onLogout={handleLogout}
-                port={port}
-            />
+            
         </div>
     )
 

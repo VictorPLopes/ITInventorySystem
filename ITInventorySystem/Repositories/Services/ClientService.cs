@@ -37,7 +37,7 @@ public class ClientService(AppDbContext context) : IClientInterface
 
             if (clt == null) throw new KeyNotFoundException("Client not found!");
 
-            context.Clients.Remove(clt);
+            clt.IsDeleted = true;
             await context.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -46,7 +46,14 @@ public class ClientService(AppDbContext context) : IClientInterface
         }
     }
 
-    public async Task<IEnumerable<Client>> GetAllAsync() => await context.Clients.ToListAsync();
+    public async Task<IEnumerable<Client>> GetAllAsync(bool includeDeleted)
+    {
+        if (includeDeleted)
+        {
+            return await context.Clients.ToListAsync();
+        }
+        return await context.Clients.Where(c => !c.IsDeleted).ToListAsync();
+    } 
 
     public async Task<Client> GetByIdAsync(int id)
     {

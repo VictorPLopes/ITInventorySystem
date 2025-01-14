@@ -5,10 +5,10 @@ namespace ITInventorySystem.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(option)
 {
-    public DbSet<User>                Users               { get; set; }
-    public DbSet<Client>              Clients             { get; set; }
-    public DbSet<Product>             Products            { get; set; }
-    public DbSet<WorkOrder>           WorkOrders          { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Client> Clients { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<WorkOrder> WorkOrders { get; set; }
     public DbSet<ProductsInWorkOrder> ProductsInWorkOrder { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -20,13 +20,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(opt
         modelBuilder.Entity<ProductsInWorkOrder>()
                     .HasOne(pw => pw.Product)
                     .WithMany(p => p.ProductsInWorkOrder)
-                    .HasForeignKey(pw => pw.ProductId);
+                    .HasForeignKey(pw => pw.ProductId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<ProductsInWorkOrder>()
                     .HasOne(pw => pw.WorkOrder)
                     .WithMany(w => w.Products)
                     .HasForeignKey(pw => pw.WorkOrderId);
-
 
         modelBuilder.Entity<Client>()
                     .HasIndex(c => c.Email)
@@ -39,7 +39,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(opt
         modelBuilder.Entity<Client>()
                     .HasMany(c => c.WorkOrders)
                     .WithOne(w => w.Client)
-                    .HasForeignKey(w => w.ClientId); // Define a relação de um para muitos entre Client e WorkOrder
+                    .HasForeignKey(w => w.ClientId)
+                    .OnDelete(DeleteBehavior.Restrict); // Define a relação de um para muitos entre Client e WorkOrder
 
         modelBuilder.Entity<User>()
                     .HasIndex(u => u.Email)
@@ -48,7 +49,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(opt
         modelBuilder.Entity<User>()
                     .HasMany(u => u.WorkOrders)
                     .WithOne(w => w.UserInCharge)
-                    .HasForeignKey(w => w.UserInChargeId); // Define a relação de um para muitos entre User e WorkOrder
+                    .HasForeignKey(w => w.UserInChargeId)
+                    .OnDelete(DeleteBehavior.Restrict); // Define a relação de um para muitos entre User e WorkOrder
+                    
 
         modelBuilder.Entity<Product>()
                     .Property(p => p.CostPrice)

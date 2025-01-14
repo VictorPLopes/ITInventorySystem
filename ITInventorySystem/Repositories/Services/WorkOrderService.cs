@@ -32,7 +32,9 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                 var product = await context.Products.FindAsync(productDto.ProductId);
                 if (product == null)
                     throw new KeyNotFoundException($"Product with ID {productDto.ProductId} not found.");
-
+                if(product.IsDeleted)
+                    throw new InvalidOperationException($"Product with ID {productDto.ProductId} is no longer available for use.");
+                
                 if (product.Quantity < productDto.Quantity)
                     throw new
                         InvalidOperationException($"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested: {productDto.Quantity}");
@@ -69,13 +71,25 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
     {
         try
         {
-            var workOrder = await context.WorkOrders.FindAsync(id);
+            var workOrder = await context.WorkOrders
+                .Include(w => w.Products)
+                .FirstOrDefaultAsync(wo => wo.Id == id);
 
             if (workOrder == null)
                 throw new KeyNotFoundException($"WorkOrder with ID {id} not found.");
 
+            foreach (var productInWorkOrder in workOrder.Products)
+            {
+                var p = await context.Products.FindAsync(productInWorkOrder.ProductId);
+                if (p != null && !p.IsDeleted)
+                {
+                    p.Quantity += productInWorkOrder.Quantity;
+                    context.Products.Update(p); // Atualiza o produto no context
+                }
+            }
+
             context.WorkOrders.Remove(workOrder);
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
         catch (Exception ex)
         {
@@ -114,6 +128,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
         return workOrder;
     }
+    
 
     public async Task<WorkOrder> UpdateAsync(int id, WorkOrderUpdateDto updateDto)
     {
@@ -187,7 +202,8 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                 var newProductInWorkOrder = new ProductsInWorkOrder
                 {
                     ProductId = productDto.ProductId,
-                    Quantity  = productDto.Quantity
+                    Quantity  = productDto.Quantity,
+                    WorkOrderId = workOrder.Id
                 };
 
                 context.ProductsInWorkOrder.Add(newProductInWorkOrder);

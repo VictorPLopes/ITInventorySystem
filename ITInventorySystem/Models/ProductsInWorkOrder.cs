@@ -1,21 +1,21 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
+﻿    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Text.Json.Serialization;
 
-namespace ITInventorySystem.Models;
+    namespace ITInventorySystem.Models;
 
-public class ProductsInWorkOrder
-{
-    public int     ProductId { get; set; }
-    public Product Product   { get; set; }
+    public class ProductsInWorkOrder
+    {
+        public int     ProductId { get; set; }
+        public Product Product   { get; set; }
 
-    public int WorkOrderId { get; set; }
+        public int WorkOrderId { get; set; }
 
-    [JsonIgnore] public WorkOrder WorkOrder { get; set; }
+        [JsonIgnore] public WorkOrder WorkOrder { get; set; }
 
-    public int Quantity { get; set; }
+        public int Quantity { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public DateTime CreatedAt { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public DateTime CreatedAt { get; set; }
 
-    public DateTime? UpdatedAt { get; set; }
-}
+        public DateTime? UpdatedAt { get; set; }
+    }
