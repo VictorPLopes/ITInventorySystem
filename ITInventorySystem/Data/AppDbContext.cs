@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(opt
     public DbSet<Product> Products { get; set; }
     public DbSet<WorkOrder> WorkOrders { get; set; }
     public DbSet<ProductsInWorkOrder> ProductsInWorkOrder { get; set; }
+    public DbSet<StockMovement> StockMovements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

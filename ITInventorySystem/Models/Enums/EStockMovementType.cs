@@ -3,5 +3,6 @@
 public enum EStockMovementType
 {
     Entry, //Entrada
-    Exit //Saída
+    Exit, //Saída
+    Adjustment //Ajuste de estoque
 }

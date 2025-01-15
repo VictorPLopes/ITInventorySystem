@@ -175,15 +175,24 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                 required
                             >
                                 <option value="">Selecione um responsável</option>
-                                {users.map((user) => (
+                                {users.filter((user) => !user.isDeleted || user.id == formData.userInChargeId)
+                                    .map((user) => (
                                     <option key={user.id} value={user.id}>
-                                        {user.id} - {user.name}
+                                        {user.id} - {user.name} {user.isDeleted && "(Usuário deletado)"}
                                     </option>
                                 ))}
                             </Form.Select>
                             <Form.Control.Feedback type="invalid">
                                 Por favor, selecione um responsável.
                             </Form.Control.Feedback>
+                            {/* Exibe uma mensagem de alerta se o responsável atual estiver deletado */}
+                            {formData.userInChargeId &&
+                                users.find((user) => user.id === formData.userInChargeId)?.isDeleted && (
+                                    <Badge bg="warning" className="mt-2">
+                                        O responsável selecionado foi desativado, mas permanece vinculado à esta ordem.
+                                    </Badge>
+                                
+                                )}
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Cliente</Form.Label>
@@ -196,13 +205,21 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                 <option value="">Selecione um cliente</option>
                                 {clients.map((client) => (
                                     <option key={client.id} value={client.id}>
-                                        {client.id} - {client.name}
+                                        {client.id} - {client.name} {client.isDeleted && "(Cliente deletado)"}
                                     </option>
                                 ))}
                             </Form.Select>
                             <Form.Control.Feedback type="invalid">
                                 Por favor, selecione um cliente.
                             </Form.Control.Feedback>
+                            {/* Exibe uma mensagem de alerta se o responsável atual estiver deletado */}
+                            {formData.clientId &&
+                                clients.find((client) => client.id === formData.clientId)?.isDeleted && (
+                                    <Badge bg="warning" className="mt-2">
+                                        O cliente selecionado foi desativado, mas permanece vinculado à esta ordem.
+                                    </Badge>
+
+                                )}
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Descrição</Form.Label>

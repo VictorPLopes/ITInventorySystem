@@ -17,8 +17,19 @@ const API_ENDPOINTS = {
 
 const WorkOrdersPage = ({ port }: { port: string }) => {
     const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
+    const [filteredWorkOrders, setFilteredWorkOrders] = useState<WorkOrder[]>([]);
     const [users, setUsers] = useState<{ id: number; name: string }[]>([]);
     const [clients, setClients] = useState<{ id: number; name: string }[]>([]);
+    const [filters, setFilters] = useState({
+        startDate: "",
+        endDate: "",
+        status: "",
+        userInChargeId: "",
+        clientId: "",
+        workHoursMin: "",
+        workHoursMax: "",
+        description: "",
+    });
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [currentWorkOrder, setCurrentWorkOrder] = useState<Partial<WorkOrder>>({});
@@ -28,7 +39,7 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
     const columns = [
         { title: "ID", data: "id" },
         {
-            title: "Data de Abertura", 
+            title: "Data de Abertura",
             data: "startDate",
             render: (data: string) => {
                 const date = new Date(data);
@@ -37,7 +48,7 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
                     month: "2-digit",
                     year: "numeric",
                 }).format(date);
-            }
+            },
         },
         {
             title: "Responsável",
@@ -104,6 +115,48 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
         if (hasAccess) fetchWorkOrders();
     }, [hasAccess, fetchWorkOrders]);
 
+    useEffect(() => {
+        const applyFilters = () => {
+            const filtered = workOrders.filter((order) => {
+                const {
+                    startDate,
+                    endDate,
+                    status,
+                    userInChargeId,
+                    clientId,
+                    workHoursMin,
+                    workHoursMax,
+                    description,
+                } = filters;
+
+                const matchesStartDate = !startDate || new Date(order.startDate) >= new Date(startDate);
+                const matchesEndDate = !endDate || new Date(order.startDate) <= new Date(endDate);
+                const matchesStatus = !status || order.status === parseInt(status, 10);
+                const matchesUser = !userInChargeId || order.userInChargeId === parseInt(userInChargeId, 10);
+                const matchesClient = !clientId || order.clientId === parseInt(clientId, 10);
+                const matchesWorkHours =
+                    (!workHoursMin || order.workHours >= parseFloat(workHoursMin)) &&
+                    (!workHoursMax || order.workHours <= parseFloat(workHoursMax));
+                const matchesDescription =
+                    !description || order.description.toLowerCase().includes(description.toLowerCase());
+
+                return (
+                    matchesStartDate &&
+                    matchesEndDate &&
+                    matchesStatus &&
+                    matchesUser &&
+                    matchesClient &&
+                    matchesWorkHours &&
+                    matchesDescription
+                );
+            });
+
+            setFilteredWorkOrders(filtered);
+        };
+
+        applyFilters();
+    }, [filters, workOrders]);
+
     const handleAddWorkOrder = () => {
         setCurrentWorkOrder({
             id: 0,
@@ -122,11 +175,6 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
         setCurrentWorkOrder(workOrder);
         setIsEdit(true);
         setShowModal(true);
-    };
-
-    const handleExportWorkOrder = (workOrder: WorkOrder) => {
-        setCurrentWorkOrder(workOrder);
-        // TODO: Implement PDF export
     };
 
     const handleDeleteWorkOrder = async (workOrder: WorkOrder) => {
@@ -185,6 +233,139 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
                             </Button>
                         </Col>
                     </Row>
+                    <Row className="mb-4">
+                        <Col>
+                            <form>
+                                <Row>
+                                    <Col md={3}>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            placeholder="Data de Início"
+                                            value={filters.startDate}
+                                            onChange={(e) =>
+                                                setFilters({ ...filters, startDate: e.target.value })
+                                            }
+                                        />
+                                    </Col>
+                                    <Col md={3}>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            placeholder="Data de Fim"
+                                            value={filters.endDate}
+                                            onChange={(e) =>
+                                                setFilters({ ...filters, endDate: e.target.value })
+                                            }
+                                        />
+                                    </Col>
+                                    <Col md={2}>
+                                        <select
+                                            className="form-control"
+                                            value={filters.status}
+                                            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                                        >
+                                            <option value="">Status</option>
+                                            <option value="0">Concluída</option>
+                                            <option value="1">Em Andamento</option>
+                                            <option value="2">Pendente</option>
+                                        </select>
+                                    </Col>
+                                    <Col md={2}>
+                                        <select
+                                            className="form-control"
+                                            value={filters.userInChargeId}
+                                            onChange={(e) =>
+                                                setFilters({ ...filters, userInChargeId: e.target.value })
+                                            }
+                                        >
+                                            <option value="">Responsável</option>
+                                            {users.map((u) => (
+                                                <option key={u.id} value={u.id}>
+                                                    {u.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </Col>
+                                    <Col md={2}>
+                                        <select
+                                            className="form-control"
+                                            value={filters.clientId}
+                                            onChange={(e) =>
+                                                setFilters({ ...filters, clientId: e.target.value })
+                                            }
+                                        >
+                                            <option value="">Cliente</option>
+                                            {clients.map((c) => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </Col>
+                                </Row>
+                                <Row className="mt-3">
+                                    <Col md={2}>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            placeholder="Horas Mín."
+                                            value={filters.workHoursMin}
+                                            onChange={(e) =>
+                                                setFilters({ ...filters, workHoursMin: e.target.value })
+                                            }
+                                        />
+                                    </Col>
+                                    <Col md={2}>
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            placeholder="Horas Máx."
+                                            value={filters.workHoursMax}
+                                            onChange={(e) =>
+                                                setFilters({ ...filters, workHoursMax: e.target.value })
+                                            }
+                                        />
+                                    </Col>
+                                    <Col md={4}>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Descrição"
+                                            value={filters.description}
+                                            onChange={(e) =>
+                                                setFilters({ ...filters, description: e.target.value })
+                                            }
+                                        />
+                                    </Col>
+                                    <Col>
+                                        <Button type="button" variant="primary">
+                                            Aplicar Filtros
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="secondary"
+                                            className="ms-2"
+                                            onClick={() =>
+                                                setFilters({
+                                                    startDate: "",
+                                                    endDate: "",
+                                                    status: "",
+                                                    userInChargeId: "",
+                                                    clientId: "",
+                                                    workHoursMin: "",
+                                                    workHoursMax: "",
+                                                    description: "",
+                                                })
+                                            }
+                                        >
+                                            Limpar
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            </form>
+                        </Col>
+                    </Row>
                     <Row>
                         <Col>
                             {loading ? (
@@ -200,12 +381,13 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
                                     style={{ overflowX: "auto", width: "100%" }}
                                 >
                                     <GenericTable
-                                        data={workOrders}
+                                        data={filteredWorkOrders}
                                         columns={columns}
                                         actions={{
                                             onEdit: handleEditWorkOrder,
                                             onDelete: handleDeleteWorkOrder,
-                                            onExtra: handleExportWorkOrder,
+                                            onExtra: (workOrder) =>
+                                                console.log("Export PDF for:", workOrder),
                                         }}
                                         extraAction={<MdPictureAsPdf />}
                                     />
