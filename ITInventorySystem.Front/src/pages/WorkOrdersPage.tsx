@@ -7,6 +7,7 @@ import { MdPictureAsPdf } from "react-icons/md";
 import { GenericTable } from "../components/GenericTable";
 import { WorkOrderModal } from "../components/WorkOrderModal";
 import WorkOrder from "../types/WorkOrder";
+import {generateWorkOrderReport} from "../utils/pdfUtils.ts";
 
 const API_ENDPOINTS = {
     workOrdersPage: (port: string) => `https://localhost:${port}/auth/work-orders-page`,
@@ -92,6 +93,7 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
         checkAccess();
     }, [port]);
 
+    // Busca as ordens de serviço registradas
     const fetchWorkOrders = useCallback(async () => {
         setLoading(true);
         try {
@@ -171,12 +173,19 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
         setShowModal(true);
     };
 
+    // Abre o modal para editar uma ordem de serviço existente
     const handleEditWorkOrder = (workOrder: WorkOrder) => {
         setCurrentWorkOrder(workOrder);
         setIsEdit(true);
         setShowModal(true);
     };
 
+    // Exporta uma ordem de serviço para PDF
+    const handleExportWorkOrder = async (workOrder: WorkOrder) => {
+        await generateWorkOrderReport(workOrder, port);
+    };
+
+    // Exclui uma ordem de serviço com confirmação
     const handleDeleteWorkOrder = async (workOrder: WorkOrder) => {
         const confirmed = await Swal.fire({
             title: "Tem certeza?",
@@ -198,6 +207,7 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
         }
     };
 
+    // Salva as alterações de uma ordem de serviço (nova ou existente)
     const handleSaveWorkOrder = async (workOrder: Partial<WorkOrder>) => {
         const endpoint = isEdit
             ? `${API_ENDPOINTS.workOrders(port)}/${workOrder.id}`
@@ -386,8 +396,7 @@ const WorkOrdersPage = ({ port }: { port: string }) => {
                                         actions={{
                                             onEdit: handleEditWorkOrder,
                                             onDelete: handleDeleteWorkOrder,
-                                            onExtra: (workOrder) =>
-                                                console.log("Export PDF for:", workOrder),
+                                            onExtra: handleExportWorkOrder,
                                         }}
                                         extraAction={<MdPictureAsPdf />}
                                     />

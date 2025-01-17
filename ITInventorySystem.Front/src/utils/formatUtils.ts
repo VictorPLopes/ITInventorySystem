@@ -1,5 +1,5 @@
 ﻿export const formatPhone = (phone: string) =>
-    phone.length <= 12
+    phone.length < 11
         ? phone.replace(/\D/g, "").replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3").slice(0, 15)
         : phone.replace(/\D/g, "").replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3").slice(0, 16);
 
