@@ -110,7 +110,7 @@ export const StockMovementModal = ({
             console.error("Erro ao registrar movimentação", error);
 
             if (error.response && error.response.data) {
-                const { message, code } = error.response.data;
+                const { message } = error.response.data;
                 setError(message || "Erro desconhecido ao registrar movimentação.");
             } else {
                 setError("Erro ao registrar movimentação. Tente novamente.");
