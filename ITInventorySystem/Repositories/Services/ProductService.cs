@@ -1,6 +1,7 @@
 ﻿using ITInventorySystem.Data;
 using ITInventorySystem.DTO.Products;
 using ITInventorySystem.Models;
+using ITInventorySystem.Models.Enums;
 using ITInventorySystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,21 +13,44 @@ public class ProductService(AppDbContext context) : IProductInterface
     {
         ValidateProductData(product.Quantity, product.CostPrice, product.SalePrice);
 
-        var prod = new Product
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
         {
-            Name                  = product.Name,
-            Description           = product.Description,
-            Quantity              = product.Quantity,
-            BrandManufacturerName = product.BrandManufacturerName,
-            Category              = product.Category,
-            CostPrice             = product.CostPrice,
-            SalePrice             = product.SalePrice
-        };
+            var prod = new Product
+            {
+                Name = product.Name,
+                Description = product.Description,
+                Quantity = product.Quantity,
+                BrandManufacturerName = product.BrandManufacturerName,
+                Category = product.Category,
+                CostPrice = product.CostPrice,
+                SalePrice = product.SalePrice
+            };
 
-        context.Products.Add(prod);
-        await context.SaveChangesAsync();
+            context.Products.Add(prod);
+            await context.SaveChangesAsync();
 
-        return prod;
+            // Cria movimentação de estoque
+            var movement = new StockMovement
+            {
+                ProductId = prod.Id,
+                Description = "Initial stock entry",
+                Quantity = product.Quantity,
+                MovementType = EStockMovementType.Entry,
+                CreatedAt = DateTime.Now
+            };
+
+            context.StockMovements.Add(movement);
+            await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+            return prod;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task DeleteAsync(int id)
@@ -67,8 +91,6 @@ public class ProductService(AppDbContext context) : IProductInterface
 
     public async Task UpdateAsync(int id, ProductUpdateDto product)
     {
-        ValidateProductData(product.Quantity, product.CostPrice, product.SalePrice);
-
         var prod = await context.Products
                                 .FirstOrDefaultAsync(prodDb => prodDb.Id == id && !prodDb.IsDeleted);
 
@@ -76,7 +98,6 @@ public class ProductService(AppDbContext context) : IProductInterface
 
         prod.Name                  = product.Name;
         prod.Description           = product.Description;
-        prod.Quantity              = product.Quantity;
         prod.BrandManufacturerName = product.BrandManufacturerName;
         prod.Category              = product.Category;
         prod.CostPrice             = product.CostPrice;

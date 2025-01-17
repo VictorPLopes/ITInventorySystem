@@ -166,6 +166,38 @@ namespace ITInventorySystem.Migrations
                     b.ToTable("ProductsInWorkOrder");
                 });
 
+            modelBuilder.Entity("ITInventorySystem.Models.StockMovement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("MovementType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("StockMovements");
+                });
+
             modelBuilder.Entity("ITInventorySystem.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -282,6 +314,17 @@ namespace ITInventorySystem.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("WorkOrder");
+                });
+
+            modelBuilder.Entity("ITInventorySystem.Models.StockMovement", b =>
+                {
+                    b.HasOne("ITInventorySystem.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("ITInventorySystem.Models.WorkOrder", b =>

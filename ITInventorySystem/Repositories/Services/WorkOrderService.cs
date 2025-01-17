@@ -1,6 +1,7 @@
 ﻿using ITInventorySystem.Data;
 using ITInventorySystem.DTO.WorkOrder;
 using ITInventorySystem.Models;
+using ITInventorySystem.Models.Enums;
 using ITInventorySystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 {
     public async Task<WorkOrder> AddAsync(WorkOrderCreateDto workOrderDto)
     {
+        using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             // Inicializa a nova ordem de serviço
@@ -30,11 +32,8 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                         ArgumentException("Product with ID {productDto.ProductId} has an invalid quantity: {productDto.Quantity}. Quantity must be greater than zero.");
 
                 var product = await context.Products.FindAsync(productDto.ProductId);
-                if (product == null)
-                    throw new KeyNotFoundException($"Product with ID {productDto.ProductId} not found.");
-                if(product.IsDeleted)
-                    throw new InvalidOperationException($"Product with ID {productDto.ProductId} is no longer available for use.");
-                
+                if (product == null || product.IsDeleted)
+                    throw new KeyNotFoundException($"Product with ID {productDto.ProductId} not found or is no longer available.");
                 if (product.Quantity < productDto.Quantity)
                     throw new
                         InvalidOperationException($"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested: {productDto.Quantity}");
@@ -44,6 +43,9 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
                 // Atualiza o produto no contexto
                 context.Products.Update(product);
+                
+                await RegisterStockMovementAsync(product.Id, productDto.Quantity, EStockMovementType.Exit, "Used in Work Order creation.");
+
 
                 // Adiciona o produto à ordem de serviço
                 var productInWorkOrder = new ProductsInWorkOrder
@@ -57,11 +59,13 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
             // Adiciona a ordem de serviço ao banco de dados
             context.WorkOrders.Add(workOrder);
             await context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return workOrder;
         }
         catch (Exception ex)
         {
+            await transaction.RollbackAsync();
             throw new Exception(ex.Message, ex);
         }
     }
@@ -69,6 +73,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
     public async Task DeleteAsync(int id)
     {
+        using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             var workOrder = await context.WorkOrders
@@ -84,16 +89,20 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                 if (p != null && !p.IsDeleted)
                 {
                     p.Quantity += productInWorkOrder.Quantity;
+                    await RegisterStockMovementAsync(p.Id, productInWorkOrder.Quantity, EStockMovementType.Entry, "Restocked from Work Order deletion.");
+
                     context.Products.Update(p); // Atualiza o produto no context
                 }
             }
 
             context.WorkOrders.Remove(workOrder);
             await context.SaveChangesAsync();
+            await transaction.CommitAsync();
         }
         catch (Exception ex)
         {
-            throw new InvalidOperationException("An error occurred while deleting the work order.", ex);
+            await transaction.RollbackAsync();
+            throw new InvalidOperationException($"An error occurred while deleting the work order. {ex.Message}");
         }
     }
 
@@ -132,100 +141,137 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
     public async Task<WorkOrder> UpdateAsync(int id, WorkOrderUpdateDto updateDto)
     {
-        // Carrega a ordem de serviço existente
-        var workOrder = await context.WorkOrders
-                                     .Include(wo => wo.Products)
-                                     .FirstOrDefaultAsync(wo => wo.Id == id);
-
-        if (workOrder == null)
-            throw new KeyNotFoundException($"WorkOrder with ID {id} not found.");
-
-        // Atualiza os campos básicos
-        workOrder.StartDate      = updateDto.StartDate;
-        workOrder.UserInChargeId = updateDto.UserInChargeId;
-        workOrder.ClientId       = updateDto.ClientId;
-        workOrder.Description    = updateDto.Description;
-        workOrder.WorkHours      = updateDto.WorkHours;
-        workOrder.Status         = updateDto.Status;
-        workOrder.UpdatedAt      = DateTime.Now;
-
-        // Atualiza a lista de produtos associados
-        var existingProducts = workOrder.Products.ToList();
-
-        // Processa os produtos do DTO
-        foreach (var productDto in updateDto.Products)
+        using var transaction = await context.Database.BeginTransactionAsync();
+        try
         {
-            if (productDto.Quantity <= 0)
-                throw new
-                    ArgumentException($"Product with ID {productDto.ProductId} has an invalid quantity: {productDto.Quantity}. Quantity must be greater than zero.");
+            // Carrega a ordem de serviço existente
+            var workOrder = await context.WorkOrders
+                .Include(wo => wo.Products)
+                .FirstOrDefaultAsync(wo => wo.Id == id);
 
-            //Busca o produto no banco de dados, se não encontra lança uma exceção
-            var product = await context.Products.FindAsync(productDto.ProductId);
-            if (product == null)
-                throw new KeyNotFoundException($"Product with ID {productDto.ProductId} not found.");
+            if (workOrder == null)
+                throw new KeyNotFoundException($"WorkOrder with ID {id} not found.");
 
-            //Verifica agora se o produto já existe naquela ordem de serviço ou não
-            var existingProduct = existingProducts.FirstOrDefault(p => p.ProductId == productDto.ProductId);
+            // Atualiza os campos básicos
+            workOrder.StartDate = updateDto.StartDate;
+            workOrder.UserInChargeId = updateDto.UserInChargeId;
+            workOrder.ClientId = updateDto.ClientId;
+            workOrder.Description = updateDto.Description;
+            workOrder.WorkHours = updateDto.WorkHours;
+            workOrder.Status = updateDto.Status;
+            workOrder.UpdatedAt = DateTime.Now;
 
-            //Se já existe
-            if (existingProduct != null)
+            // Atualiza a lista de produtos associados
+            var existingProducts = workOrder.Products.ToList();
+
+            // Processa os produtos do DTO
+            foreach (var productDto in updateDto.Products)
             {
-                // Produto já existe na ordem: Atualiza a quantidade
-                if (productDto.Quantity > existingProduct.Quantity)
-                {
-                    // Reduz o estoque apenas se a quantidade aumentou
-                    var additionalQuantity = productDto.Quantity - existingProduct.Quantity;
-                    if (product.Quantity < additionalQuantity)
-                        throw new
-                            InvalidOperationException($"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested Additional: {additionalQuantity}");
+                if (productDto.Quantity <= 0)
+                    throw new
+                        ArgumentException(
+                            $"Product with ID {productDto.ProductId} has an invalid quantity: {productDto.Quantity}. Quantity must be greater than zero.");
 
-                    product.Quantity -= additionalQuantity;
+                //Busca o produto no banco de dados, se não encontra lança uma exceção
+                var product = await context.Products.FindAsync(productDto.ProductId);
+                if (product == null)
+                    throw new KeyNotFoundException($"Product with ID {productDto.ProductId} not found.");
+
+                //Verifica agora se o produto já existe naquela ordem de serviço ou não
+                var existingProduct = existingProducts.FirstOrDefault(p => p.ProductId == productDto.ProductId);
+
+                //Se já existe
+                if (existingProduct != null)
+                {
+                    // Produto já existe na ordem: Atualiza a quantidade
+                    if (productDto.Quantity > existingProduct.Quantity && productDto.Quantity != existingProduct.Quantity )
+                    {
+                        // Reduz o estoque apenas se a quantidade aumentou
+                        var additionalQuantity = productDto.Quantity - existingProduct.Quantity;
+                        if (product.Quantity < additionalQuantity)
+                            throw new
+                                InvalidOperationException(
+                                    $"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested Additional: {additionalQuantity}");
+
+                        product.Quantity -= additionalQuantity;
+                        await RegisterStockMovementAsync(product.Id, additionalQuantity, EStockMovementType.Exit,
+                            "Utilizado em correção de ordem de serviço.");
+                    }
+                    else if (productDto.Quantity < existingProduct.Quantity)
+                    {
+                        // Devolve o estoque se a quantidade foi reduzida
+                        var quantityToReturn = existingProduct.Quantity - productDto.Quantity;
+                        product.Quantity += quantityToReturn;
+                        await RegisterStockMovementAsync(product.Id, quantityToReturn, EStockMovementType.Entry, "Devolvido através de correção de ordem de serviço.");
+
+                    }
+
+                    existingProduct.Quantity = productDto.Quantity;
                 }
                 else
                 {
-                    // Devolve o estoque se a quantidade foi reduzida
-                    var quantityToReturn = existingProduct.Quantity - productDto.Quantity;
-                    product.Quantity += quantityToReturn;
+                    // Novo produto na ordem
+                    if (product.Quantity < productDto.Quantity)
+                        throw new
+                            InvalidOperationException(
+                                $"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested: {productDto.Quantity}");
+
+                    product.Quantity -= productDto.Quantity;
+                    await RegisterStockMovementAsync(product.Id, productDto.Quantity, EStockMovementType.Exit, "Utilizado em correção de ordem de serviço.");
+
+                    var newProductInWorkOrder = new ProductsInWorkOrder
+                    {
+                        ProductId = productDto.ProductId,
+                        Quantity = productDto.Quantity,
+                        WorkOrderId = workOrder.Id
+                    };
+
+                    context.ProductsInWorkOrder.Add(newProductInWorkOrder);
                 }
-
-                existingProduct.Quantity = productDto.Quantity;
             }
-            else
+
+            // Remove produtos que não estão mais na lista de produtos do DTO
+            var productIdsToRemove = existingProducts
+                .Where(ep => updateDto.Products.All(dto => dto.ProductId != ep.ProductId))
+                .ToList();
+
+            foreach (var productToRemove in productIdsToRemove)
             {
-                // Novo produto na ordem
-                if (product.Quantity < productDto.Quantity)
-                    throw new
-                        InvalidOperationException($"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested: {productDto.Quantity}");
-
-                product.Quantity -= productDto.Quantity;
-
-                var newProductInWorkOrder = new ProductsInWorkOrder
+                var product = await context.Products.FindAsync(productToRemove.ProductId);
+                if (product != null)
                 {
-                    ProductId = productDto.ProductId,
-                    Quantity  = productDto.Quantity,
-                    WorkOrderId = workOrder.Id
-                };
-
-                context.ProductsInWorkOrder.Add(newProductInWorkOrder);
+                    // Devolve o estoque e registra a movimentação
+                    product.Quantity += productToRemove.Quantity;
+                    await RegisterStockMovementAsync(product.Id, productToRemove.Quantity, EStockMovementType.Entry, "Devolvido através de correção de ordem de serviço.");
+                }
+                context.ProductsInWorkOrder.Remove(productToRemove);
             }
+
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return workOrder;
         }
-
-        // Remove produtos que não estão mais na lista de produtos do DTO
-        var productIdsToRemove = existingProducts
-                                 .Where(ep => updateDto.Products.All(dto => dto.ProductId != ep.ProductId))
-                                 .ToList();
-
-        foreach (var productToRemove in productIdsToRemove)
+        catch (Exception ex)
         {
-            var product = await context.Products.FindAsync(productToRemove.ProductId);
-            if (product != null)
-                // Devolve o estoque
-                product.Quantity += productToRemove.Quantity;
-            context.ProductsInWorkOrder.Remove(productToRemove);
+            await transaction.RollbackAsync();
+            throw;
         }
+        
+    }
+    
+    public async Task RegisterStockMovementAsync(int productId, int quantity, EStockMovementType movementType, string description)
+    {
+        var stockMovement = new StockMovement
+        {
+            ProductId = productId,
+            Quantity = quantity,
+            MovementType = movementType,
+            Description = description,
+            CreatedAt = DateTime.Now
+        };
 
-        // Salva alterações no banco
+        context.StockMovements.Add(stockMovement);
         await context.SaveChangesAsync();
-        return workOrder;
     }
 }

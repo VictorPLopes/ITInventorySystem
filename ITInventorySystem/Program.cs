@@ -89,6 +89,7 @@ builder.Services.AddScoped<IAuthenticationInterface, AuthenticationService>();
 builder.Services.AddScoped<IWorkOrderInterface, WorkOrderService>();
 builder.Services.AddScoped<IProductInterface, ProductService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IStockMovementInterface, StockMovementService>();
 
 // Configuração do banco de dados com SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>

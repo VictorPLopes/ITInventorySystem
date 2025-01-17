@@ -35,4 +35,8 @@ public class AuthenticationController(IAuthenticationInterface authenticationInt
     [HttpGet("users-page")]
     [Authorize(Roles = "Admin, Master")]
     public string? UsersPage() => User.Identity?.Name;
+    
+    [HttpGet("movements-page")]
+    [Authorize]
+    public string? MovementsPage() => User.Identity?.Name;
 }

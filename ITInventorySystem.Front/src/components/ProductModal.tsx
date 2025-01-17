@@ -113,16 +113,23 @@ export const ProductModal: React.FC<ProductModalProps> = ({show, onClose, onSave
                     </Form.Group>
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Quantidade</Form.Label>
-                        <Form.Control
-                            type="number"
-                            name="quantity"
-                            value={formData.quantity || ""}
-                            onChange={handleInputChange}
-                            placeholder="Digite a quantidade"
-                            min="0"
-                            required
-                        />
+                        {!isEdit && (
+                            <Form.Group className="mb-3">
+                                <Form.Label>Quantidade</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    name="quantity"
+                                    value={formData.quantity || ""}
+                                    onChange={handleInputChange}
+                                    placeholder="Digite a quantidade"
+                                    min="0"
+                                    required
+                                />
+                                <Form.Control.Feedback type="invalid">
+                                    Por favor, insira uma quantidade válida.
+                                </Form.Control.Feedback>
+                            </Form.Group>
+                        )}
                         <Form.Control.Feedback type="invalid">
                             Por favor, insira uma quantidade válida.
                         </Form.Control.Feedback>

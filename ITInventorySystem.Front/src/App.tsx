@@ -11,6 +11,7 @@ import "./App.css";
 import Layout from "./Layout/Layout";
 import "@fortawesome/fontawesome-free/css/all.css";
 import JwtUser from "./types/JwtUser";
+import StockMovementPage from "./pages/StockMovementPage.tsx";
 
 function App() {
   const port: string = "44307";
@@ -90,6 +91,10 @@ function App() {
             element={
               <ProfilePage port={port} loggedUser={loggedUser} />
             }
+          />
+          <Route
+            path="/movements"
+            element={<StockMovementPage port={port}/>}
           />
         </Route>
       </Routes>

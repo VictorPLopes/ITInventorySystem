@@ -1,4 +1,5 @@
 ﻿using ITInventorySystem.Data;
+using ITInventorySystem.Exceptions;
 using ITInventorySystem.Models;
 using ITInventorySystem.Models.Enums;
 using ITInventorySystem.Repositories.Interfaces;
@@ -13,19 +14,38 @@ public class StockMovementService(AppDbContext context) : IStockMovementInterfac
         using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
-            //Verifica se o produto existe e n foi excluido 
             var product = await context.Products.FindAsync(productId);
             if (product == null || product.IsDeleted)
-                throw new Exception($"Product {productId} not found or is deleted.");
-            //Verifica se há estoque suficienmte para uma movimentação de Saída
-            if (movementType == EStockMovementType.Exit && product.Quantity < quantity)
-                throw new Exception($"Insufficient stock for Product {productId} .");
+                throw new StockMovementException($"Produto {productId} não encontrado ou desativado.", 1001);
 
-            //Atualiza o estoque
-            product.Quantity += (movementType == EStockMovementType.Exit ? -quantity : quantity);
+            switch (movementType)
+            {
+                case EStockMovementType.Entry:
+                    if (quantity <= 0)
+                        throw new StockMovementException("A quantidade para entrada deve ser positiva.", 1002);
+                    product.Quantity += quantity;
+                    break;
+                    
+                case EStockMovementType.Exit:
+                    if (quantity <= 0)
+                        throw new StockMovementException("A quantidade para saída deve ser positiva.", 1003);
+                    if (product.Quantity < quantity)
+                        throw new StockMovementException($"Estoque insuficiente! Disponível: {product.Quantity}, solicitado: {quantity}.", 1004);
+                    product.Quantity -= quantity;
+                    break;
+                    
+                case EStockMovementType.Adjustment:
+                    if (product.Quantity + quantity < 0)
+                        throw new StockMovementException($"Ajuste de estoque inválido! Estoque não pode ser negativo. Disponível: {product.Quantity}, ajuste: {quantity}.", 1005);
+                    product.Quantity += quantity;
+                    break;
+                    
+                default:
+                    throw new StockMovementException("Tipo de movimentação inválido.", 1006);
+            }
+            
             context.Products.Update(product);
-
-            //Registra a movimentacao
+            
             var stockMov = new StockMovement
             {
                 ProductId = productId,
@@ -40,13 +60,19 @@ public class StockMovementService(AppDbContext context) : IStockMovementInterfac
 
             return stockMov;
         }
-        catch (Exception e)
+        catch (StockMovementException ex)  // Captura erros específicos de estoque
         {
             await transaction.RollbackAsync();
-            Console.WriteLine($"Error in RegisterMovementAsync: {e.Message}");
+            Console.WriteLine($"Erro específico no estoque: {ex.Message}");
             throw;
         }
-    }
+        catch (Exception ex) // Captura outros erros inesperados
+        {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Erro inesperado: {ex.Message}");
+            throw new StockMovementException("Erro interno no servidor ao registrar movimentação.", 1099);
+        }
+    }   
 
     public async Task<IEnumerable<StockMovement>> GetAllMovementsAsync() => await context.StockMovements.Include(sm => sm.Product).ToListAsync();
     

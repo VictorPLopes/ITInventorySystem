@@ -2,7 +2,7 @@ import {Link} from "react-router-dom";
 import "./sidebar.css";
 import classNames from "classnames";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faBars, faBoxOpen, faFileLines, faHome, faUserGear, faUserTie, faArrowRightFromBracket} from "@fortawesome/free-solid-svg-icons";
+import {faBars, faBoxOpen, faFileLines, faHome, faUserGear, faUserTie, faArrowRightFromBracket, faArrowRightArrowLeft} from "@fortawesome/free-solid-svg-icons";
 import {Fragment, useEffect, useState} from "react";
 import axios from "../../AxiosConfig";
 import JwtUser from "../../types/JwtUser.tsx";
@@ -32,6 +32,7 @@ const Sidebar = ({
         {routerLink: "inventory", icon: faBoxOpen, label: "Inventário"},
         {routerLink: "clients", icon: faUserTie, label: "Clientes"},
         {routerLink: "work-orders", icon: faFileLines, label: "Ordens de Serviço"},
+        {routerLink: "movements", icon: faArrowRightArrowLeft, label: "Movimentações de estoque"}
     ];
 
     const adminItems = [
