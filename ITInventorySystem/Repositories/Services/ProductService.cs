@@ -13,18 +13,18 @@ public class ProductService(AppDbContext context) : IProductInterface
     {
         ValidateProductData(product.Quantity, product.CostPrice, product.SalePrice);
 
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             var prod = new Product
             {
-                Name = product.Name,
-                Description = product.Description,
-                Quantity = product.Quantity,
+                Name                  = product.Name,
+                Description           = product.Description,
+                Quantity              = product.Quantity,
                 BrandManufacturerName = product.BrandManufacturerName,
-                Category = product.Category,
-                CostPrice = product.CostPrice,
-                SalePrice = product.SalePrice
+                Category              = product.Category,
+                CostPrice             = product.CostPrice,
+                SalePrice             = product.SalePrice
             };
 
             context.Products.Add(prod);
@@ -33,11 +33,11 @@ public class ProductService(AppDbContext context) : IProductInterface
             // Cria movimentação de estoque
             var movement = new StockMovement
             {
-                ProductId = prod.Id,
-                Description = "Initial stock entry",
-                Quantity = product.Quantity,
+                ProductId    = prod.Id,
+                Description  = "Initial stock entry",
+                Quantity     = product.Quantity,
                 MovementType = EStockMovementType.Entry,
-                CreatedAt = DateTime.Now
+                CreatedAt    = DateTime.Now
             };
 
             context.StockMovements.Add(movement);
@@ -62,7 +62,7 @@ public class ProductService(AppDbContext context) : IProductInterface
 
             if (prod == null) throw new KeyNotFoundException("Product not found!");
 
-            prod.IsDeleted = true;  
+            prod.IsDeleted = true;
             await context.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -73,11 +73,8 @@ public class ProductService(AppDbContext context) : IProductInterface
 
     public async Task<IEnumerable<Product>> GetAllAsync(bool includeDeleted = false)
     {
-        if (includeDeleted)
-        {
-            return await context.Products.ToListAsync();
-        } 
-        
+        if (includeDeleted) return await context.Products.ToListAsync();
+
         return await context.Products.Where(p => !p.IsDeleted).ToListAsync();
     }
 

@@ -48,12 +48,9 @@ public class ClientService(AppDbContext context) : IClientInterface
 
     public async Task<IEnumerable<Client>> GetAllAsync(bool includeDeleted)
     {
-        if (includeDeleted)
-        {
-            return await context.Clients.ToListAsync();
-        }
+        if (includeDeleted) return await context.Clients.ToListAsync();
         return await context.Clients.Where(c => !c.IsDeleted).ToListAsync();
-    } 
+    }
 
     public async Task<Client> GetByIdAsync(int id)
     {

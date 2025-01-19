@@ -11,7 +11,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 {
     public async Task<WorkOrder> AddAsync(WorkOrderCreateDto workOrderDto)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             // Inicializa a nova ordem de serviço
@@ -33,7 +33,8 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
                 var product = await context.Products.FindAsync(productDto.ProductId);
                 if (product == null || product.IsDeleted)
-                    throw new KeyNotFoundException($"Product with ID {productDto.ProductId} not found or is no longer available.");
+                    throw new
+                        KeyNotFoundException($"Product with ID {productDto.ProductId} not found or is no longer available.");
                 if (product.Quantity < productDto.Quantity)
                     throw new
                         InvalidOperationException($"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested: {productDto.Quantity}");
@@ -43,8 +44,9 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
                 // Atualiza o produto no contexto
                 context.Products.Update(product);
-                
-                await RegisterStockMovementAsync(product.Id, productDto.Quantity, EStockMovementType.Exit, "Used in Work Order creation.");
+
+                await RegisterStockMovementAsync(product.Id, productDto.Quantity, EStockMovementType.Exit,
+                                                 "Used in Work Order creation.");
 
 
                 // Adiciona o produto à ordem de serviço
@@ -73,12 +75,12 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
     public async Task DeleteAsync(int id)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             var workOrder = await context.WorkOrders
-                .Include(w => w.Products)
-                .FirstOrDefaultAsync(wo => wo.Id == id);
+                                         .Include(w => w.Products)
+                                         .FirstOrDefaultAsync(wo => wo.Id == id);
 
             if (workOrder == null)
                 throw new KeyNotFoundException($"WorkOrder with ID {id} not found.");
@@ -89,7 +91,8 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                 if (p != null && !p.IsDeleted)
                 {
                     p.Quantity += productInWorkOrder.Quantity;
-                    await RegisterStockMovementAsync(p.Id, productInWorkOrder.Quantity, EStockMovementType.Entry, "Restocked from Work Order deletion.");
+                    await RegisterStockMovementAsync(p.Id, productInWorkOrder.Quantity, EStockMovementType.Entry,
+                                                     "Restocked from Work Order deletion.");
 
                     context.Products.Update(p); // Atualiza o produto no context
                 }
@@ -113,7 +116,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                      .Include(w => w.Products)
                      .ThenInclude(p => p.Product)
                      .ToListAsync();
-    
+
     public async Task<IEnumerable<WorkOrder>> GetByClientIdAsync(int clientId) =>
         await context.WorkOrders
                      .Include(w => w.Client)
@@ -137,29 +140,29 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
         return workOrder;
     }
-    
+
 
     public async Task<WorkOrder> UpdateAsync(int id, WorkOrderUpdateDto updateDto)
     {
-        using var transaction = await context.Database.BeginTransactionAsync();
+        await using var transaction = await context.Database.BeginTransactionAsync();
         try
         {
             // Carrega a ordem de serviço existente
             var workOrder = await context.WorkOrders
-                .Include(wo => wo.Products)
-                .FirstOrDefaultAsync(wo => wo.Id == id);
+                                         .Include(wo => wo.Products)
+                                         .FirstOrDefaultAsync(wo => wo.Id == id);
 
             if (workOrder == null)
                 throw new KeyNotFoundException($"WorkOrder with ID {id} not found.");
 
             // Atualiza os campos básicos
-            workOrder.StartDate = updateDto.StartDate;
+            workOrder.StartDate      = updateDto.StartDate;
             workOrder.UserInChargeId = updateDto.UserInChargeId;
-            workOrder.ClientId = updateDto.ClientId;
-            workOrder.Description = updateDto.Description;
-            workOrder.WorkHours = updateDto.WorkHours;
-            workOrder.Status = updateDto.Status;
-            workOrder.UpdatedAt = DateTime.Now;
+            workOrder.ClientId       = updateDto.ClientId;
+            workOrder.Description    = updateDto.Description;
+            workOrder.WorkHours      = updateDto.WorkHours;
+            workOrder.Status         = updateDto.Status;
+            workOrder.UpdatedAt      = DateTime.Now;
 
             // Atualiza a lista de produtos associados
             var existingProducts = workOrder.Products.ToList();
@@ -170,7 +173,7 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                 if (productDto.Quantity <= 0)
                     throw new
                         ArgumentException(
-                            $"Product with ID {productDto.ProductId} has an invalid quantity: {productDto.Quantity}. Quantity must be greater than zero.");
+                                          $"Product with ID {productDto.ProductId} has an invalid quantity: {productDto.Quantity}. Quantity must be greater than zero.");
 
                 //Busca o produto no banco de dados, se não encontra lança uma exceção
                 var product = await context.Products.FindAsync(productDto.ProductId);
@@ -184,26 +187,27 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                 if (existingProduct != null)
                 {
                     // Produto já existe na ordem: Atualiza a quantidade
-                    if (productDto.Quantity > existingProduct.Quantity && productDto.Quantity != existingProduct.Quantity )
+                    if (productDto.Quantity > existingProduct.Quantity &&
+                        productDto.Quantity != existingProduct.Quantity)
                     {
                         // Reduz o estoque apenas se a quantidade aumentou
                         var additionalQuantity = productDto.Quantity - existingProduct.Quantity;
                         if (product.Quantity < additionalQuantity)
                             throw new
                                 InvalidOperationException(
-                                    $"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested Additional: {additionalQuantity}");
+                                                          $"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested Additional: {additionalQuantity}");
 
                         product.Quantity -= additionalQuantity;
                         await RegisterStockMovementAsync(product.Id, additionalQuantity, EStockMovementType.Exit,
-                            "Utilizado em correção de ordem de serviço.");
+                                                         "Utilizado em correção de ordem de serviço.");
                     }
                     else if (productDto.Quantity < existingProduct.Quantity)
                     {
                         // Devolve o estoque se a quantidade foi reduzida
                         var quantityToReturn = existingProduct.Quantity - productDto.Quantity;
                         product.Quantity += quantityToReturn;
-                        await RegisterStockMovementAsync(product.Id, quantityToReturn, EStockMovementType.Entry, "Devolvido através de correção de ordem de serviço.");
-
+                        await RegisterStockMovementAsync(product.Id, quantityToReturn, EStockMovementType.Entry,
+                                                         "Devolvido através de correção de ordem de serviço.");
                     }
 
                     existingProduct.Quantity = productDto.Quantity;
@@ -214,15 +218,16 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                     if (product.Quantity < productDto.Quantity)
                         throw new
                             InvalidOperationException(
-                                $"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested: {productDto.Quantity}");
+                                                      $"Insufficient stock for Product ID {productDto.ProductId}. Available: {product.Quantity}, Requested: {productDto.Quantity}");
 
                     product.Quantity -= productDto.Quantity;
-                    await RegisterStockMovementAsync(product.Id, productDto.Quantity, EStockMovementType.Exit, "Utilizado em correção de ordem de serviço.");
+                    await RegisterStockMovementAsync(product.Id, productDto.Quantity, EStockMovementType.Exit,
+                                                     "Utilizado em correção de ordem de serviço.");
 
                     var newProductInWorkOrder = new ProductsInWorkOrder
                     {
-                        ProductId = productDto.ProductId,
-                        Quantity = productDto.Quantity,
+                        ProductId   = productDto.ProductId,
+                        Quantity    = productDto.Quantity,
                         WorkOrderId = workOrder.Id
                     };
 
@@ -232,8 +237,8 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
 
             // Remove produtos que não estão mais na lista de produtos do DTO
             var productIdsToRemove = existingProducts
-                .Where(ep => updateDto.Products.All(dto => dto.ProductId != ep.ProductId))
-                .ToList();
+                                     .Where(ep => updateDto.Products.All(dto => dto.ProductId != ep.ProductId))
+                                     .ToList();
 
             foreach (var productToRemove in productIdsToRemove)
             {
@@ -242,8 +247,10 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
                 {
                     // Devolve o estoque e registra a movimentação
                     product.Quantity += productToRemove.Quantity;
-                    await RegisterStockMovementAsync(product.Id, productToRemove.Quantity, EStockMovementType.Entry, "Devolvido através de correção de ordem de serviço.");
+                    await RegisterStockMovementAsync(product.Id, productToRemove.Quantity, EStockMovementType.Entry,
+                                                     "Devolvido através de correção de ordem de serviço.");
                 }
+
                 context.ProductsInWorkOrder.Remove(productToRemove);
             }
 
@@ -257,18 +264,18 @@ public class WorkOrderService(AppDbContext context) : IWorkOrderInterface
             await transaction.RollbackAsync();
             throw;
         }
-        
     }
-    
-    public async Task RegisterStockMovementAsync(int productId, int quantity, EStockMovementType movementType, string description)
+
+    public async Task RegisterStockMovementAsync(int    productId, int quantity, EStockMovementType movementType,
+                                                 string description)
     {
         var stockMovement = new StockMovement
         {
-            ProductId = productId,
-            Quantity = quantity,
+            ProductId    = productId,
+            Quantity     = quantity,
             MovementType = movementType,
-            Description = description,
-            CreatedAt = DateTime.Now
+            Description  = description,
+            CreatedAt    = DateTime.Now
         };
 
         context.StockMovements.Add(stockMovement);

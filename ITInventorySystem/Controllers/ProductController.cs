@@ -17,6 +17,7 @@ public class ProductController(IProductInterface productInterface) : ControllerB
         var products = await productInterface.GetAllAsync();
         return Ok(products);
     }
+
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<Product>>> GetAllProductsIncludingDeleted()
     {

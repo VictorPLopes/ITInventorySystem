@@ -8,9 +8,7 @@ public class Product
 {
     public int Id { get; set; }
 
-    [Required]
-    [StringLength(100)] 
-    public string Name { get; set; }
+    [Required] [StringLength(100)] public string Name { get; set; }
 
     public int Quantity { get; set; }
 
@@ -27,8 +25,8 @@ public class Product
     [JsonIgnore]
     public ICollection<ProductsInWorkOrder> ProductsInWorkOrder { get; set; } =
         new List<ProductsInWorkOrder>(); // Um produto pode estar em várias ordens de serviço
-    
-    public bool IsDeleted { get; set; } 
+
+    public bool IsDeleted { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public DateTime CreatedAt { get; set; }

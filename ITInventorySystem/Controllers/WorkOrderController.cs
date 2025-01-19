@@ -15,7 +15,9 @@ public class WorkOrderController(IWorkOrderInterface workOrderInterface) : Contr
     [HttpGet]
     public async Task<ActionResult<IEnumerable<WorkOrder>>> GetAll([FromQuery] int clientId = 0)
     {
-        var workOrders = clientId > 0 ? await workOrderInterface.GetByClientIdAsync(clientId) : await workOrderInterface.GetAllAsync();
+        var workOrders = clientId > 0
+                             ? await workOrderInterface.GetByClientIdAsync(clientId)
+                             : await workOrderInterface.GetAllAsync();
         return Ok(workOrders);
     }
 

@@ -21,9 +21,14 @@ public class UserController(IUserInterface userInterface) : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<User>>> GetAllUsers() => Ok(await userInterface.GetAllAsync());
-    
+
     [HttpGet("all")]
-    public async Task<ActionResult<IEnumerable<User>>> GetAllUsersIncludingDeleted() => Ok(await userInterface.GetAllAsync(true));
+    public async Task<ActionResult<IEnumerable<User>>> GetAllUsersIncludingDeleted() =>
+        Ok(await userInterface.GetAllAsync(true));
+
+    [HttpGet("count")]
+    [AllowAnonymous]
+    public async Task<ActionResult<int>> GetUsersCount() => Ok(await userInterface.GetCountAsync());
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<User>> GetUser(int id) => Ok(await userInterface.GetByIdAsync(id));
@@ -39,6 +44,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         var user = await userInterface.AddAsync(userDto);
         return Ok(user);
     }
+
     [HttpPost]
     public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDto usr)
     {
@@ -115,7 +121,8 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         catch (Exception ex)
         {
             // Para outros tipos de erro, retorna um status 500 Internal Server Error
-            return StatusCode(500, new { message = "Um erro ocorreu ao editar a senha do usuário", error = ex.Message });
+            return StatusCode(500,
+                              new { message = "Um erro ocorreu ao editar a senha do usuário", error = ex.Message });
         }
     }
 
@@ -124,7 +131,7 @@ public class UserController(IUserInterface userInterface) : ControllerBase
     public async Task<ActionResult> UpdateMyPassword(int id, [FromBody] UserUpdateMyPasswordDto user)
     {
         var currentUserId = GetCurrentUserId();
-        
+
         // Usuários comuns não podem editar a senha de outros usuários
         if (currentUserId != id)
             return Forbid("Você não tem permissão para editar a senha de outro usuário.");
@@ -142,10 +149,11 @@ public class UserController(IUserInterface userInterface) : ControllerBase
         catch (Exception ex)
         {
             // Para outros tipos de erro, retorna um status 500 Internal Server Error
-            return StatusCode(500, new { message = "Um erro ocorreu ao editar a senha do usuário", error = ex.Message });
+            return StatusCode(500,
+                              new { message = "Um erro ocorreu ao editar a senha do usuário", error = ex.Message });
         }
     }
-    
+
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)

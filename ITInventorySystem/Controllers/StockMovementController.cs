@@ -1,87 +1,78 @@
 ﻿using ITInventorySystem.DTO.StockMovement;
 using ITInventorySystem.Exceptions;
-using ITInventorySystem.Models;
-using ITInventorySystem.Models.Enums;
 using ITInventorySystem.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ITInventorySystem.Controllers
+namespace ITInventorySystem.Controllers;
+
+[ApiController]
+[Route("movements")]
+[Authorize]
+public class StockMovementController(IStockMovementInterface stockMovementService) : ControllerBase
 {
-    [ApiController]
-    [Route("movements")]
-    [Authorize]
-    public class StockMovementController(IStockMovementInterface stockMovementService) : ControllerBase
+    [HttpPost]
+    public async Task<IActionResult> RegisterMovement([FromBody] CreateStockMovementDTO movementDTO)
     {
-        
-        [HttpPost]
-        public async Task<IActionResult> RegisterMovement([FromBody] CreateStockMovementDTO movementDTO)
+        try
         {
-            try
-            {
-                var stockMovement = await stockMovementService.RegisterMovementAsync(
-                    movementDTO.ProductId,
-                    movementDTO.Quantity,
-                    movementDTO.MovementType,
-                    movementDTO.Description
-                );
+            var stockMovement = await stockMovementService.RegisterMovementAsync(
+                                     movementDTO.ProductId,
+                                     movementDTO.Quantity,
+                                     movementDTO.MovementType,
+                                     movementDTO.Description
+                                    );
 
-                return CreatedAtAction(nameof(GetMovementById), new { id = stockMovement.Id }, stockMovement);
-            }
-            catch (StockMovementException ex)
-            {
-                return BadRequest(new { message = ex.Message, code = ex.ErrorCode });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Erro inesperado no servidor.", code = 1099 });
-            }
+            return CreatedAtAction(nameof(GetMovementById), new { id = stockMovement.Id }, stockMovement);
         }
-        
-        [HttpGet]
-        public async Task<IActionResult> GetAllMovements()
+        catch (StockMovementException ex)
         {
-            var movements = await stockMovementService.GetAllMovementsAsync();
-            return Ok(movements);
+            return BadRequest(new { message = ex.Message, code = ex.ErrorCode });
         }
-
-        // GET: api/StockMovement/Product/{productId}
-        [HttpGet("product/{productId}")]
-        public async Task<IActionResult> GetMovementsByProductId(int productId)
+        catch (Exception ex)
         {
-            try
-            {
-                var movements = await stockMovementService.GetByProductIdAsync(productId);
-                return Ok(movements);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        // GET: api/StockMovement/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetMovementById(int id)
-        {
-            try
-            {
-                var movement = (await stockMovementService.GetAllMovementsAsync())
-                    .FirstOrDefault(sm => sm.Id == id);
-
-                if (movement == null)
-                {
-                    return NotFound(new { message = $"Stock movement with ID {id} not found." });
-                }
-
-                return Ok(movement);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            return StatusCode(500, new { message = "Erro inesperado no servidor.", code = 1099 });
         }
     }
 
-    
+    [HttpGet]
+    public async Task<IActionResult> GetAllMovements()
+    {
+        var movements = await stockMovementService.GetAllMovementsAsync();
+        return Ok(movements);
+    }
+
+    // GET: api/StockMovement/Product/{productId}
+    [HttpGet("product/{productId}")]
+    public async Task<IActionResult> GetMovementsByProductId(int productId)
+    {
+        try
+        {
+            var movements = await stockMovementService.GetByProductIdAsync(productId);
+            return Ok(movements);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    // GET: api/StockMovement/{id}
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetMovementById(int id)
+    {
+        try
+        {
+            var movement = (await stockMovementService.GetAllMovementsAsync())
+                .FirstOrDefault(sm => sm.Id == id);
+
+            if (movement == null) return NotFound(new { message = $"Stock movement with ID {id} not found." });
+
+            return Ok(movement);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }

@@ -9,6 +9,7 @@ import {Alert, Button, Col, Container, Form, FormControl, FormGroup, FormLabel, 
 const API_ENDPOINTS = {
     login: (port: string) => `https://localhost:${port}/auth/login`,
     dashboard: (port: string) => `https://localhost:${port}/auth/dashboard`,
+    count: (port: string) => `https://localhost:${port}/users/count`,
 };
 
 const LoginPage = ({port, onLogin}: { port: string, onLogin: any}) => {
@@ -39,6 +40,16 @@ const LoginPage = ({port, onLogin}: { port: string, onLogin: any}) => {
                 navigate("/dashboard");
             } catch {
                 // Usuário não autenticado
+            }
+            
+            // Verifica se há usuários cadastrados
+            try {
+                const response = await axios.get(API_ENDPOINTS.count(port));
+                if (response.data === 0) {
+                    navigate("/setup");
+                }
+            } catch {
+                // Usuários já cadastrados
             }
         };
 

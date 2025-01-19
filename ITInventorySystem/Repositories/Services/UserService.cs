@@ -34,10 +34,11 @@ public class UserService(AppDbContext context) : IUserInterface
     {
         if (includeDeleted)
             return await context.Users.ToListAsync();
-        
-        return await context.Users.Where(userDb => !userDb.IsDeleted).ToListAsync();
 
-    } 
+        return await context.Users.Where(userDb => !userDb.IsDeleted).ToListAsync();
+    }
+
+    public async Task<int> GetCountAsync() => await context.Users.CountAsync();
 
     public async Task<User> GetByIdAsync(int id)
     {
@@ -99,17 +100,17 @@ public class UserService(AppDbContext context) : IUserInterface
     public async Task UpdateMyPasswordAsync(int id, string oldPassword, string newPassword)
     {
         var userDb = await context.Users.FirstOrDefaultAsync(userDb => userDb.Id == id);
-        
+
         if (userDb == null)
             throw new KeyNotFoundException("User not found!");
 
         if (!HashPassword.Verify(oldPassword, userDb.PasswordHash, userDb.PasswordSalt))
             throw new InvalidOperationException("Incorrect old password!");
-        
+
         HashPassword.Hash(newPassword, out var passwordHash, out var passwordSalt);
         userDb.PasswordHash = passwordHash;
         userDb.PasswordSalt = passwordSalt;
-        
+
         context.Users.Update(userDb);
         await context.SaveChangesAsync();
     }

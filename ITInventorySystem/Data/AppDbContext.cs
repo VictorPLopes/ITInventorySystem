@@ -5,12 +5,12 @@ namespace ITInventorySystem.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(option)
 {
-    public DbSet<User> Users { get; set; }
-    public DbSet<Client> Clients { get; set; }
-    public DbSet<Product> Products { get; set; }
-    public DbSet<WorkOrder> WorkOrders { get; set; }
+    public DbSet<User>                Users               { get; set; }
+    public DbSet<Client>              Clients             { get; set; }
+    public DbSet<Product>             Products            { get; set; }
+    public DbSet<WorkOrder>           WorkOrders          { get; set; }
     public DbSet<ProductsInWorkOrder> ProductsInWorkOrder { get; set; }
-    public DbSet<StockMovement> StockMovements { get; set; }
+    public DbSet<StockMovement>       StockMovements      { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -52,7 +52,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> option) : DbContext(opt
                     .WithOne(w => w.UserInCharge)
                     .HasForeignKey(w => w.UserInChargeId)
                     .OnDelete(DeleteBehavior.Restrict); // Define a relação de um para muitos entre User e WorkOrder
-                    
+
 
         modelBuilder.Entity<Product>()
                     .Property(p => p.CostPrice)
