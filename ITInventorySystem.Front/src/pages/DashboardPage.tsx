@@ -1,10 +1,11 @@
 import {useEffect, useState} from "react";
-import {Card, Col, Container, Row, Spinner} from "react-bootstrap";
+import {Button, Card, Col, Container, Row, Spinner} from "react-bootstrap";
 import axios from "../AxiosConfig";
 import {Toaster} from "react-hot-toast";
 import {Bar} from "react-chartjs-2";
 import {BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip} from "chart.js";
 import {FaBoxOpen, FaClipboardList, FaUsers} from "react-icons/fa";
+import ReportDownloadModal from "../components/ReportDownloadModal.tsx";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -18,6 +19,9 @@ const DashboardPage = ({port}: { port: string }) => {
     const [dashboardSummary, setDashboardSummary] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>("");
+    const [showModal, setShowModal] = useState(false);
+    const [selectedReportType, setSelectedReportType] = useState<string | null>(null);
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -41,6 +45,36 @@ const DashboardPage = ({port}: { port: string }) => {
         fetchData();
     }, [port]);
 
+    // Função para abrir o modal e definir o tipo de relatório
+    const openModal = (reportType: string) => {
+        setSelectedReportType(reportType);
+        setShowModal(true);
+    };
+
+    // Função para chamar a API e baixar o relatório
+    const handleDownloadReport = async (startDate: string, endDate: string) => {
+        if (!selectedReportType) return;
+
+        const endpoint = `https://localhost:${port}/reports/${selectedReportType}?startDate=${startDate}&endDate=${endDate}`;
+
+        try {
+            const response = await axios.get(endpoint, { responseType: "blob" });
+
+            // Criar link para download
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `${selectedReportType}_${startDate}_to_${endDate}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error("Erro ao baixar o relatório:", error);
+            alert("Erro ao baixar o relatório. Por favor, tente novamente.");
+        } finally {
+            setShowModal(false); // Fecha o modal após o download
+        }
+    };
     const barChartData = {
         labels: topProducts.map((product) => product.productName),
         datasets: [
@@ -83,6 +117,25 @@ const DashboardPage = ({port}: { port: string }) => {
                     <h2 className="mb-4 text-primary">📊 Dashboard</h2>
                 </Col>
             </Row>
+
+            <Row className="mb-3">
+                <Col className="text-end">
+                    <Button className="me-2" variant="primary" onClick={() => openModal("stock-movement")}>
+                        📥 Baixar Relatório de Estoque
+                    </Button>
+                    <Button variant="success" onClick={() => openModal("work-orders")}>
+                        📥 Baixar Relatório de Ordens de Serviço
+                    </Button>
+                </Col>
+            </Row>
+
+            {/* Modal de Seleção de Datas */}
+            <ReportDownloadModal
+                show={showModal}
+                reportType={selectedReportType}
+                onClose={() => setShowModal(false)}
+                onDownload={handleDownloadReport}
+            />    
 
             {/* Resumo do Dashboard */}
             {dashboardSummary && (
