@@ -123,7 +123,8 @@ const StockMovementsPage = ({ port }: { port: string }) => {
                                     data={movements}
                                     columns={[
                                         { title: "ID", data: "id" },
-                                        { title: "Produto", data: "product", render: (product: any) => product?.name || "Desconhecido" },
+                                        { title: "Produto", data: "product", render: (product: any) => `${product.id} - ${product.name}`
+                                                || "Desconhecido" },
                                         { title: "Quantidade", data: "quantity" },
                                         { title: "Tipo", data: "movementType", render: (type: number) => movementTypeLabels[type] || "Desconhecido" },
                                         { title: "Descrição", data: "description" },

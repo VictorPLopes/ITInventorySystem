@@ -10,7 +10,7 @@ DataTable.use(DT);
 
 interface GenericTableProps<T> {
     data: T[];
-    columns: { title: string; data: string; render?: (value: any) => JSX.Element | string; orderable?: boolean }[];
+    columns: { title: string; data?: string; render?: (value: any) => JSX.Element | string; orderable?: boolean }[];
     actions?: {
         onEdit?: (row: T) => void;
         onDelete?: (row: T) => void;

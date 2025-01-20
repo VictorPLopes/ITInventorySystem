@@ -203,11 +203,17 @@ export const WorkOrderModal: React.FC<WorkOrderModalProps> = ({
                                 required
                             >
                                 <option value="">Selecione um cliente</option>
-                                {clients.map((client) => (
-                                    <option key={client.id} value={client.id}>
-                                        {client.id} - {client.name} {client.isDeleted && "(Cliente deletado)"}
-                                    </option>
-                                ))}
+                                {clients
+                                    .filter(
+                                        (client) =>
+                                            !client.isDeleted || // Se não for deletado, sempre mostrar
+                                            (isEdit && workOrder.clientId === client.id) // Se estiver editando e o cliente pertence à OS
+                                    )
+                                    .map((client) => (
+                                        <option key={client.id} value={client.id}>
+                                            {client.id} - {client.name} {client.isDeleted && "(Cliente deletado)"}
+                                        </option>
+                                    ))}
                             </Form.Select>
                             <Form.Control.Feedback type="invalid">
                                 Por favor, selecione um cliente.

@@ -6,7 +6,6 @@ import {Button, Col, Container, Row, Spinner} from "react-bootstrap";
 import {MdCompareArrows} from "react-icons/md";
 import {GenericTable} from "../components/GenericTable";
 import {ProductModal} from "../components/ProductModal";
-import {InOutModal} from "../components/InOutModal";
 import Product from "../types/Product";
 
 const API_ENDPOINTS = {
@@ -21,7 +20,6 @@ const InventoryPage = ({port}: { port: string }) => {
     const [showModal, setShowModal] = useState(false);
     const [currentProduct, setCurrentProduct] = useState<Partial<Product>>({});
     const [isEdit, setIsEdit] = useState(false);
-    const [showInOutModal, setShowInOutModal] = useState(false);
     const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
     const columns = [
@@ -95,12 +93,7 @@ const InventoryPage = ({port}: { port: string }) => {
         setIsEdit(true);
         setShowModal(true);
     };
-
-    // Abre o modal para movimentar a quantidade de um produto
-    const handleInOutProduct = (product: Product) => {
-        setCurrentProduct(product);
-        setShowInOutModal(true);
-    };
+   
 
     // Exclui um produto com confirmação
     const handleDeleteProduct = async (product: Product) => {
@@ -140,29 +133,7 @@ const InventoryPage = ({port}: { port: string }) => {
             toast.error(error.response?.data?.message || "Erro ao salvar o produto.");
         }
     };
-
-    // Salva a movimentação de entrada ou saída de um produto
-    const handleSaveInOut = async (product: Partial<Product>, quantity: number) => {
-        const endpoint = `${API_ENDPOINTS.products(port)}/${product.id}`;
-
-        // Checa se a quantidade é suficiente para saída
-        if (quantity < 0 && product.quantity as number + quantity < 0) {
-            toast.error("Quantidade insuficiente para saída.");
-            return;
-        }
-
-        product.quantity = product.quantity as number + quantity;
-
-        try {
-            // Atualiza a quantidade do produto
-            await axios.put(endpoint, product);
-            toast.success("Movimentação realizada com sucesso!");
-            setShowInOutModal(false);
-            await fetchProducts();
-        } catch (error: any) {
-            toast.error(error.response?.data?.message || "Erro ao movimentar o produto.");
-        }
-    };
+   
 
     return (
         <Container className="mt-4">
@@ -203,7 +174,6 @@ const InventoryPage = ({port}: { port: string }) => {
                                         actions={{
                                             onEdit: handleEditProduct,
                                             onDelete: handleDeleteProduct,
-                                            onExtra: handleInOutProduct,
                                         }}
                                         extraAction={<MdCompareArrows/>}
                                     />
@@ -222,15 +192,7 @@ const InventoryPage = ({port}: { port: string }) => {
                     onSave={handleSaveProduct}
                     product={currentProduct}
                 />
-            )}
-            {showInOutModal && (
-                <InOutModal
-                    show={showInOutModal}
-                    onClose={() => setShowInOutModal(false)}
-                    onSave={handleSaveInOut}
-                    product={currentProduct}
-                />
-            )}
+            )}            
         </Container>
     );
 };

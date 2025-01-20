@@ -52,7 +52,6 @@ public class ProductService(AppDbContext context) : IProductInterface
             throw;
         }
     }
-
     public async Task DeleteAsync(int id)
     {
         try

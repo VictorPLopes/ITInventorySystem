@@ -140,7 +140,7 @@ export const StockMovementModal = ({
                                     <option value={0}>Selecione um produto</option>
                                     {products.map((product) => (
                                         <option key={product.id} value={product.id}>
-                                            {product.name} (Em estoque: {product.quantity})
+                                            {product.id} - {product.name} (Em estoque: {product.quantity})
                                         </option>
                                     ))}
                                 </Form.Select>
